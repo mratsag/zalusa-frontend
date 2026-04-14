@@ -191,7 +191,7 @@ export function AuthPage() {
     setMessage(null);
     setBusy(true);
     try {
-      const data = await authService.login({ email, password });
+      const data = await authService.login({ identifier: email, password });
       localStorage.setItem("zalusa.token", data.token);
       localStorage.setItem("zalusa.customerId", data.customerId);
       const draftId = sp.get("draftId");
@@ -272,7 +272,7 @@ export function AuthPage() {
       await authService.verifyEmail({ email, code });
       setVerifySuccess("E-posta doğrulandı! Giriş yapılıyor...");
       try {
-        const loginRes = await authService.login({ email, password });
+        const loginRes = await authService.login({ identifier: email, password });
         localStorage.setItem("zalusa.token", loginRes.token);
         localStorage.setItem("zalusa.customerId", loginRes.customerId);
         const draftId = sp.get("draftId");
@@ -565,16 +565,16 @@ export function AuthPage() {
               <form className="space-y-5" onSubmit={onLogin}>
                 {/* Mail Adresi */}
                 <div>
-                  <div className="mb-2 text-[13px] font-semibold text-[#14141F]">Mail Adresi</div>
+                  <div className="mb-2 text-[13px] font-semibold text-[#14141F]">Mail veya Telefon Numarası</div>
                   <div className="relative">
                     <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                     </div>
                     <input
-                      type="email"
+                      type="text"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
-                      placeholder="john-doe@example.com"
+                      placeholder="ornek@mail.com veya 5XX XXX XX XX"
                       required
                       className={fieldInputClass}
                     />
@@ -623,7 +623,7 @@ export function AuthPage() {
                   className="flex h-[44px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#4F46E5] text-white text-[14px] font-semibold transition-all hover:bg-[#4338CA] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Mail Adresiyle Giriş Yap
+                  Giriş Yap
                 </button>
               </form>
             ) : (

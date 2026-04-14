@@ -141,6 +141,25 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         </div>
       )}
 
+      {/* Telegram Kargo Bot */}
+      <div className="mt-4 px-2.5">
+        <div className="mb-2 px-3 text-[12px] font-bold uppercase tracking-widest text-[#0EA5E9]">Hızlı Kargo</div>
+        <a
+          href="https://t.me/ZalusaAkilliKargoBot?start=true"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex items-center gap-2.5 rounded-[12px] px-3 py-2.5 w-full text-[14.5px] font-semibold transition-all duration-200 text-[#64748B] hover:bg-[#E0F2FE] hover:text-[#0284C7]"
+        >
+          <svg className="h-[20px] w-[20px] shrink-0 text-[#0EA5E9] group-hover:text-[#0284C7] transition-colors" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+          </svg>
+          <span className="truncate pt-0.5">Telegram ile Kargo Oluştur</span>
+          <svg className="h-3.5 w-3.5 shrink-0 ml-auto text-[#94A3B8] group-hover:text-[#0284C7] transition-colors" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4.25 5.5a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 0 0 .75-.75v-4a.75.75 0 0 1 1.5 0v4A2.25 2.25 0 0 1 12.75 17h-8.5A2.25 2.25 0 0 1 2 14.75v-8.5A2.25 2.25 0 0 1 4.25 4h5a.75.75 0 0 1 0 1.5h-5Zm7.25-.75a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0V6.31l-5.47 5.47a.75.75 0 1 1-1.06-1.06l5.47-5.47H12.25a.75.75 0 0 1-.75-.75Z" clipRule="evenodd"/>
+          </svg>
+        </a>
+      </div>
+
       {/* Kişisel section */}
       <div className="mt-4 px-2.5">
         <div className="mb-2 px-3 text-[12px] font-bold uppercase tracking-widest text-[#94A3B8]">Kişisel</div>
@@ -161,7 +180,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       {/* User profile at bottom */}
-      <div className="px-2.5 pb-10 mt-3">
+      <div className="px-2.5 pb-3 mt-3">
         <div className="flex items-center justify-between rounded-[12px] ring-1 ring-[#E2E8F0] p-3 text-left hover:bg-[#F7F7F7] cursor-pointer transition-colors bg-white">
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-white text-[12px] font-bold text-[#0F172A] ring-1 ring-[#E2E8F0] shadow-sm">
@@ -189,7 +208,7 @@ export function Sidebar({
   return (
     <>
       {/* Desktop */}
-      <aside className="hidden min-h-screen w-[260px] shrink-0 bg-white border-r border-[#E2E8F0] md:flex flex-col relative group">
+      <aside className="hidden w-[260px] shrink-0 bg-white border-r border-[#E2E8F0] md:flex flex-col fixed top-0 left-0 bottom-0 z-30 overflow-y-auto">
         <SidebarContent />
       </aside>
 

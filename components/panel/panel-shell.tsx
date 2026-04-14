@@ -22,7 +22,7 @@ export function PanelShell({
       <div className="flex">
         <Sidebar open={open} onClose={() => setOpen(false)} />
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col md:ml-[260px]">
           {/* Header (Desktop) */}
           <header className="hidden md:flex h-20 shrink-0 items-center justify-between px-8 sticky top-0 z-30 bg-white/70 backdrop-blur-xl border-b border-white shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] transition-all">
             <div className="flex-1"></div> {/* Left spacer if needed */}

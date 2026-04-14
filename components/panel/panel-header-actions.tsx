@@ -1,20 +1,41 @@
 "use client";
 
 import React from "react";
-import { MessageSquare, Wallet, ChevronDown } from "lucide-react";
+import { MessageSquare, ChevronDown, User, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { ChatWidget } from "@/components/ChatWidget";
 
 export function PanelHeaderActions() {
+  const router = useRouter();
   const [name, setName] = React.useState<string | null>(null);
   const [chatOpen, setChatOpen] = React.useState(false);
+  const [profileOpen, setProfileOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const u = getCurrentUser();
     setName(u?.fullName ?? null);
   }, []);
 
-  const initials = name ? name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() : "AM";
+  // Click outside to close dropdown
+  React.useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+    if (profileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [profileOpen]);
+
+  function handleLogout() {
+    localStorage.removeItem("zalusa.token");
+    localStorage.removeItem("zalusa.customerId");
+    router.push("/");
+  }
 
   return (
     <div className="flex items-center gap-2.5">
@@ -40,10 +61,35 @@ export function PanelHeaderActions() {
         <ChevronDown className="h-4 w-4 text-slate-400 ml-1" />
       </button>
 
-      {/* Profile Button */}
-      <a href="/panel/profilim" className="h-10 w-10 flex items-center justify-center rounded-full bg-[#F8FAFC] border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer group ml-1">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 transition-colors"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      </a>
+      {/* Profile Button with Dropdown */}
+      <div className="relative ml-1" ref={dropdownRef}>
+        <button
+          onClick={() => setProfileOpen(v => !v)}
+          className="h-10 w-10 flex items-center justify-center rounded-full bg-[#F8FAFC] border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 transition-colors"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+
+        {profileOpen && (
+          <div className="absolute right-0 top-12 z-50 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg animate-in fade-in slide-in-from-top-2 duration-150">
+            <button
+              onClick={() => { setProfileOpen(false); router.push("/panel/profilim"); }}
+              className="flex w-full items-center gap-3 px-4 py-3 text-[13px] font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              <User className="h-4 w-4 text-slate-400" />
+              Profil Sayfası
+            </button>
+            <div className="mx-3 h-px bg-slate-100" />
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 px-4 py-3 text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors"
+            >
+              <LogOut className="h-4 w-4 text-red-400" />
+              Çıkış Yap
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

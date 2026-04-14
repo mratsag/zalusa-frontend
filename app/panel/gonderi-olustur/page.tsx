@@ -46,7 +46,7 @@ const DEFAULT_DRAFT: ShipmentDraft = {
   packages: [{ ...EMPTY_PACKAGE_ITEM, id: crypto.randomUUID() }],
   selectedCarrierId: "", carrierQuotes: [],
   selectedSenderAddressId: "sender-1", selectedReceiverAddressId: "",
-  senderName: "", senderCompany: "", senderPhone: "+90", senderAddress: "", senderCity: "", saveSenderAddress: false,
+  senderName: "", senderCompany: "", senderPhone: "+90", senderAddress: "", senderCity: "", senderStateId: null, saveSenderAddress: false,
   receiverName: "", receiverCompany: "", receiverPhone: "", receiverAddress: "", receiverCity: "",
   receiverStateProvince: "", receiverAddressCountry: "", receiverAddressPostalCode: "",
   saveReceiverAddress: false,
@@ -162,14 +162,14 @@ function getCurrencySymbol(currency: string): string {
 function Field({ label, icon: Icon, children }: { label: string; icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
     <label className="block group">
-      <div className="mb-2 flex items-center gap-2 text-sm font-bold text-slate-800 uppercase tracking-wide">
-        {Icon ? <Icon className="h-4 w-4 text-slate-500" /> : null}
+      <div className="mb-2 flex items-center gap-1.5 text-[12px] font-bold text-slate-700 uppercase tracking-wide">
+        {Icon ? <Icon className="h-3.5 w-3.5 text-slate-400" /> : null}
         <span>{label}</span>
       </div>
-      <div className="rounded-2xl border-[2px] border-slate-200 bg-transparent p-1 transition-all group-focus-within:border-brand-500 group-focus-within:bg-brand-50/10 group-focus-within:shadow-sm hover:border-slate-300">
+      <div className="flex items-center h-[52px] rounded-2xl border-[1.5px] border-slate-300 bg-slate-50/50 px-4 transition-all focus-within:border-brand-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-500/20 hover:border-slate-400">
         {React.Children.map(children, child => {
           if (React.isValidElement<{ className?: string }>(child)) {
-            return React.cloneElement(child, { className: cn(child.props.className, "border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent") } as any);
+            return React.cloneElement(child, { className: cn(child.props.className, "flex-1 border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent p-0 text-[14px] font-medium text-slate-700 placeholder:text-slate-400") } as any);
           }
           return child;
         })}
@@ -180,7 +180,7 @@ function Field({ label, icon: Icon, children }: { label: string; icon?: React.Co
 
 function CarrierTag({ tag }: { tag: string }) {
   const m: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; cls: string }> = {
-    recommended: { label: "Tavsiye Edilen", icon: Star, cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+    recommended: { label: "Tavsiye Edilen", icon: Star, cls: "bg-amber-50/60 text-amber-500 ring-amber-100" },
     fastest: { label: "En Hızlı", icon: Zap, cls: "bg-sky-50 text-sky-700 ring-sky-200" },
     cheapest: { label: "En Uygun", icon: BadgeDollarSign, cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
   };
@@ -192,7 +192,7 @@ function CarrierCard({ quote: q, selected, onSelect }: { quote: ApiCarrierQuote;
   const logoColor = getLogoColor(q);
   const sym = getCurrencySymbol(q.currency);
   return (
-    <button type="button" onClick={onSelect} className={cn("group relative flex flex-col rounded-2xl p-5 text-left ring-1 transition-all", selected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : "bg-surface ring-border hover:ring-brand-200 hover:shadow-sm", q.tags.includes("recommended") && !selected && "ring-amber-200 bg-amber-50/30")}>
+    <button type="button" onClick={onSelect} className={cn("group relative flex flex-col rounded-2xl p-5 text-left ring-1 transition-all", selected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : "bg-surface ring-border hover:ring-brand-200 hover:shadow-sm", q.tags.includes("recommended") && !selected && "bg-amber-50/30")}>
       {q.tags.length > 0 && <div className="mb-3 flex flex-wrap items-center gap-1.5">{q.tags.map((t: string) => <CarrierTag key={t} tag={t} />)}</div>}
       <div className="flex items-center gap-3">
         <CarrierLogo q={q} />
@@ -222,7 +222,7 @@ function CarrierListItem({ quote: q, selected, onSelect }: { quote: ApiCarrierQu
   const tagBg = !selected && hasTag
     ? q.tags.includes("cheapest") ? "bg-emerald-50/40 ring-emerald-200"
     : q.tags.includes("fastest") ? "bg-sky-50/40 ring-sky-200"
-    : q.tags.includes("recommended") ? "bg-amber-50/40 ring-amber-200"
+    : q.tags.includes("recommended") ? "bg-amber-50/20 ring-amber-100/40"
     : ""
     : "";
   return (
@@ -259,7 +259,7 @@ function RouteSummaryBar({ senderCountry, senderName, senderFlag, receiverCountr
     ? <div className="shrink-0 overflow-hidden h-9 w-9 relative" style={{ borderRadius: 10 }}><img src={src} alt={code} className="w-full h-full object-cover" /></div>
     : <CountryFlag code={code} size="lg" />;
   return (
-    <div className="flex items-center justify-between rounded-2xl p-3 sm:p-4 text-white" style={{ backgroundColor: "#161616", minHeight: 66, boxShadow: "0 0 0 1px rgba(0,0,0,0.02), 0 1px 3px 0 rgba(0,0,0,0.08)" }}>
+    <div className="flex items-center justify-between rounded-2xl p-3 sm:p-4 text-white" style={{ backgroundColor: "#3959F2", minHeight: 66, boxShadow: "0 0 0 1px rgba(0,0,0,0.02), 0 1px 3px 0 rgba(0,0,0,0.08)" }}>
       <div className="flex items-center gap-1.5">{flagImg(senderFlag, senderCountry)}<div><div className="text-[9px] sm:text-[10px] font-medium uppercase tracking-wider text-white/50">Çıkış</div><div className="text-[12px] sm:text-[14px] font-bold leading-tight">{senderName || (COUNTRY_NAMES[senderCountry] ?? senderCountry)}</div></div></div>
       <div className="flex items-center gap-1 sm:gap-2 shrink min-w-0"><div className="h-px w-4 sm:w-12 bg-white/20" /><div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[12px] text-white/50"><Plane className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" /><span className="hidden sm:inline">Kargo Ağırlığı </span><span className="font-semibold text-white/80">{chargeableWeight.toFixed(2)} kg</span></div><div className="h-px w-4 sm:w-12 bg-white/20" /></div>
       <div className="flex items-center gap-1.5"><div className="text-right"><div className="text-[9px] sm:text-[10px] font-medium uppercase tracking-wider text-white/50">Varış</div><div className="text-[12px] sm:text-[14px] font-bold leading-tight">{receiverName || COUNTRY_NAMES[receiverCountry] || receiverCountry}</div></div>{flagImg(receiverFlag, receiverCountry)}</div>
@@ -308,6 +308,87 @@ export const descriptionTypeService = {
   },
 };
 
+
+
+// ─── Telefon Formatlama ──────────────────────────────────────────────────────
+// Ülke koduna göre telefon numarasını uluslararası standartlarda formatlar
+const PHONE_FORMATS: Record<string, { len: number; groups: number[] }> = {
+  "+90": { len: 10, groups: [3, 3, 2, 2] },       // TR: +90 532 123 45 67
+  "+1":  { len: 10, groups: [3, 3, 4] },            // US/CA: +1 212 555 1234
+  "+44": { len: 10, groups: [4, 6] },               // GB: +44 7911 123456
+  "+49": { len: 10, groups: [3, 7] },               // DE: +49 151 1234567
+  "+33": { len: 9,  groups: [1, 2, 2, 2, 2] },      // FR: +33 6 12 34 56 78
+  "+39": { len: 10, groups: [3, 3, 4] },             // IT: +39 312 345 6789
+  "+34": { len: 9,  groups: [3, 3, 3] },             // ES: +34 612 345 678
+  "+31": { len: 9,  groups: [1, 4, 4] },             // NL: +31 6 1234 5678
+  "+32": { len: 8,  groups: [3, 2, 2, 2] },          // BE: +32 470 12 34 56
+  "+43": { len: 10, groups: [3, 7] },               // AT: +43 664 1234567
+  "+41": { len: 9,  groups: [2, 3, 2, 2] },         // CH: +41 76 123 45 67
+  "+48": { len: 9,  groups: [3, 3, 3] },             // PL: +48 512 345 678
+  "+46": { len: 9,  groups: [2, 3, 2, 2] },         // SE: +46 70 123 45 67
+  "+45": { len: 8,  groups: [2, 2, 2, 2] },         // DK: +45 20 12 34 56
+  "+47": { len: 8,  groups: [3, 2, 3] },             // NO: +47 412 34 567
+  "+351": { len: 9, groups: [3, 3, 3] },            // PT: +351 912 345 678
+  "+353": { len: 9, groups: [2, 3, 4] },            // IE: +353 85 123 4567
+  "+81": { len: 10, groups: [2, 4, 4] },            // JP: +81 90 1234 5678
+  "+86": { len: 11, groups: [3, 4, 4] },            // CN: +86 138 1234 5678
+  "+82": { len: 10, groups: [2, 4, 4] },            // KR: +82 10 1234 5678
+  "+61": { len: 9,  groups: [3, 3, 3] },            // AU: +61 412 345 678
+  "+55": { len: 11, groups: [2, 5, 4] },            // BR: +55 11 98765 4321
+  "+966": { len: 9, groups: [2, 3, 4] },            // SA: +966 50 123 4567
+  "+971": { len: 9, groups: [2, 3, 4] },            // AE: +971 50 123 4567
+};
+// Varsayılan format: 3-3-4 gruplama
+const DEFAULT_FORMAT = { len: 10, groups: [3, 3, 4] };
+
+function detectPhonePrefix(phone: string): string {
+  // En uzun prefix'ten kısaya doğru dene
+  if (phone.startsWith("+")) {
+    for (const len of [4, 3, 2]) {
+      const prefix = phone.slice(0, len + 1); // +XXX
+      if (PHONE_FORMATS[prefix]) return prefix;
+    }
+    // Bilinmeyen prefix - ilk + ve rakamları al
+    const m = phone.match(/^(\+\d{1,4})/);
+    return m ? m[1] : "";
+  }
+  return "";
+}
+
+function formatPhoneDisplay(raw: string): string {
+  if (!raw || raw.length <= 1) return raw;
+  const prefix = detectPhonePrefix(raw);
+  if (!prefix) return raw;
+  
+  const digits = raw.slice(prefix.length).replace(/\D/g, "");
+  if (!digits) return prefix;
+  
+  const fmt = PHONE_FORMATS[prefix] || DEFAULT_FORMAT;
+  const parts: string[] = [];
+  let pos = 0;
+  for (const g of fmt.groups) {
+    if (pos >= digits.length) break;
+    parts.push(digits.slice(pos, pos + g));
+    pos += g;
+  }
+  // Kalan rakamlar varsa ekle
+  if (pos < digits.length) parts.push(digits.slice(pos));
+  
+  return prefix + " " + parts.join(" ");
+}
+
+function cleanPhoneDigits(formatted: string): string {
+  // Sadece + ve rakamları tut
+  return formatted.replace(/[^\d+]/g, "");
+}
+
+// Bayrak URL helper
+function getFlagImageUrl(code: string, size: number = 40): string {
+  const upper = code.toUpperCase();
+  if (upper === "US" || upper === "ABD") return "/us-flag.png";
+  if (upper === "IK") return "/ik-flag.png";
+  return `https://flagcdn.com/w${size}/${code.toLowerCase()}.png`;
+}
 export default function GonderiOlusturPage() {
   const { hydrated } = useAppState();
   const searchParams = useSearchParams();
@@ -318,12 +399,19 @@ export default function GonderiOlusturPage() {
   const [done, setDone] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [apiError, setApiError] = React.useState<string | null>(null);
+  // ── Domestic Transfer State ─────────────────────────────────────────────────
+  const [requiresDomesticTransfer, setRequiresDomesticTransfer] = React.useState(false);
+  const [domesticTrackingCode, setDomesticTrackingCode] = React.useState<string>("");
+  const [domesticCarrierCompany, setDomesticCarrierCompany] = React.useState<string>("");
+  const [createdShipmentTrackingCode, setCreatedShipmentTrackingCode] = React.useState<string>("");
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
+  const [errorModal, setErrorModal] = React.useState<{ title: string; message: string } | null>(null);
   const [showNewSenderForm, setShowNewSenderForm] = React.useState(false);
   const [showNewReceiverForm, setShowNewReceiverForm] = React.useState(false);
   const [showServicesModal, setShowServicesModal] = React.useState(false);
   const [senderSearch, setSenderSearch] = React.useState("");
   const [receiverSearch, setReceiverSearch] = React.useState("");
+  const [receiverHasStates, setReceiverHasStates] = React.useState(true);
   const [apiCountries, setApiCountries] = React.useState<any[]>([]);
   const [apiQuotes, setApiQuotes] = React.useState<ApiCarrierQuote[]>([]);
   const [quotesMessage, setQuotesMessage] = React.useState<string | null>(null);
@@ -331,7 +419,7 @@ export default function GonderiOlusturPage() {
   const [apiMeasurements, setApiMeasurements] = React.useState<ApiMeasurement[]>([]);
 const [showProformaExcel, setShowProformaExcel] = React.useState(false);
 const [descriptionTypes, setDescriptionTypes] = React.useState<{ id: number; label: string }[]>([]);
-  console.log("apiQuotes", apiQuotes)
+  // console.log("apiQuotes", apiQuotes)
   // ── Taslak banner state'leri ──────────────────────────────────────────────
   const [pendingDraft, setPendingDraft] = React.useState<PendingDraftInfo | null>(null);
   const [draftBannerDismissed, setDraftBannerDismissed] = React.useState(false);
@@ -365,7 +453,8 @@ const [showPackageExcel, setShowPackageExcel] = React.useState(false);
           try { trName = trNames.of(code) || c.countryName; } catch {}
           // ABD bayrağı için yerel dosya kullan (flagcdn "ABD" kodunu tanımıyor)
           const isUS = code === "US" || code === "ABD";
-          const flagUrl = isUS ? "/us-flag.png" : `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
+          const isIK = code === "IK";
+          const flagUrl = isUS ? "/us-flag.png" : isIK ? "/ik-flag.png" : `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
           return {
             value: code,
             name: trName,
@@ -491,7 +580,12 @@ const [showPackageExcel, setShowPackageExcel] = React.useState(false);
             });
             const quotes = quoteRes.quotes ?? [];
             setApiQuotes(quotes);
-            setQuotesMessage(quotes.length === 0 ? (quoteRes.message || "Bu rota için kargo firması bulunamadı.") : null);
+            if (quotes.length === 0 && quoteRes.capacity_exceeded) {
+              setErrorModal({ title: "Kapasite Aşımı", message: quoteRes.message || "Girdiğiniz ölçüler mevcut kargo kapasitelerini aşmaktadır. Lütfen kapasitenize uygun bir ürün giriniz." });
+              setQuotesMessage(null);
+            } else {
+              setQuotesMessage(quotes.length === 0 ? (quoteRes.message || "Bu rota için kargo firması bulunamadı.") : null);
+            }
 
             // Tavsiye edilen kargoyu seç
             const rec = quotes.find((q: ApiCarrierQuote) => q.tags.includes("recommended"));
@@ -659,7 +753,7 @@ const [showPackageExcel, setShowPackageExcel] = React.useState(false);
 
 
   // ── Draft mutators ────────────────────────────────────────────────────────
-  function update<K extends keyof ShipmentDraft>(key: K, value: ShipmentDraft[K]) { setDraft(d => ({ ...d, [key]: value })); }
+  function update<K extends keyof ShipmentDraft>(key: K, value: ShipmentDraft[K]) { setDraft(d => ({ ...d, [key]: value })); setFieldErrors(prev => { if (prev[key]) { const next = { ...prev }; delete next[key]; return next; } return prev; }); }
   function updateProformaItem(itemId: string, field: keyof ProformaItem, value: string) { setDraft(d => ({ ...d, proformaItems: d.proformaItems.map(i => i.id === itemId ? { ...i, [field]: value } : i) })); }
   function addProformaItem() {
     const totalPkgCount = draft.packages.reduce((sum, p) => sum + (Number(p.packageCount) || 1), 0);
@@ -735,9 +829,16 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
     setLoading(true);
     try {
       if (step === 0) {
-        if (!draft.receiverCountry || !draft.receiverPostalCode) {
-          setApiError("Alıcı ülke ve posta kodu zorunludur."); setLoading(false); return;
+        const step0Errors: Record<string, string> = {};
+        if (!draft.receiverCountry) step0Errors.receiverCountry = "Zorunlu";
+        if (!draft.receiverPostalCode) step0Errors.receiverPostalCode = "Zorunlu";
+        if (Object.keys(step0Errors).length > 0) {
+          setFieldErrors(step0Errors);
+          setApiError("Lütfen zorunlu alanları doldurunuz.");
+          setLoading(false);
+          return;
         }
+        setFieldErrors({});
         // Taslak oluştur veya güncelle (step 0)
         let sid = shipmentId;
         if (!sid) {
@@ -780,7 +881,12 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           });
           const quotes = quoteRes.quotes ?? [];
           setApiQuotes(quotes);
-          setQuotesMessage(quotes.length === 0 ? (quoteRes.message || "Bu rota için kargo firması bulunamadı.") : null);
+          if (quotes.length === 0 && quoteRes.capacity_exceeded) {
+            setErrorModal({ title: "Kapasite Aşımı", message: quoteRes.message || "Girdiğiniz ölçüler mevcut kargo kapasitelerini aşmaktadır. Lütfen kapasitenize uygun bir ürün giriniz." });
+            setQuotesMessage(null);
+          } else {
+            setQuotesMessage(quotes.length === 0 ? (quoteRes.message || "Bu rota için kargo firması bulunamadı.") : null);
+          }
           const rec = quotes.find(q => q.tags.includes("recommended"));
           const defaultId = rec?.carrierId || quotes[0]?.carrierId || "";
           setDraft(d => ({ ...d, selectedCarrierId: defaultId }));
@@ -810,7 +916,12 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
         });
         const quotes = quoteRes.quotes ?? [];
         setApiQuotes(quotes);
-        setQuotesMessage(quotes.length === 0 ? (quoteRes.message || "Bu rota için kargo firması bulunamadı.") : null);
+        if (quotes.length === 0 && quoteRes.capacity_exceeded) {
+          setErrorModal({ title: "Kapasite Aşımı", message: quoteRes.message || "Girdiğiniz ölçüler mevcut kargo kapasitelerini aşmaktadır. Lütfen kapasitenize uygun bir ürün giriniz." });
+          setQuotesMessage(null);
+        } else {
+          setQuotesMessage(quotes.length === 0 ? (quoteRes.message || "Bu rota için kargo firması bulunamadı.") : null);
+        }
         // Ölçüleri yenile (saveMeasurement varsa yeni kayıtlar gelmiş olabilir)
         if (saveMeasurements.length > 0) {
           measurementService.list().then(r => setApiMeasurements(r.measurements)).catch(() => {});
@@ -851,6 +962,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           senderPhone: draft.senderPhone,
           senderAddress: draft.senderAddress,
           senderCity: draft.senderCity,
+          senderStateId: draft.senderStateId,
           saveSenderAddress: draft.saveSenderAddress,
           receiverAddressId: receiverAddr ? receiverAddr.id : null,
           receiverName: draft.receiverName,
@@ -898,7 +1010,12 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
       setStep(s => Math.min(s + 1, STEPS.length - 1));
       setDone(false);
     } catch (err: any) {
-      setApiError(err?.message || "Bir hata oluştu.");
+      const msg = err?.message || "Bir hata oluştu.";
+      if (msg.includes("taslak değil") || msg.includes("düzenlenemez")) {
+        setErrorModal({ title: "Gönderi Düzenlenemez", message: msg });
+      } else {
+        setApiError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -917,7 +1034,12 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
       setStep(s => Math.min(s + 1, STEPS.length - 1));
       setDone(false);
     } catch (err: any) {
-      setApiError(err?.message || "Bir hata oluştu.");
+      const msg = err?.message || "Bir hata oluştu.";
+      if (msg.includes("taslak değil") || msg.includes("düzenlenemez")) {
+        setErrorModal({ title: "Gönderi Düzenlenemez", message: msg });
+      } else {
+        setApiError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -945,10 +1067,41 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           throw new Error("Belgeler yüklenirken hata oluştu: " + (err?.message || "Bilinmeyen Hata"));
         });
       }
+      // Adım 5 → pending_payment'a al, domestic transfer varsa backend otomatik işledi
       await shipmentService.updateDraft(shipmentId, 5, {});
-      setDone(true);
+
+      // ── Ödeme başlat: Iyzico checkout sayfasına yönlendir ──
+      const token = (() => { try { return localStorage.getItem("zalusa.token") ?? ""; } catch { return ""; } })();
+      const payRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? ""}/api/payment/start`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ shipmentId: Number(shipmentId) })
+        }
+      );
+      if (!payRes.ok) {
+        const payErr = await payRes.json().catch(() => ({}));
+        throw new Error(payErr?.error || "Ödeme başlatılamadı");
+      }
+      const payData = await payRes.json();
+      if (payData.paymentPageUrl) {
+        // Iyzico ödeme sayfasına yönlendir
+        window.location.href = payData.paymentPageUrl;
+        return;
+      } else {
+        throw new Error("Ödeme sayfası URL'i alınamadı");
+      }
     } catch (err: any) {
-      setApiError(err?.message || "Gönderi tamamlanamadı.");
+      const msg = err?.message || "Gönderi tamamlanamadı.";
+      if (msg.includes("taslak değil") || msg.includes("düzenlenemez")) {
+        setErrorModal({ title: "Gönderi Düzenlenemez", message: msg });
+      } else {
+        setApiError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -958,6 +1111,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
     setDraft(DEFAULT_DRAFT); setStep(0); setDone(false); setShipmentId(null);
     setShowNewReceiverForm(false); setReceiverSearch(""); setApiQuotes([]); setApiError(null);
     setPendingDraft(null); setDraftBannerDismissed(true);
+    setRequiresDomesticTransfer(false); setDomesticTrackingCode(""); setDomesticCarrierCompany(""); setCreatedShipmentTrackingCode("");
   }
 
   if (!hydrated || draftLoading) return <div className="space-y-5"><Skeleton className="h-[96px] rounded-2xl" /><Skeleton className="h-[420px] rounded-2xl" /></div>;
@@ -1118,7 +1272,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
               <div>
                 <div className="mb-4 text-[14px] font-bold text-[#0F172A]">Gönderi Tipi</div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {(["Belge", "Paket", "Koli"] as const).map((typeName) => {
                     const meta = SHIPMENT_TYPE_META[typeName];
                     const isActive = draft.shipmentType === typeName;
@@ -1128,18 +1282,18 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                         type="button"
                         onClick={() => update("shipmentType", typeName as any)}
                         className={cn(
-                          "relative flex items-center justify-between rounded-2xl px-5 py-4 text-left transition-all duration-200",
+                          "relative flex items-center justify-between rounded-2xl px-3 py-3 sm:px-5 sm:py-4 text-left transition-all duration-200",
                           isActive
                             ? "bg-[#3959F2] text-white shadow-lg shadow-[#4F46E5]/25"
                             : "bg-[#F8FAFC] text-[#0F172A] ring-1 ring-[#E2E8F0] hover:ring-[#CBD5E1] hover:shadow-sm"
                         )}
                       >
                         <div className="min-w-0 flex-1">
-                          <div className="text-[15px] font-bold">{typeName}</div>
-                          <div className={cn("mt-0.5 text-[12px] font-medium", isActive ? "text-white/75" : "text-[#94A3B8]")}>{meta.description}</div>
+                          <div className="text-[13px] sm:text-[15px] font-bold">{typeName}</div>
+                          <div className={cn("mt-0.5 text-[12px] font-medium hidden sm:block", isActive ? "text-white/75" : "text-[#94A3B8]")}>{meta.description}</div>
                         </div>
                         <div className="ml-3 shrink-0">
-                          <img src={`/${typeName.toLowerCase()}.png`} alt={typeName} className="drop-shadow-sm transition-transform group-hover:scale-110 h-12 w-12 sm:h-auto sm:w-auto object-contain" />
+                          <img src={`/${typeName.toLowerCase()}.png`} alt={typeName} className="drop-shadow-sm transition-transform group-hover:scale-110 h-8 w-8 sm:h-12 sm:w-12 object-contain" />
                         </div>
                       </button>
                     );
@@ -1176,7 +1330,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                   <div className="mb-2 text-xs font-bold uppercase tracking-widest">
                     Alıcı Ülke <span className="text-red-500">*</span>
                   </div>
-                  <div className="rounded-2xl ring-1 ring-border bg-surface">
+                  <div className={cn("rounded-2xl ring-1 bg-surface", fieldErrors.receiverCountry ? "ring-2 ring-red-500" : "ring-border")}>
                     <SearchableSelect
                       options={apiCountries.length > 0 ? apiCountries : RECEIVER_COUNTRIES.map((c) => ({ ...c, label: (<div className="flex items-center gap-2"><CountryFlag code={c.value} size="sm" /><span>{c.label}</span></div>) as any, searchableText: c.label }))}
                       value={draft.receiverCountry}
@@ -1196,7 +1350,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                   <div className="mb-2 text-xs font-bold uppercase tracking-widest">
                     Alıcı Posta Kodu / Şehir <span className="text-red-500">*</span>
                   </div>
-                  <div className="relative rounded-2xl ring-1 ring-border bg-surface overflow-hidden">
+                  <div className={cn("relative rounded-2xl ring-1 bg-surface overflow-hidden", fieldErrors.receiverPostalCode ? "ring-2 ring-red-500" : "ring-border")}>
                     <Input
                       value={draft.receiverPostalCode}
                       onChange={(e) => update("receiverPostalCode", e.target.value)}
@@ -1509,10 +1663,10 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
   const isSelected = draft.selectedCarrierId === q.carrierId;
   const qSym = getCurrencySymbol(q.currency);
   return (
-    <button key={q.carrierId} type="button" onClick={() => update("selectedCarrierId", q.carrierId)} className={cn("group w-full text-left rounded-2xl ring-1 overflow-hidden transition-all", isSelected ? "bg-white ring-1 shadow-sm ring-[#4F46E5]" : cn("bg-white hover:shadow-sm", cardRing))}>
+    <button key={q.carrierId} type="button" onClick={() => update("selectedCarrierId", q.carrierId)} className={cn("group w-full text-left rounded-2xl overflow-hidden transition-all", isSelected ? cn("bg-white shadow-lg", cardRing ? "ring-2 ring-[#4F46E5]" : "shadow-[0_0_0_2px_rgba(79,70,229,0.15)]") : cn("bg-white hover:shadow-sm", cardRing))}>
       {/* Tag header */}
       <div className={cn("flex items-center justify-between border-b px-5 pt-3 pb-2", headerBg, borderColor)}>
-        <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1", tagColor)}>
+        <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ", tagColor)}>
           <TagIcon className="h-3 w-3" />{tagLabel}
         </span>
         {showBestLabel && <span className="text-[11px] font-medium flex items-center gap-1 text-[#6366F1]"><Star className="h-3 w-3" /> En iyi fiyat / performans</span>}
@@ -1580,8 +1734,8 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       "Tavsiye Edilen",
                       "bg-white text-[#6366F1] ring-[#6366F1]/30",
                       "bg-[#F5F3FF]",
-                      "border-[#6366F1]",
-                      "ring-[#6366F1]",
+                      "border-transparent",
+                      "",
                       Star,
                       true
                     )}
@@ -1591,7 +1745,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       "bg-white text-[#F59E0B] ring-[#F59E0B]/30",
                       "bg-[#FEFCE8]",
                       "border-[#F59E0B]",
-                      "ring-[#F59E0B]/30",
+                      "ring-1 ring-[#F59E0B]/30",
                       Zap
                     )}
                     {cheapestQ && cheapestQ.carrierId !== recommendedQ?.carrierId && cheapestQ.carrierId !== fastestQ?.carrierId && renderTaggedCarrier(
@@ -1600,7 +1754,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       "bg-white text-[#10B981] ring-[#10B981]/30",
                       "bg-[#ECFDF5]",
                       "border-[#10B981]",
-                      "ring-[#10B981]/30",
+                      "ring-1 ring-[#10B981]/30",
                       BadgeDollarSign
                     )}
                   </div>
@@ -1738,12 +1892,13 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                         <div className="grid gap-3 sm:grid-cols-2">
                           <Field label="Ad Soyad" icon={User}><Input value={draft.senderName} onChange={e => update("senderName", e.target.value)} placeholder="Gönderici adı soyadı" /></Field>
                           <Field label="Firma Adı" icon={Building}><Input value={draft.senderCompany} onChange={e => update("senderCompany", e.target.value)} placeholder="Firma adı (opsiyonel)" /></Field>
-                          <Field label="Telefon" icon={Phone}><Input value={draft.senderPhone} onChange={e => { let v = e.target.value; if (!v.startsWith("+90")) v = "+90" + v.replace(/^\+?9?0?/, ""); update("senderPhone", v); }} placeholder="+90 5XX XXX XX XX" /></Field>
+                          <Field label="Telefon" icon={Phone}><Input value={formatPhoneDisplay(draft.senderPhone)} onChange={e => { const raw = cleanPhoneDigits(e.target.value); update("senderPhone", raw); }} placeholder="+90 5XX XXX XX XX" /></Field>
                           <Field label="Şehir" icon={MapPin}>
                             <CitySelect
                               countryCode={draft.senderCountry || "TR"}
                               value={draft.senderCity}
                               onChange={(v) => update("senderCity", v)}
+                              onStateIdChange={(id) => update("senderStateId", id)}
                               placeholder="Şehir seçiniz"
                               className="h-10 border-0 ring-0 focus:ring-0 bg-transparent text-sm px-2"
                             />
@@ -1815,15 +1970,10 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                           <Field label="Firma Adı" icon={Building}><Input value={draft.receiverCompany} onChange={e => update("receiverCompany", e.target.value)} placeholder="Firma adı (opsiyonel)" /></Field>
                           <Field label="Telefon" icon={Phone}>
                             <Input
-                              value={draft.receiverPhone}
+                              value={formatPhoneDisplay(draft.receiverPhone)}
                               onChange={e => {
-                                let v = e.target.value;
-                                const country = apiCountries.find((c: any) => c.value === draft.receiverAddressCountry);
-                                const prefix = country?.phoneCode || "";
-                                if (prefix && !v.startsWith(prefix)) {
-                                  v = prefix + v.replace(/^\+?\d{0,3}/, "");
-                                }
-                                update("receiverPhone", v);
+                                const raw = cleanPhoneDigits(e.target.value);
+                                update("receiverPhone", raw);
                               }}
                               placeholder={(() => {
                                 const country = apiCountries.find((c: any) => c.value === (draft.receiverAddressCountry || draft.receiverCountry));
@@ -1854,18 +2004,28 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                               countryCode={draft.receiverAddressCountry}
                               value={draft.receiverStateProvince ?? ""}
                               onChange={(v) => update("receiverStateProvince", v)}
+                              onHasStates={(has) => setReceiverHasStates(has)}
                               placeholder="Eyalet / Bölge seçiniz"
                               disabled={!draft.receiverAddressCountry}
                             />
                           </Field>
                           <Field label="Şehir" icon={MapPin}>
-                            <CitySelect
-                              countryCode={draft.receiverAddressCountry || draft.receiverCountry}
-                              value={draft.receiverCity}
-                              onChange={(v) => update("receiverCity", v)}
-                              placeholder="Şehir seçiniz"
-                              disabled={!draft.receiverAddressCountry && !draft.receiverCountry}
-                            />
+                            {receiverHasStates ? (
+                              <CitySelect
+                                countryCode={draft.receiverAddressCountry || draft.receiverCountry}
+                                value={draft.receiverCity}
+                                onChange={(v) => update("receiverCity", v)}
+                                placeholder="Şehir seçiniz"
+                                disabled={!draft.receiverAddressCountry && !draft.receiverCountry}
+                              />
+                            ) : (
+                              <Input
+                                value={draft.receiverCity}
+                                onChange={(e) => update("receiverCity", e.target.value)}
+                                placeholder="Şehir adı giriniz"
+                                disabled={!draft.receiverAddressCountry && !draft.receiverCountry}
+                              />
+                            )}
                           </Field>
                           <Field label="Posta Kodu" icon={MapPin}>
                             <Input value={draft.receiverAddressPostalCode ?? ""} onChange={e => update("receiverAddressPostalCode", e.target.value)} placeholder="Posta kodu (opsiyonel)" />
@@ -2254,7 +2414,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                   {/* Route Banner */}
                   <div className="w-full bg-[#1F2937] rounded-[16px] px-6 py-4 flex items-center justify-between mb-8 shadow-sm relative overflow-hidden">
                     <div className="flex items-center gap-4 relative z-10 w-1/3">
-                        <img src={`https://flagcdn.com/w80/${(draft.senderCountry || "TR").toLowerCase()}.png`} alt="TR" className="w-[42px] h-[30px] rounded-[6px] object-cover ring-2 ring-white/10" />
+                        <img src={getFlagImageUrl(draft.senderCountry || "TR", 80)} alt="TR" className="w-[42px] h-[30px] rounded-[6px] object-cover ring-2 ring-white/10" />
                         <div className="flex flex-col">
                           <span className="text-[12px] font-medium text-white/50 relative -bottom-0.5">Çıkış</span>
                           <span className="text-[16px] font-bold text-white tracking-wide">{apiCountries.find(x => x.value === draft.senderCountry)?.name || COUNTRY_NAMES[draft.senderCountry] || "Türkiye"}</span>
@@ -2271,7 +2431,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                           <span className="text-[12px] font-medium text-white/50 relative -bottom-0.5">Varış</span>
                           <span className="text-[16px] font-bold text-white tracking-wide">{apiCountries.find(x => x.value === draft.receiverCountry)?.name || COUNTRY_NAMES[draft.receiverCountry] || "İspanya"}</span>
                         </div>
-                        <img src={`https://flagcdn.com/w80/${(draft.receiverCountry || "ES").toLowerCase()}.png`} alt="ES" className="w-[42px] h-[30px] rounded-[6px] object-cover ring-2 ring-white/10" />
+                        <img src={getFlagImageUrl(draft.receiverCountry || "ES", 80)} alt="ES" className="w-[42px] h-[30px] rounded-[6px] object-cover ring-2 ring-white/10" />
                     </div>
                   </div>
 
@@ -2392,6 +2552,108 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                     </p>
                   </div>
 
+                  {/* ══════════════════════════════════════════════════════════ */}
+                  {/* ÇİFT AŞAMALI KARGO — ADIM KARTLARI                        */}
+                  {/* Sadece requiresDomesticTransfer=true ise gösterilir        */}
+                  {/* ══════════════════════════════════════════════════════════ */}
+                  {requiresDomesticTransfer && (
+                    <div className="w-full max-w-[540px] flex flex-col gap-4 mb-8 px-1">
+
+                      {/* ── ADIM 1: Yurt İçi Teslimat ── */}
+                      <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 p-[2px] shadow-xl shadow-amber-500/30">
+                        <div className="relative rounded-[18px] bg-white overflow-hidden">
+                          {/* Header */}
+                          <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-3 flex items-center gap-3">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 text-white font-black text-sm">1</div>
+                            <div>
+                              <div className="text-white font-bold text-[15px] leading-tight">Adım 1: Yurt İçi Teslimat</div>
+                              <div className="text-white/80 text-[11px] font-medium">Paketi İstanbul Zalusa Merkezine ulaştırın</div>
+                            </div>
+                            <div className="ml-auto">
+                              <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1">
+                                <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                                <span className="text-white font-semibold text-[11px]">Bekliyor</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Body */}
+                          <div className="p-5">
+                            {/* Kargo Kodu — Devasa */}
+                            <div className="text-center mb-4">
+                              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Yurt İçi Kargo Kodu</div>
+                              <div className="text-[34px] sm:text-[42px] font-black text-slate-900 tracking-widest leading-none font-mono bg-slate-50 border-2 border-dashed border-amber-300 rounded-2xl py-4 px-4 select-all">
+                                {domesticTrackingCode || "—"}
+                              </div>
+                              {domesticCarrierCompany && (
+                                <div className="mt-2.5 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-full px-4 py-1.5">
+                                  <span className="text-amber-700 font-bold text-[13px]">{domesticCarrierCompany}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Uyarı Kutusu */}
+                            <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-[14px] p-4">
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 mt-0.5">
+                                <AlertTriangle className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <div className="text-[13px] font-bold text-amber-800 mb-1">Paketi şubeye teslim edin</div>
+                                <p className="text-[12px] text-amber-700 leading-relaxed">
+                                  Lütfen paketinizi yukarıdaki kod ile en yakın <strong>{domesticCarrierCompany || "kargo"}</strong> şubesine <strong>ücretsiz</strong> olarak teslim ediniz. Yurt içi kargo ücreti sisteminiz tarafından ödenmiştir.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ── ADIM 2: Yurtdışı Çıkışı ── */}
+                      <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 p-[2px] shadow-xl shadow-blue-500/20">
+                        <div className="relative rounded-[18px] bg-white overflow-hidden">
+                          {/* Header */}
+                          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 flex items-center gap-3">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 text-white font-black text-sm">2</div>
+                            <div>
+                              <div className="text-white font-bold text-[15px] leading-tight">Adım 2: Yurtdışı Çıkışı</div>
+                              <div className="text-white/80 text-[11px] font-medium">Paket İstanbul merkezinden yurtdışına gönderilecek</div>
+                            </div>
+                            <div className="ml-auto">
+                              <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1">
+                                <Clock className="h-3 w-3 text-white/80" />
+                                <span className="text-white font-semibold text-[11px]">Sırada</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Body */}
+                          <div className="p-5">
+                            <div className="text-center mb-4">
+                              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Uluslararası Takip Numarası</div>
+                              <div className="text-[22px] sm:text-[26px] font-black text-slate-800 tracking-widest leading-none font-mono bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 select-all">
+                                {createdShipmentTrackingCode || "—"}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-[14px] p-4">
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                                <Globe className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <div className="text-[13px] font-bold text-blue-800 mb-0.5">
+                                  {selectedQuote?.carrierName || "Uluslararası kargo"} ile gönderilecek
+                                </div>
+                                <p className="text-[12px] text-blue-700 leading-relaxed">
+                                  Yurt içi paketi Zalusa merkezimize ulaşınca bu numara ile {draft.receiverCountry} adresine gönderim başlatılır.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  )}
+
                   {/* Kargo Fişi (Ticket) Modeli */}
                   <div className="relative w-full max-w-[480px] flex flex-col mb-8 font-sans">
                     
@@ -2426,7 +2688,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       {/* Rota Kartı */}
                       <div className="bg-white rounded-[16px] py-6 px-6 flex items-center justify-between mb-6 relative z-20 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
                         <div className="flex items-center gap-3">
-                          <img src={`https://flagcdn.com/w40/${(draft.senderCountry || "TR").toLowerCase()}.png`} alt="TR" className="w-[30px] h-[22px] rounded object-cover shadow-sm ring-1 ring-slate-100" />
+                          <img src={getFlagImageUrl(draft.senderCountry || "TR", 40)} alt="TR" className="w-[30px] h-[22px] rounded object-cover shadow-sm ring-1 ring-slate-100" />
                           <span className="text-[32px] font-black text-slate-800 tracking-tighter uppercase leading-none">{draft.senderCountry || "IST"}</span>
                         </div>
                         
@@ -2442,7 +2704,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                         
                         <div className="flex items-center gap-3">
                           <span className="text-[32px] font-black text-slate-800 tracking-tighter uppercase leading-none">{draft.receiverCountry || "ES"}</span>
-                          <img src={`https://flagcdn.com/w40/${(draft.receiverCountry || "ES").toLowerCase()}.png`} alt={draft.receiverCountry || "ES"} className="w-[30px] h-[22px] rounded object-cover shadow-sm ring-1 ring-slate-100" />
+                          <img src={getFlagImageUrl(draft.receiverCountry || "ES", 40)} alt={draft.receiverCountry || "ES"} className="w-[30px] h-[22px] rounded object-cover shadow-sm ring-1 ring-slate-100" />
                         </div>
                       </div>
 
@@ -2635,6 +2897,46 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
     </div>
   </div>
 )}
+
+{/* ── Error Modal ── */}
+{errorModal && (() => {
+  const isCapacity = errorModal.title === "Kapasite Aşımı";
+  return (
+  <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setErrorModal(null)}>
+    <div className="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-black/5 animate-in zoom-in-95 fade-in duration-200" onClick={e => e.stopPropagation()}>
+      <div className="flex flex-col items-center text-center gap-3">
+        <div className={cn("flex h-14 w-14 shrink-0 items-center justify-center rounded-full", isCapacity ? "bg-amber-100" : "bg-red-100")}>
+          <AlertTriangle className={cn("h-7 w-7", isCapacity ? "text-amber-600" : "text-red-600")} />
+        </div>
+        <div>
+          <h3 className="text-[17px] font-bold text-[#0F172A]">{errorModal.title}</h3>
+          <p className="mt-2 text-[13px] text-[#64748B] leading-relaxed">{errorModal.message}</p>
+        </div>
+        {isCapacity && (
+          <div className="w-full mt-1 rounded-xl bg-amber-50 border border-amber-200 p-3">
+            <p className="text-[12px] text-amber-700 font-medium">💡 Paket ölçülerinizi (en, boy, yükseklik, ağırlık) küçülterek veya adet sayısını azaltarak tekrar deneyebilirsiniz.</p>
+          </div>
+        )}
+      </div>
+      <div className="mt-5 flex items-center justify-center gap-2">
+        {isCapacity ? (
+          <button type="button" onClick={() => { setErrorModal(null); setStep(1); }} className="rounded-xl bg-amber-500 hover:bg-amber-600 px-5 py-2.5 text-[13px] font-bold text-white transition-colors flex items-center gap-2">
+            <Ruler className="h-4 w-4" />
+            Paket Ölçülerini Düzenle
+          </button>
+        ) : (
+          <button type="button" onClick={() => { setErrorModal(null); window.location.href = '/panel/gonderilerim'; }} className="rounded-xl bg-[#3959F2] hover:bg-[#4338CA] px-5 py-2.5 text-[13px] font-bold text-white transition-colors">
+            Gönderilerime Git
+          </button>
+        )}
+        <button type="button" onClick={() => setErrorModal(null)} className="rounded-xl bg-white hover:bg-slate-50 border border-slate-200 px-5 py-2.5 text-[13px] font-bold text-[#0F172A] transition-colors">
+          Kapat
+        </button>
+      </div>
+    </div>
+  </div>
+  );
+})()}
     </div>
   );
 }

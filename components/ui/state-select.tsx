@@ -9,6 +9,7 @@ interface StateSelectProps {
   countryCode: string;
   value: string;
   onChange: (value: string) => void;
+  onHasStates?: (has: boolean) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
@@ -18,6 +19,7 @@ export function StateSelect({
   countryCode,
   value,
   onChange,
+  onHasStates,
   placeholder = "Eyalet / Bölge seçiniz",
   className,
   disabled,
@@ -52,11 +54,14 @@ export function StateSelect({
     setLoading(true);
     try {
       const res = await stateService.list(countryCode);
+      const hasSt = (res.states || []).length > 0;
       setStates(res.states || []);
-      setHasStates((res.states || []).length > 0);
+      setHasStates(hasSt);
+      onHasStates?.(hasSt);
     } catch {
       setStates([]);
       setHasStates(false);
+      onHasStates?.(false);
     } finally {
       setLoading(false);
     }

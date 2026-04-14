@@ -12,6 +12,7 @@ import {
   type ApiCarrierQuote, type ApiAddress, type ApiPackage,
 } from "@/lib/services/shipmentService";
 import { CitySelect } from "@/components/ui/city-select";
+import { useToast } from "@/components/ui/toast";
 
 // ─── Config ────────────────────────────────────────────────────────────────────
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -37,9 +38,11 @@ interface ShipmentWizardProps {
 }
 
 export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardProps) {
+  const toast = useToast();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [capacityModal, setCapacityModal] = useState<string | null>(null);
 
   // Step 0: Temel bilgiler
   const [shipmentType, setShipmentType] = useState("Paket");
@@ -161,7 +164,11 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
         });
         setQuotes(res.quotes || []);
         if (!res.quotes?.length) {
-          setError("Bu rota için uygun kargo firması bulunamadı.");
+          if (res.capacity_exceeded) {
+            setCapacityModal(res.message || "Girdiğiniz ölçüler mevcut kargo kapasitelerini aşmaktadır. Lütfen kapasitenize uygun bir ürün giriniz.");
+          } else {
+            setError("Bu rota için uygun kargo firması bulunamadı.");
+          }
           setLoading(false);
           return;
         }
@@ -190,7 +197,9 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
 
       setStep(s => s + 1);
     } catch (err: any) {
-      setError(err?.message || "Bir hata oluştu.");
+      const msg = err?.message || "Bir hata oluştu.";
+      setError(msg);
+      toast.error(msg, "Adım Hatası");
     } finally {
       setLoading(false);
     }
@@ -234,7 +243,9 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
 
       onComplete(result.trackingCode, result.totalCost);
     } catch (err: any) {
-      setError(err?.message || "Kargo oluşturulamadı.");
+      const msg = err?.message || "Kargo oluşturulamadı.";
+      setError(msg);
+      toast.error(msg, "Kargo Oluşturma Hatası");
     } finally {
       setLoading(false);
     }
@@ -310,7 +321,7 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                   {filteredCountries.slice(0, 8).map(c => (
                     <button key={c.isoCode} onClick={() => { setReceiverCountry(c.isoCode); setCountrySearch(c.countryName); }}
                       className="w-full text-left px-3 py-2 text-[12px] hover:bg-blue-50 flex items-center gap-2">
-                      <img src={`https://flagcdn.com/w20/${c.isoCode.toLowerCase()}.png`} alt={c.isoCode} className="h-3.5 w-5 object-cover rounded-sm" />
+                      <img src={((c.isoCode.toUpperCase() === "US" || c.isoCode.toUpperCase() === "ABD") ? "/us-flag.png" : c.isoCode.toUpperCase() === "IK" ? "/ik-flag.png" : `https://flagcdn.com/w20/${c.isoCode.toLowerCase()}.png`)} alt={c.isoCode} className="h-3.5 w-5 object-cover rounded-sm" />
                       <span>{c.countryName}</span>
                       <span className="text-slate-400 ml-auto">{c.isoCode}</span>
                     </button>
@@ -643,6 +654,35 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
           </button>
         )}
       </div>
+
+      {/* ── Capacity Exceeded Modal ── */}
+      {capacityModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setCapacityModal(null)}>
+          <div className="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-black/5" onClick={e => e.stopPropagation()}>
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-amber-100">
+                <AlertTriangle className="h-7 w-7 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="text-[17px] font-bold text-slate-900">Kapasite Aşımı</h3>
+                <p className="mt-2 text-[13px] text-slate-500 leading-relaxed">{capacityModal}</p>
+              </div>
+              <div className="w-full mt-1 rounded-xl bg-amber-50 border border-amber-200 p-3">
+                <p className="text-[12px] text-amber-700 font-medium">💡 Paket ölçülerinizi (en, boy, yükseklik, ağırlık) küçülterek veya adet sayısını azaltarak tekrar deneyebilirsiniz.</p>
+              </div>
+            </div>
+            <div className="mt-5 flex items-center justify-center gap-2">
+              <button type="button" onClick={() => { setCapacityModal(null); setStep(1); }} className="rounded-xl bg-amber-500 hover:bg-amber-600 px-5 py-2.5 text-[13px] font-bold text-white transition-colors flex items-center gap-2">
+                <Ruler className="h-4 w-4" />
+                Paket Ölçülerini Düzenle
+              </button>
+              <button type="button" onClick={() => setCapacityModal(null)} className="rounded-xl bg-white hover:bg-slate-50 border border-slate-200 px-5 py-2.5 text-[13px] font-bold text-slate-900 transition-colors">
+                Kapat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

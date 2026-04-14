@@ -145,3 +145,12 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield; /* Firefox */
 }
+
+/* Sidebar hidden scrollbar */
+aside::-webkit-scrollbar {
+  display: none;
+}
+aside {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

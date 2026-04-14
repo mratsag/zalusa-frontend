@@ -9,6 +9,7 @@ interface CitySelectProps {
   countryCode: string;
   value: string;
   onChange: (value: string) => void;
+  onStateIdChange?: (stateId: number | null) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
@@ -18,6 +19,7 @@ export function CitySelect({
   countryCode,
   value,
   onChange,
+  onStateIdChange,
   placeholder = "Şehir seçiniz",
   className,
   disabled,
@@ -223,6 +225,7 @@ export function CitySelect({
                     type="button"
                     onClick={() => {
                       onChange(state.stateName);
+                      onStateIdChange?.(state.id);
                       setIsOpen(false);
                     }}
                     className={cn(

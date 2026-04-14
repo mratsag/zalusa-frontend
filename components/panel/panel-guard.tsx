@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { ToastProvider } from "@/components/ui/toast";
 
 export function PanelGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -14,5 +15,5 @@ export function PanelGuard({ children }: { children: React.ReactNode }) {
     }
   }, [router, pathname]);
 
-  return <>{children}</>;
+  return <ToastProvider>{children}</ToastProvider>;
 }

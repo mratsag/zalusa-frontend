@@ -172,7 +172,9 @@ export default function ProfilPage() {
           const code = c.isoCode.toUpperCase();
           let trName = c.countryName;
           try { trName = trNames.of(code) || c.countryName; } catch {}
-          const flagUrl = `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
+          const isUS = code === "US" || code === "ABD";
+          const isIK = code === "IK";
+          const flagUrl = isUS ? "/us-flag.png" : isIK ? "/ik-flag.png" : `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
           return {
             value: code,
             searchableText: `${trName} ${code}`,
@@ -310,6 +312,21 @@ export default function ProfilPage() {
     const setSaving = type === "sender" ? setSavingSender : setSavingReceiver;
     if (!addr.label || !addr.name || !addr.address || !addr.city || !addr.countryCode) {
       setMessage("Lütfen zorunlu alanları (Başlık, Ad Soyad, Ülke, Şehir, Açık Adres) doldurun.");
+      return;
+    }
+    // TR telefon validasyonu
+    if (addr.countryCode === "TR" && addr.phone) {
+      const digits = addr.phone.replace(/[^0-9]/g, "");
+      let cleaned = digits;
+      if (cleaned.startsWith("90") && cleaned.length >= 12) cleaned = cleaned.slice(2);
+      if (cleaned.startsWith("0") && cleaned.length === 11) cleaned = cleaned.slice(1);
+      if (cleaned.length !== 10 || !cleaned.startsWith("5")) {
+        setMessage("Türkiye telefon numarası 05XX XXX XX XX formatında olmalıdır. Lütfen geçerli bir numara girin.");
+        return;
+      }
+    }
+    if (addr.phone && addr.phone.replace(/[^0-9]/g, "").length > 15) {
+      setMessage("Telefon numarası çok uzun. Lütfen geçerli bir numara girin.");
       return;
     }
     setSaving(true);
@@ -751,8 +768,9 @@ export default function ProfilPage() {
                         <Input value={newSenderAddr.company} onChange={e => setNewSenderAddr(p => ({ ...p, company: e.target.value }))} placeholder="Firma adı (opsiyonel)" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
                       </div>
                       <div>
-                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Telefon</div>
-                        <Input value={newSenderAddr.phone} onChange={e => setNewSenderAddr(p => ({ ...p, phone: e.target.value }))} placeholder="+90 ..." className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
+                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Telefon <span className="text-red-500">*</span></div>
+                        <Input value={newSenderAddr.phone} onChange={e => setNewSenderAddr(p => ({ ...p, phone: e.target.value }))} placeholder="05XX XXX XX XX" maxLength={15} className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
+                        {newSenderAddr.countryCode === "TR" && <p className="mt-1 text-[11px] text-slate-400">Örn: 05321234567</p>}
                       </div>
                       <div>
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Ülke <span className="text-red-500">*</span></div>

@@ -253,7 +253,7 @@ export const shipmentService = {
     packages: ApiPackage[];
     shipmentType?: string;
   }) {
-    return apiPost<{ quotes: ApiCarrierQuote[]; chargeableWeight?: number; message?: string }>(
+    return apiPost<{ quotes: ApiCarrierQuote[]; chargeableWeight?: number; message?: string; capacity_exceeded?: boolean }>(
       "/api/shipments/quotes",
       payload
     );
@@ -273,6 +273,7 @@ export const shipmentService = {
     senderPhone?: string;
     senderAddress?: string;
     senderCity?: string;
+    senderStateId?: number | null;
     saveSenderAddress?: boolean;
     receiverAddressId?: number | null;
     receiverName?: string;
@@ -299,6 +300,9 @@ export const shipmentService = {
       totalPackages: number;
       proformaTotal: number;
       proformaCurrency: string;
+      requiresDomesticTransfer: boolean;
+      domesticTrackingCode?: string;
+      domesticCarrierCompany?: string;
       message: string;
     }>("/api/shipments/quick-create", payload);
   },

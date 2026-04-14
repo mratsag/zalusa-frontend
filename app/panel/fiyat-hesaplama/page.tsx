@@ -59,7 +59,8 @@ export default function FiyatHesaplamaPage() {
           let trName = c.countryName;
           try { trName = trNames.of(code) || c.countryName; } catch {}
           const isUS = code === "US" || code === "ABD";
-          const flagUrl = isUS ? "/us-flag.png" : `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
+          const isIK = code === "IK";
+          const flagUrl = isUS ? "/us-flag.png" : isIK ? "/ik-flag.png" : `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
           return {
             value: code,
             name: trName,

@@ -144,6 +144,14 @@ function formatDate(iso: string): string {
 
 // ─── Sayfa Bileşeni ──────────────────────────────────────────────────────────
 
+
+// Bayrak URL helper - IK ve US gibi özel kodlar için yerel dosya kullan
+function getFlagImageUrl(code: string, size: number = 40): string {
+  const upper = code.toUpperCase();
+  if (upper === "US" || upper === "ABD") return "/us-flag.png";
+  if (upper === "IK") return "/ik-flag.png";
+  return `https://flagcdn.com/w${size}/${code.toLowerCase()}.png`;
+}
 export default function PanelHomePage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -260,7 +268,7 @@ export default function PanelHomePage() {
                     <div className="flex items-center gap-3.5 min-w-0">
                       <div className="flex h-11 w-11 shrink-0 overflow-hidden items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-[#E2E8F0]">
                         <img
-                          src={`https://flagcdn.com/w80/${c.countryCode.toLowerCase()}.png`}
+                          src={getFlagImageUrl(c.countryCode, 80)}
                           alt={getCountryName(c.countryCode)}
                           className="h-full w-full object-cover"
                         />
@@ -315,7 +323,7 @@ export default function PanelHomePage() {
                         <PackageOpen className="h-[18px] w-[18px] text-white" />
                         <div className="absolute -bottom-0.5 -right-0.5 flex h-[20px] w-[20px] overflow-hidden items-center justify-center rounded-full bg-white shadow ring-2 ring-white">
                           <img
-                            src={`https://flagcdn.com/w40/${order.countryCode.toLowerCase()}.png`}
+                            src={getFlagImageUrl(order.countryCode, 40)}
                             alt={getCountryName(order.countryCode)}
                             className="h-full w-full object-cover"
                           />

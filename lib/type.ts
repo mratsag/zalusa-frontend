@@ -39,7 +39,7 @@ export type ShipmentDraft = {
 
   selectedSenderAddressId: string; selectedReceiverAddressId: string;
   senderName: string; senderCompany: string; senderPhone: string;
-  senderAddress: string; senderCity: string; saveSenderAddress: boolean;
+  senderAddress: string; senderCity: string; senderStateId: number | null; saveSenderAddress: boolean;
   receiverName: string; receiverCompany: string; receiverPhone: string;
   receiverAddress: string; receiverCity: string; receiverStateProvince: string;
   receiverAddressCountry: string; receiverAddressPostalCode: string;
