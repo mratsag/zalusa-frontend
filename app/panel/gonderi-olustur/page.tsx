@@ -1444,34 +1444,104 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       {/* Card body */}
                       <div className="p-4 sm:p-6">
                         <div className="flex gap-10">
-                          {/* 3D Box illustration */}
-                          <div className="hidden lg:flex flex-col items-center justify-center shrink-0" style={{ width: 280 }}>
-                            <svg viewBox="0 0 250 240" width="260" height="240" className="drop-shadow-sm">
-                              {/* Back face */}
-                              <polygon points="60,50 180,50 180,170 60,170" fill="#DBEAFE" stroke="#93C5FD" strokeWidth="1.5" />
-                              {/* Top face */}
-                              <polygon points="60,50 110,20 230,20 180,50" fill="#BFDBFE" stroke="#93C5FD" strokeWidth="1.5" />
-                              {/* Right face */}
-                              <polygon points="180,50 230,20 230,140 180,170" fill="#93C5FD" stroke="#60A5FA" strokeWidth="1.5" />
-                              {/* Dimension lines - Height */}
-                              <line x1="40" y1="55" x2="40" y2="165" stroke="#3B82F6" strokeWidth="1" strokeDasharray="4 2" />
-                              <line x1="35" y1="55" x2="45" y2="55" stroke="#3B82F6" strokeWidth="1" />
-                              <line x1="35" y1="165" x2="45" y2="165" stroke="#3B82F6" strokeWidth="1" />
-                              <rect x="12" y="95" width="56" height="24" rx="6" fill="white" stroke="#3B82F6" strokeWidth="1" />
-                              <text x="40" y="112" textAnchor="middle" fontSize="11" fontWeight="600" fill="#3B82F6">{pkg.heightCm || "0"} cm</text>
-                              <text x="40" y="185" textAnchor="middle" fontSize="10" fill="#94A3B8">yükseklik</text>
-                              {/* Dimension lines - Width */}
-                              <line x1="65" y1="185" x2="175" y2="185" stroke="#3B82F6" strokeWidth="1" strokeDasharray="4 2" />
-                              <line x1="65" y1="180" x2="65" y2="190" stroke="#3B82F6" strokeWidth="1" />
-                              <line x1="175" y1="180" x2="175" y2="190" stroke="#3B82F6" strokeWidth="1" />
-                              <rect x="92" y="193" width="56" height="24" rx="6" fill="white" stroke="#3B82F6" strokeWidth="1" />
-                              <text x="120" y="210" textAnchor="middle" fontSize="11" fontWeight="600" fill="#3B82F6">{pkg.widthCm || "0"} cm</text>
-                              <text x="120" y="228" textAnchor="middle" fontSize="10" fill="#94A3B8">genişlik</text>
-                              {/* Dimension lines - Depth (boy) */}
-                              <rect x="178" y="175" width="56" height="24" rx="6" fill="white" stroke="#10B981" strokeWidth="1" />
-                              <text x="206" y="192" textAnchor="middle" fontSize="11" fontWeight="600" fill="#10B981">{pkg.lengthCm || "0"} cm</text>
-                              <text x="206" y="210" textAnchor="middle" fontSize="10" fill="#94A3B8">uzunluk</text>
-                            </svg>
+                          {/* 3D Box illustration — dynamic based on dimensions */}
+                          <div className="hidden lg:flex items-center justify-center shrink-0" style={{ width: 280, minHeight: 220 }}>
+                            {(() => {
+                              // Normalize dimensions to visual range
+                              const rawW = Math.max(toNumber(pkg.widthCm), 1);
+                              const rawL = Math.max(toNumber(pkg.lengthCm), 1);
+                              const rawH = Math.max(toNumber(pkg.heightCm), 1);
+                              const maxDim = Math.max(rawW, rawL, rawH, 1);
+                              // Scale to visual units (min 30, max 120)
+                              const minVis = 30, maxVis = 120;
+                              const scale = (v: number) => minVis + ((v / maxDim) * (maxVis - minVis));
+                              const vW = scale(rawW);   // visual width (front face width)
+                              const vL = scale(rawL);   // visual length (depth, goes to upper-right)
+                              const vH = scale(rawH);   // visual height
+
+                              // Isometric projection ratios
+                              const dxRatio = 0.45;   // depth x-shift per unit
+                              const dyRatio = 0.25;   // depth y-shift per unit
+                              const depthX = vL * dxRatio;
+                              const depthY = vL * dyRatio;
+
+                              // Calculate total dimensions for centering
+                              const totalBoxW = vW + depthX;
+                              const totalBoxH = vH + depthY;
+                              
+                              // SVG canvas with padding for labels
+                              const padLeft = 55, padRight = 40, padTop = 20, padBottom = 60;
+                              const svgW = padLeft + totalBoxW + padRight;
+                              const svgH = padTop + totalBoxH + padBottom;
+
+                              // Box anchor point (front-bottom-left corner) — centered in canvas
+                              const ax = padLeft;
+                              const ay = padTop + totalBoxH;
+
+                              // 8 corners of the box
+                              const fbl = { x: ax, y: ay };                                    // front-bottom-left
+                              const fbr = { x: ax + vW, y: ay };                               // front-bottom-right
+                              const ftl = { x: ax, y: ay - vH };                               // front-top-left
+                              const ftr = { x: ax + vW, y: ay - vH };                          // front-top-right
+                              const bbl = { x: ax + depthX, y: ay - depthY };                  // back-bottom-left
+                              const bbr = { x: ax + vW + depthX, y: ay - depthY };             // back-bottom-right
+                              const btl = { x: ax + depthX, y: ay - vH - depthY };             // back-top-left
+                              const btr = { x: ax + vW + depthX, y: ay - vH - depthY };        // back-top-right
+
+                              const pts = (arr: {x:number,y:number}[]) => arr.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+
+                              // Dimension label positions
+                              const hMidY = ay - vH / 2;
+                              const wMidX = ax + vW / 2;
+                              const lMidX = ax + vW + depthX / 2;
+                              const lMidY = ay - depthY / 2 - vH / 2;
+
+                              // Truncate display value for labels (max 6 chars)
+                              const fmtVal = (v: string) => {
+                                const s = v || "0";
+                                return s.length > 6 ? s.slice(0, 5) + "…" : s;
+                              };
+                              const hLabel = `${fmtVal(pkg.heightCm)} cm`;
+                              const wLabel = `${fmtVal(pkg.widthCm)} cm`;
+                              const lLabel = `${fmtVal(pkg.lengthCm)} cm`;
+                              // Dynamic label box width (approx 7px per char + 16px padding)
+                              const lblW = (text: string) => Math.max(56, text.length * 7 + 16);
+                              const hLblW = lblW(hLabel);
+                              const wLblW = lblW(wLabel);
+                              const lLblW = lblW(lLabel);
+
+                              return (
+                                <svg viewBox={`0 0 ${svgW} ${svgH}`} width="260" style={{ maxHeight: 220 }} className="drop-shadow-sm">
+                                  {/* Front face */}
+                                  <polygon points={pts([fbl, fbr, ftr, ftl])} fill="#DBEAFE" stroke="#93C5FD" strokeWidth="1.5" />
+                                  {/* Top face */}
+                                  <polygon points={pts([ftl, ftr, btr, btl])} fill="#BFDBFE" stroke="#93C5FD" strokeWidth="1.5" />
+                                  {/* Right face */}
+                                  <polygon points={pts([fbr, bbr, btr, ftr])} fill="#93C5FD" stroke="#60A5FA" strokeWidth="1.5" />
+
+                                  {/* ── Height dimension (left side) ── */}
+                                  <line x1={ax - 20} y1={ftl.y + 2} x2={ax - 20} y2={fbl.y - 2} stroke="#3B82F6" strokeWidth="1" strokeDasharray="4 2" />
+                                  <line x1={ax - 25} y1={ftl.y + 2} x2={ax - 15} y2={ftl.y + 2} stroke="#3B82F6" strokeWidth="1" />
+                                  <line x1={ax - 25} y1={fbl.y - 2} x2={ax - 15} y2={fbl.y - 2} stroke="#3B82F6" strokeWidth="1" />
+                                  <rect x={ax - 20 - hLblW / 2} y={hMidY - 12} width={hLblW} height="24" rx="6" fill="white" stroke="#3B82F6" strokeWidth="1" />
+                                  <text x={ax - 20} y={hMidY + 4} textAnchor="middle" fontSize="11" fontWeight="600" fill="#3B82F6">{hLabel}</text>
+                                  <text x={ax - 20} y={fbl.y + 16} textAnchor="middle" fontSize="10" fill="#94A3B8">yükseklik</text>
+
+                                  {/* ── Width dimension (bottom) ── */}
+                                  <line x1={fbl.x + 2} y1={fbl.y + 15} x2={fbr.x - 2} y2={fbr.y + 15} stroke="#3B82F6" strokeWidth="1" strokeDasharray="4 2" />
+                                  <line x1={fbl.x + 2} y1={fbl.y + 10} x2={fbl.x + 2} y2={fbl.y + 20} stroke="#3B82F6" strokeWidth="1" />
+                                  <line x1={fbr.x - 2} y1={fbr.y + 10} x2={fbr.x - 2} y2={fbr.y + 20} stroke="#3B82F6" strokeWidth="1" />
+                                  <rect x={wMidX - wLblW / 2} y={fbl.y + 22} width={wLblW} height="24" rx="6" fill="white" stroke="#3B82F6" strokeWidth="1" />
+                                  <text x={wMidX} y={fbl.y + 39} textAnchor="middle" fontSize="11" fontWeight="600" fill="#3B82F6">{wLabel}</text>
+                                  <text x={wMidX} y={fbl.y + 56} textAnchor="middle" fontSize="10" fill="#94A3B8">genişlik</text>
+
+                                  {/* ── Length/Depth dimension (right side, diagonal) ── */}
+                                  <rect x={lMidX - lLblW / 2} y={lMidY + 5} width={lLblW} height="24" rx="6" fill="white" stroke="#10B981" strokeWidth="1" />
+                                  <text x={lMidX} y={lMidY + 22} textAnchor="middle" fontSize="11" fontWeight="600" fill="#10B981">{lLabel}</text>
+                                  <text x={lMidX} y={lMidY + 40} textAnchor="middle" fontSize="10" fill="#94A3B8">uzunluk</text>
+                                </svg>
+                              );
+                            })()}
                           </div>
 
                           {/* Input fields */}
@@ -1482,7 +1552,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                 <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Genişlik</div>
                                 <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                   <span className="pl-2.5 text-[#94A3B8]"><Ruler className="h-3.5 w-3.5" /></span>
-                                  <Input inputMode="decimal" value={pkg.widthCm} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "widthCm", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <Input inputMode="decimal" maxLength={7} value={pkg.widthCm} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "widthCm", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                 </div>
                               </div>
@@ -1490,7 +1560,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                 <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Uzunluk</div>
                                 <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                   <span className="pl-2.5 text-[#94A3B8]"><Ruler className="h-3.5 w-3.5 rotate-90" /></span>
-                                  <Input inputMode="decimal" value={pkg.lengthCm} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "lengthCm", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <Input inputMode="decimal" maxLength={7} value={pkg.lengthCm} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "lengthCm", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                 </div>
                               </div>
@@ -1498,7 +1568,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                 <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Yükseklik</div>
                                 <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                   <span className="pl-2.5 text-[#94A3B8]"><Ruler className="h-3.5 w-3.5" /></span>
-                                  <Input inputMode="decimal" value={pkg.heightCm} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "heightCm", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <Input inputMode="decimal" maxLength={7} value={pkg.heightCm} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "heightCm", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                 </div>
                               </div>
@@ -1509,7 +1579,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                 <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Ağırlık</div>
                                 <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                   <span className="pl-2.5 text-[#94A3B8]"><Package className="h-3.5 w-3.5" /></span>
-                                  <Input inputMode="decimal" value={pkg.weightKg} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "weightKg", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <Input inputMode="decimal" maxLength={7} value={pkg.weightKg} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "weightKg", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">kg</span>
                                 </div>
                               </div>
@@ -1735,7 +1805,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       "bg-white text-[#6366F1] ring-[#6366F1]/30",
                       "bg-[#F5F3FF]",
                       "border-transparent",
-                      "",
+                      "ring-1 ring-[#8B5CF6]/20",
                       Star,
                       true
                     )}
@@ -1853,9 +1923,9 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       </button>
                     </div>
 
-                    <div className="relative">
+                    <div className="relative flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                       <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#94A3B8]" />
-                      <Input value={senderSearch} onChange={e => setSenderSearch(e.target.value)} placeholder="İsim veya adres ile arayın..." className="pl-9 h-9 rounded-lg ring-1 ring-[#E2E8F0] border-0 bg-white text-[12px]" />
+                      <Input value={senderSearch} onChange={e => setSenderSearch(e.target.value)} placeholder="İsim veya adres ile arayın..." className="pl-9 h-9 border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent text-[12px]" />
                     </div>
 
                     {!showNewSenderForm && (filteredSenderAddresses.length > 0
@@ -1929,9 +1999,9 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       </button>
                     </div>
 
-                    <div className="relative">
+                    <div className="relative flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                       <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#94A3B8]" />
-                      <Input value={receiverSearch} onChange={e => setReceiverSearch(e.target.value)} placeholder="İsim veya adres ile arayın..." className="pl-9 h-9 rounded-lg ring-1 ring-[#E2E8F0] border-0 bg-white text-[12px]" />
+                      <Input value={receiverSearch} onChange={e => setReceiverSearch(e.target.value)} placeholder="İsim veya adres ile arayın..." className="pl-9 h-9 border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent text-[12px]" />
                     </div>
 
                     {!showNewReceiverForm && (filteredReceiverAddresses.length > 0
@@ -2238,7 +2308,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
 
                        {/* SKU */}
                        <div className="sm:col-span-12 lg:col-span-5 flex flex-col gap-2">
-                        <label className="text-[12px] font-medium text-slate-500">SKU</label>
+                        <label className="text-[12px] font-bold text-slate-700 mt-1">SKU</label>
                         <div className="flex items-center h-[52px] rounded-2xl border border-slate-200 px-4 focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500 transition-shadow bg-white">
                           <Barcode className="mr-3 h-4 w-4 text-slate-400 shrink-0" />
                           <Input value={item.sku} onChange={e => updateProformaItem(item.id, "sku", e.target.value)} placeholder="Örn: Stok Kodu vb. (Opsiyonel)" className="flex-1 border-0 ring-0 shadow-none bg-transparent p-0 text-[14px] font-medium text-slate-700 focus:ring-0 placeholder:text-slate-400" />

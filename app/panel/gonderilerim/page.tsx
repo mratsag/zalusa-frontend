@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   Package,
   Clock,
@@ -18,6 +18,9 @@ import {
   Loader2,
   Copy,
   Crown,
+  Trash2,
+  XCircle,
+  AlertTriangle,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -32,23 +35,23 @@ function getLogoSrc(url: string): string {
   return `${API_BASE}${url}`;
 }
 
-// ─── Ülke Kodu → Türkçe Ad ───────────────────────────────────────────────────
+// â”€â”€â”€ Ãœlke Kodu â†’ TÃ¼rkÃ§e Ad â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const COUNTRY_NAMES: Record<string, string> = {
-  DE: "Almanya", NL: "Hollanda", FR: "Fransa", GB: "İngiltere", US: "ABD",
-  IT: "İtalya", ES: "İspanya", AT: "Avusturya", BE: "Belçika", CH: "İsviçre",
-  SE: "İsveç", DK: "Danimarka", NO: "Norveç", PL: "Polonya", CZ: "Çekya",
-  PT: "Portekiz", IE: "İrlanda", FI: "Finlandiya", GR: "Yunanistan",
-  RO: "Romanya", BG: "Bulgaristan", HR: "Hırvatistan", HU: "Macaristan",
-  JP: "Japonya", CN: "Çin", KR: "Güney Kore", AU: "Avustralya", CA: "Kanada",
-  BR: "Brezilya", SA: "Suudi Arabistan", AE: "BAE", TR: "Türkiye",
+  DE: "Almanya", NL: "Hollanda", FR: "Fransa", GB: "Ä°ngiltere", US: "ABD",
+  IT: "Ä°talya", ES: "Ä°spanya", AT: "Avusturya", BE: "BelÃ§ika", CH: "Ä°sviÃ§re",
+  SE: "Ä°sveÃ§", DK: "Danimarka", NO: "NorveÃ§", PL: "Polonya", CZ: "Ã‡ekya",
+  PT: "Portekiz", IE: "Ä°rlanda", FI: "Finlandiya", GR: "Yunanistan",
+  RO: "Romanya", BG: "Bulgaristan", HR: "HÄ±rvatistan", HU: "Macaristan",
+  JP: "Japonya", CN: "Ã‡in", KR: "GÃ¼ney Kore", AU: "Avustralya", CA: "Kanada",
+  BR: "Brezilya", SA: "Suudi Arabistan", AE: "BAE", TR: "TÃ¼rkiye",
 };
 
 function getCountryName(code: string): string {
   return COUNTRY_NAMES[code?.toUpperCase()] ?? code;
 }
 
-// ─── Status Mapping ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Status Mapping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const STATUS_MAP: Record<string, { label: string; className: string; dotClass: string }> = {
   draft: {
@@ -57,17 +60,17 @@ const STATUS_MAP: Record<string, { label: string; className: string; dotClass: s
     dotClass: "bg-slate-400",
   },
   pending_payment: {
-    label: "ÖDEME BEKLİYOR",
+    label: "Ã–DEME BEKLÄ°YOR",
     className: "bg-orange-50 text-orange-600",
     dotClass: "bg-orange-500",
   },
   paid: {
-    label: "ÖDENDİ",
+    label: "Ã–DENDÄ°",
     className: "bg-blue-50 text-blue-600",
     dotClass: "bg-blue-500",
   },
   processing: {
-    label: "İŞLENİYOR",
+    label: "Ä°ÅLENÄ°YOR",
     className: "bg-amber-50 text-amber-600",
     dotClass: "bg-amber-500",
   },
@@ -77,19 +80,19 @@ const STATUS_MAP: Record<string, { label: string; className: string; dotClass: s
     dotClass: "bg-sky-500",
   },
   delivered: {
-    label: "TESLİM EDİLDİ",
+    label: "TESLÄ°M EDÄ°LDÄ°",
     className: "bg-[#ECFDF5] text-[#10B981]",
     dotClass: "bg-[#10B981]",
   },
   cancelled: {
-    label: "İPTAL EDİLDİ",
+    label: "Ä°PTAL EDÄ°LDÄ°",
     className: "bg-red-50 text-red-600",
     dotClass: "bg-red-500",
   },
 };
 
 function getCountryEmoji(countryCode: string) {
-  if (!countryCode) return "🏳️";
+  if (!countryCode) return "ğŸ³ï¸";
   const code = countryCode.toUpperCase();
   // If it's longer than 2 characters, maybe it's not a standard ISO code. 
   // We'll just try to convert the first 2 letters.
@@ -104,19 +107,19 @@ function getStatus(status: string) {
   return STATUS_MAP[status] ?? { label: status, className: "bg-slate-100 text-slate-600" };
 }
 
-// ─── Tab → Backend status mapping ─────────────────────────────────────────────
+// â”€â”€â”€ Tab â†’ Backend status mapping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-const TABS = ["Tümü", "Taslak", "Ödeme Bekliyor", "Yolda", "Teslim Edildi"] as const;
+const TABS = ["TÃ¼mÃ¼", "Taslak", "Ã–deme Bekliyor", "Yolda", "Teslim Edildi"] as const;
 
 const TAB_TO_STATUS: Record<string, string | undefined> = {
-  "Tümü": undefined,
+  "TÃ¼mÃ¼": undefined,
   "Taslak": "draft",
-  "Ödeme Bekliyor": "pending_payment",
+  "Ã–deme Bekliyor": "pending_payment",
   "Yolda": "shipped",
   "Teslim Edildi": "delivered",
 };
 
-// ─── Custom Icons ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ Custom Icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function WeightIcon({ className }: { className?: string }) {
   return (
@@ -138,7 +141,7 @@ function MoneyIcon({ className }: { className?: string }) {
   );
 }
 
-// ─── StatusBadge ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ StatusBadge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function StatusBadge({ status }: { status: string }) {
   const st = getStatus(status);
@@ -150,7 +153,7 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-// ─── Tarih Formatlama ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Tarih Formatlama â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -163,7 +166,131 @@ function formatDate(iso: string): string {
   });
 }
 
-// ─── Sayfa Bileşeni ──────────────────────────────────────────────────────────
+// â”€â”€â”€ Dropdown MenÃ¼ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+function ShipmentDropdown({ shipmentId, onCancel }: { shipmentId: number; onCancel: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="h-[40px] w-[40px] flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
+      >
+        <MoreHorizontal className="h-5 w-5" />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-[44px] z-50 w-[180px] bg-white rounded-[12px] shadow-[0_8px_30px_-4px_rgba(0,0,0,0.12)] border border-slate-100 py-1.5 animate-in fade-in slide-in-from-top-2 duration-150">
+          <button
+            onClick={() => { setOpen(false); onCancel(); }}
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] font-semibold text-red-600 hover:bg-red-50 transition-colors"
+          >
+            <Trash2 className="h-4 w-4" />
+            GÃ¶nderiyi Ä°ptal Et
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// â”€â”€â”€ Ä°ptal Onay ModalÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+function CancelConfirmModal({
+  shipmentId,
+  trackingCode,
+  onConfirm,
+  onClose,
+  loading,
+}: {
+  shipmentId: number;
+  trackingCode: string;
+  onConfirm: () => void;
+  onClose: () => void;
+  loading: boolean;
+}) {
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      
+      {/* Modal */}
+      <div className="relative bg-white rounded-[20px] shadow-[0_20px_60px_-12px_rgba(0,0,0,0.25)] w-full max-w-[420px] p-6 animate-in zoom-in-95 fade-in duration-200">
+        {/* Warning Icon */}
+        <div className="flex justify-center mb-4">
+          <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center">
+            <AlertTriangle className="h-7 w-7 text-red-500" />
+          </div>
+        </div>
+
+        <h3 className="text-[17px] font-bold text-slate-900 text-center">
+          GÃ¶nderiyi Ä°ptal Et
+        </h3>
+        <p className="text-[13px] text-slate-500 text-center mt-2 leading-relaxed">
+          <span className="font-bold text-slate-700">{trackingCode || `ZLS-SHP-${shipmentId}`}</span> kodlu gÃ¶nderiyi iptal etmek istediÄŸinize emin misiniz? Bu iÅŸlem geri alÄ±namaz.
+        </p>
+
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="flex-1 h-[44px] rounded-[12px] bg-slate-100 hover:bg-slate-200 text-slate-700 text-[13px] font-bold transition-all disabled:opacity-50"
+          >
+            VazgeÃ§
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="flex-1 h-[44px] rounded-[12px] bg-red-500 hover:bg-red-600 text-white text-[13px] font-bold transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+            {loading ? "Ä°ptal Ediliyor..." : "Ä°ptal Et"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// â”€â”€â”€ Toast Bildirimi â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+function Toast({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 3500);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className={`fixed bottom-6 right-6 z-[9999] flex items-center gap-3 px-5 py-3.5 rounded-[14px] shadow-[0_8px_30px_-4px_rgba(0,0,0,0.2)] text-[13px] font-bold animate-in slide-in-from-bottom-4 fade-in duration-300 ${
+      type === "success" ? "bg-[#10B981] text-white" : "bg-red-500 text-white"
+    }`}>
+      {type === "success" ? (
+        <CheckCircle2 className="h-4.5 w-4.5" />
+      ) : (
+        <XCircle className="h-4.5 w-4.5" />
+      )}
+      {message}
+    </div>
+  );
+}
+
+// â”€â”€â”€ Sayfa BileÅŸeni â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function GonderilerimPage() {
   const [shipments, setShipments] = useState<ShipmentListItem[]>([]);
@@ -174,9 +301,14 @@ export default function GonderilerimPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [search, setSearch] = useState("");
-  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("Tümü");
+  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("TÃ¼mÃ¼");
 
-  // ── Veri Çek ──
+  // Cancel state
+  const [cancelTarget, setCancelTarget] = useState<{ id: number; trackingCode: string } | null>(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  // â”€â”€ Veri Ã‡ek â”€â”€
   const fetchShipments = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -190,7 +322,7 @@ export default function GonderilerimPage() {
       setShipments(res.shipments);
       setTotal(res.total);
     } catch (err: any) {
-      setError(err.message ?? "Gönderiler yüklenemedi");
+      setError(err.message ?? "GÃ¶nderiler yÃ¼klenemedi");
     } finally {
       setLoading(false);
     }
@@ -200,13 +332,29 @@ export default function GonderilerimPage() {
     fetchShipments();
   }, [fetchShipments]);
 
-  // Tab değişince sayfa 1'e dön
+  // Tab deÄŸiÅŸince sayfa 1'e dÃ¶n
   function handleTabChange(tab: (typeof TABS)[number]) {
     setActiveTab(tab);
     setPage(1);
   }
 
-  // ── Client-side arama filtresi ──
+  // â”€â”€ Ä°ptal Ä°ÅŸlemi â”€â”€
+  async function handleCancelConfirm() {
+    if (!cancelTarget) return;
+    setCancelLoading(true);
+    try {
+      await shipmentService.cancel(cancelTarget.id);
+      setToast({ message: "GÃ¶nderi baÅŸarÄ±yla iptal edildi", type: "success" });
+      setCancelTarget(null);
+      fetchShipments();
+    } catch (err: any) {
+      setToast({ message: err.message || "Ä°ptal iÅŸlemi baÅŸarÄ±sÄ±z", type: "error" });
+    } finally {
+      setCancelLoading(false);
+    }
+  }
+
+  // â”€â”€ Client-side arama filtresi â”€â”€
   const filtered = shipments.filter((s) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -222,7 +370,7 @@ export default function GonderilerimPage() {
     );
   });
 
-  // ── Loading State ──
+  // â”€â”€ Loading State â”€â”€
   if (loading && shipments.length === 0) {
     return (
       <div className="space-y-5">
@@ -239,7 +387,7 @@ export default function GonderilerimPage() {
     );
   }
 
-  // ── Error State ──
+  // â”€â”€ Error State â”€â”€
   if (error && shipments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
@@ -253,33 +401,36 @@ export default function GonderilerimPage() {
 
   const totalPages = Math.ceil(total / limit);
 
+  // Ä°ptal edilebilir statusler
+  const canCancel = (status: string) => status === "draft" || status === "pending_payment";
+
   return (
     <div className="space-y-6 pb-10">
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <div className="flex flex-col gap-1">
         <h1 className="text-[22px] font-bold tracking-tight text-slate-900">
-          Gönderilerim
+          GÃ¶nderilerim
         </h1>
         <p className="text-[13px] text-slate-500">
-          Tüm gönderilerinizi ve taslaklarınızı buradan yönetebilirsiniz.
+          TÃ¼m gÃ¶nderilerinizi ve taslaklarÄ±nÄ±zÄ± buradan yÃ¶netebilirsiniz.
         </p>
       </div>
 
-      {/* ── Search & Filter Row ── */}
+      {/* â”€â”€ Search & Filter Row â”€â”€ */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 stroke-[2.5px]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Takip kodu, şehir veya kargo firması ara..."
+            placeholder="Takip kodu, ÅŸehir veya kargo firmasÄ± ara..."
             className="w-full pl-11 pr-4 rounded-[12px] h-[44px] border border-slate-200 bg-white text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-700 placeholder:text-slate-400 font-medium"
           />
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button className="flex items-center gap-2 px-4 h-[44px] text-[13px] font-semibold rounded-[12px] bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all shadow-sm">
             <ArrowUpDown className="h-4 w-4 text-slate-400" />
-            Sırala
+            SÄ±rala
           </button>
           <button className="flex items-center gap-2 px-4 h-[44px] text-[13px] font-semibold rounded-[12px] bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all shadow-sm">
             <Filter className="h-4 w-4 text-slate-400" />
@@ -288,11 +439,11 @@ export default function GonderilerimPage() {
         </div>
       </div>
 
-      {/* ── Tabs ── */}
+      {/* â”€â”€ Tabs â”€â”€ */}
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-2">
         {TABS.map((tab) => {
           const isActive = activeTab === tab;
-          const counts: Record<string, number> = { "Tümü": 6, "Taslak": 3, "Ödeme Bekliyor": 1, "Yolda": 1, "Teslim Edildi": 1 };
+          const counts: Record<string, number> = { "TÃ¼mÃ¼": 6, "Taslak": 3, "Ã–deme Bekliyor": 1, "Yolda": 1, "Teslim Edildi": 1 };
           
           return (
             <button
@@ -315,36 +466,36 @@ export default function GonderilerimPage() {
         })}
       </div>
 
-      {/* ── Loading overlay for tab/page changes ── */}
+      {/* â”€â”€ Loading overlay for tab/page changes â”€â”€ */}
       {loading && shipments.length > 0 && (
         <div className="flex justify-center py-4">
           <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
         </div>
       )}
 
-      {/* ── Empty State ── */}
+      {/* â”€â”€ Empty State â”€â”€ */}
       {!loading && filtered.length === 0 ? (
         <Card className="border-dashed rounded-[24px]">
           <CardContent className="flex flex-col items-center justify-center p-12 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
               <Box className="h-8 w-8 text-slate-400" />
             </div>
-            <h3 className="mt-4 text-lg font-semibold">Gönderi Bulunamadı</h3>
+            <h3 className="mt-4 text-lg font-semibold">GÃ¶nderi BulunamadÄ±</h3>
             <p className="mt-2 text-sm text-slate-500 max-w-sm">
               {search
-                ? "Arama kriterlerinize uygun bir gönderi bulunamadı."
-                : "Henüz hiç gönderi oluşturmadınız."}
+                ? "Arama kriterlerinize uygun bir gÃ¶nderi bulunamadÄ±."
+                : "HenÃ¼z hiÃ§ gÃ¶nderi oluÅŸturmadÄ±nÄ±z."}
             </p>
             <Button
               className="mt-6 rounded-full"
               onClick={() => (window.location.href = "/panel/gonderi-olustur")}
             >
-              Yeni Gönderi Oluştur
+              Yeni GÃ¶nderi OluÅŸtur
             </Button>
           </CardContent>
         </Card>
       ) : (
-        /* ── Shipment Cards ── */
+        /* â”€â”€ Shipment Cards â”€â”€ */
         <div className="grid gap-4">
           {filtered.map((s) => {
             const rawDate = new Date(s.createdAt || Date.now());
@@ -352,6 +503,7 @@ export default function GonderilerimPage() {
             const cardDate = `${rawDate.getDate().toString().padStart(2, '0')} ${trMonth} ${rawDate.getFullYear()}`;
 
             const isDelivered = s.status === "delivered";
+            const showMenu = canCancel(s.status);
 
             return (
               <div
@@ -385,16 +537,16 @@ export default function GonderilerimPage() {
                   {/* Right Actions */}
                   <div className="flex items-center justify-between w-full sm:w-auto gap-4 xl:gap-6 mt-2 sm:mt-0 pl-0 sm:pl-4">
                     <div className="flex flex-col items-start xl:items-end">
-                      <span className="text-[11px] font-semibold text-slate-400 tracking-wide uppercase">Toplam Ücret</span>
+                      <span className="text-[11px] font-semibold text-slate-400 tracking-wide uppercase">Toplam Ãœcret</span>
                       <span className="text-[18px] font-bold text-slate-900 tracking-tight mt-0.5">
                         {s.carrierCurrency === "TRY"
-                          ? `${(s.carrierPriceTry ?? 0).toLocaleString("tr-TR")} ₺`
+                          ? `${(s.carrierPriceTry ?? 0).toLocaleString("tr-TR")} â‚º`
                           : `$${(s.carrierPrice ?? 0).toFixed(2)}`}
                       </span>
                       {s.discountAmountTry && s.discountAmountTry > 0 ? (
                         <div className="mt-1 flex items-center justify-center gap-1 rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
                           <Crown className="h-3 w-3" />
-                          <span>{s.discountAmountTry.toLocaleString("tr-TR")} ₺ Bayi İndirimi Kazanıldı</span>
+                          <span>{s.discountAmountTry.toLocaleString("tr-TR")} â‚º Bayi Ä°ndirimi KazanÄ±ldÄ±</span>
                         </div>
                       ) : null}
                     </div>
@@ -413,7 +565,7 @@ export default function GonderilerimPage() {
                           className="px-6 py-[10px] rounded-full bg-[#10B981] hover:bg-[#10B981] text-white text-[13px] font-bold transition-all shadow-sm"
                           onClick={() => window.location.href = `/panel/odeme/${s.id}`}
                         >
-                          Ödeme Yap
+                          Ã–deme Yap
                         </button>
                       ) : s.status === "shipped" ? (
                         <button
@@ -430,9 +582,14 @@ export default function GonderilerimPage() {
                           Detaylar
                         </button>
                       )}
-                      <button className="h-[40px] w-[40px] flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
-                        <MoreHorizontal className="h-5 w-5" />
-                      </button>
+
+                      {/* 3 Nokta MenÃ¼ â€” Sadece draft ve pending_payment iÃ§in */}
+                      {showMenu && (
+                        <ShipmentDropdown
+                          shipmentId={s.id}
+                          onCancel={() => setCancelTarget({ id: s.id, trackingCode: s.trackingCode })}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -492,7 +649,7 @@ export default function GonderilerimPage() {
                     </div>
                     <div className="flex items-center gap-1.5">
                       <WeightIcon className="h-3.5 w-3.5" />
-                      <span>Ağırlık: <span className="font-bold text-slate-700">{s.chargeableWeight ? s.chargeableWeight.toFixed(1) : "0.0"} kg</span></span>
+                      <span>AÄŸÄ±rlÄ±k: <span className="font-bold text-slate-700">{s.chargeableWeight ? s.chargeableWeight.toFixed(1) : "0.0"} kg</span></span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Box className="h-3.5 w-3.5" />
@@ -506,7 +663,7 @@ export default function GonderilerimPage() {
         </div>
       )}
 
-      {/* ── Pagination ── */}
+      {/* â”€â”€ Pagination â”€â”€ */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 pt-4">
           <Button
@@ -516,7 +673,7 @@ export default function GonderilerimPage() {
             disabled={page <= 1}
             onClick={() => setPage((p) => p - 1)}
           >
-            Önceki
+            Ã–nceki
           </Button>
           <span className="text-sm text-slate-500 px-3">
             {page} / {totalPages}
@@ -531,6 +688,26 @@ export default function GonderilerimPage() {
             Sonraki
           </Button>
         </div>
+      )}
+
+      {/* â”€â”€ Ä°ptal Onay ModalÄ± â”€â”€ */}
+      {cancelTarget && (
+        <CancelConfirmModal
+          shipmentId={cancelTarget.id}
+          trackingCode={cancelTarget.trackingCode}
+          onConfirm={handleCancelConfirm}
+          onClose={() => setCancelTarget(null)}
+          loading={cancelLoading}
+        />
+      )}
+
+      {/* â”€â”€ Toast Bildirimi â”€â”€ */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );

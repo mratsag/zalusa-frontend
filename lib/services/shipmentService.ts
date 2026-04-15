@@ -316,6 +316,11 @@ export const shipmentService = {
     const qs = query.toString();
     return apiGet<ShipmentListResponse>(`/api/shipments${qs ? `?${qs}` : ""}`);
   },
+
+  /** PUT /api/shipments/:id/cancel — Gönderi iptal et */
+  cancel(id: number) {
+    return apiPut<{ message: string }>(`/api/shipments/${id}/cancel`, {});
+  },
 };
 
 // ─── Address Service ─────────────────────────────────────────────────────────
