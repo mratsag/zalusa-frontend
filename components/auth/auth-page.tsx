@@ -746,17 +746,19 @@ export function AuthPage() {
                   })}
                 </ul>
 
-                {/* KVKK */}
+                {/* KVKK + Gizlilik Politikası + Kullanım Koşulları */}
                 <div className="grid gap-3 rounded-[10px] bg-[#F8FAFC] p-4 ring-1 ring-[#E2E8F0]">
                   <Checkbox
                     checked={kvkk}
-                    onChange={setKvkk}
-                    label={<span className="text-[#14141F]/85">KVKK onayını veriyorum.</span>}
-                  />
-                  <Checkbox
-                    checked={mailConsent}
-                    onChange={setMailConsent}
-                    label={<span className="text-[#14141F]/85">Mail ile iletişim kurulabilmesi için onay veriyorum.</span>}
+                    onChange={(val) => { setKvkk(val); setMailConsent(val); }}
+                    label={
+                      <span className="text-[13px] text-[#14141F]/85 leading-relaxed">
+                        <a href="/gizlilik-politikasi" target="_blank" className="font-semibold text-[#4F46E5] hover:underline underline-offset-2">Gizlilik Politikası</a>
+                        {", "}
+                        <a href="/kullanim-kosullari" target="_blank" className="font-semibold text-[#4F46E5] hover:underline underline-offset-2">Kullanım Koşulları</a>
+                        {" ve KVKK Aydınlatma Metni'ni okudum, kabul ediyorum. E-posta ile iletişim kurulmasına onay veriyorum."}
+                      </span>
+                    }
                   />
                 </div>
 

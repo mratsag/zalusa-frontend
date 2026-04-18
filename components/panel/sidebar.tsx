@@ -12,7 +12,7 @@ import { profileService } from "@/lib/services/profileService";
 
 /* ── Nav items grouped by category (matching Figma) ── */
 const MENU_ITEMS = panelNavItems.filter(i =>
-  ["/panel", "/panel/gonderi-olustur", "/panel/gonderilerim", "/panel/fiyat-hesaplama", "/panel/kurye-cagir"].includes(i.href)
+  ["/panel", "/panel/gonderi-olustur", "/panel/yurt-ici-gonderi", "/panel/gonderilerim", "/panel/fiyat-hesaplama", "/panel/kurye-cagir"].includes(i.href)
 );
 const PERSONAL_ITEMS = panelNavItems.filter(i =>
   ["/panel/profilim", "/panel/fatura-odeme", "/panel/entegrasyon"].includes(i.href)
@@ -175,7 +175,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           </svg>
         </a>
         <a
-          href="https://wa.me/15551366714?text=merhaba"
+          href="https://wa.me/905426338134?text=merhaba"
           target="_blank"
           rel="noopener noreferrer"
           className="group flex items-center gap-2.5 rounded-[12px] px-3 py-2.5 w-full text-[14.5px] font-semibold transition-all duration-200 text-[#64748B] hover:bg-[#DCFCE7] hover:text-[#16A34A]"

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
@@ -60,7 +60,7 @@ const STATUS_MAP: Record<string, { label: string; className: string; dotClass: s
     dotClass: "bg-slate-400",
   },
   pending_payment: {
-    label: "Ã–DEME BEKLÄ°YOR",
+    label: "ÖDEME BEKLİYOR",
     className: "bg-orange-50 text-orange-600",
     dotClass: "bg-orange-500",
   },
@@ -109,12 +109,12 @@ function getStatus(status: string) {
 
 // â”€â”€â”€ Tab â†’ Backend status mapping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-const TABS = ["TÃ¼mÃ¼", "Taslak", "Ã–deme Bekliyor", "Yolda", "Teslim Edildi"] as const;
+const TABS = ["Tümü", "Taslak", "Ödeme Bekliyor", "Yolda", "Teslim Edildi"] as const;
 
 const TAB_TO_STATUS: Record<string, string | undefined> = {
-  "TÃ¼mÃ¼": undefined,
+  "Tümü": undefined,
   "Taslak": "draft",
-  "Ã–deme Bekliyor": "pending_payment",
+  "Ödeme Bekliyor": "pending_payment",
   "Yolda": "shipped",
   "Teslim Edildi": "delivered",
 };
@@ -198,7 +198,7 @@ function ShipmentDropdown({ shipmentId, onCancel }: { shipmentId: number; onCanc
             className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] font-semibold text-red-600 hover:bg-red-50 transition-colors"
           >
             <Trash2 className="h-4 w-4" />
-            GÃ¶nderiyi Ä°ptal Et
+            Gönderiyi İptal Et
           </button>
         </div>
       )}
@@ -239,7 +239,7 @@ function CancelConfirmModal({
           GÃ¶nderiyi Ä°ptal Et
         </h3>
         <p className="text-[13px] text-slate-500 text-center mt-2 leading-relaxed">
-          <span className="font-bold text-slate-700">{trackingCode || `ZLS-SHP-${shipmentId}`}</span> kodlu gÃ¶nderiyi iptal etmek istediÄŸinize emin misiniz? Bu iÅŸlem geri alÄ±namaz.
+          <span className="font-bold text-slate-700">{trackingCode || `ZLS-SHP-${shipmentId}`}</span> kodlu gönderiyi iptal etmek istediğinize emin misiniz? Bu işlem geri alınamaz.
         </p>
 
         <div className="flex gap-3 mt-6">
@@ -301,7 +301,7 @@ export default function GonderilerimPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [search, setSearch] = useState("");
-  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("TÃ¼mÃ¼");
+  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("Tümü");
 
   // Cancel state
   const [cancelTarget, setCancelTarget] = useState<{ id: number; trackingCode: string } | null>(null);
@@ -322,7 +322,7 @@ export default function GonderilerimPage() {
       setShipments(res.shipments);
       setTotal(res.total);
     } catch (err: any) {
-      setError(err.message ?? "GÃ¶nderiler yÃ¼klenemedi");
+      setError(err.message ?? "Gönderiler yüklenemedi");
     } finally {
       setLoading(false);
     }
@@ -344,11 +344,11 @@ export default function GonderilerimPage() {
     setCancelLoading(true);
     try {
       await shipmentService.cancel(cancelTarget.id);
-      setToast({ message: "GÃ¶nderi baÅŸarÄ±yla iptal edildi", type: "success" });
+      setToast({ message: "Gönderi başarıyla iptal edildi", type: "success" });
       setCancelTarget(null);
       fetchShipments();
     } catch (err: any) {
-      setToast({ message: err.message || "Ä°ptal iÅŸlemi baÅŸarÄ±sÄ±z", type: "error" });
+      setToast({ message: err.message || "İptal işlemi başarısız", type: "error" });
     } finally {
       setCancelLoading(false);
     }
@@ -409,10 +409,10 @@ export default function GonderilerimPage() {
       {/* â”€â”€ Header â”€â”€ */}
       <div className="flex flex-col gap-1">
         <h1 className="text-[22px] font-bold tracking-tight text-slate-900">
-          GÃ¶nderilerim
+          Gönderilerim
         </h1>
         <p className="text-[13px] text-slate-500">
-          TÃ¼m gÃ¶nderilerinizi ve taslaklarÄ±nÄ±zÄ± buradan yÃ¶netebilirsiniz.
+          Tüm gönderilerinizi ve taslaklarınızı buradan yönetebilirsiniz.
         </p>
       </div>
 
@@ -423,14 +423,14 @@ export default function GonderilerimPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Takip kodu, ÅŸehir veya kargo firmasÄ± ara..."
+            placeholder="Takip kodu, şehir veya kargo firması ara..."
             className="w-full pl-11 pr-4 rounded-[12px] h-[44px] border border-slate-200 bg-white text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-700 placeholder:text-slate-400 font-medium"
           />
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button className="flex items-center gap-2 px-4 h-[44px] text-[13px] font-semibold rounded-[12px] bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all shadow-sm">
             <ArrowUpDown className="h-4 w-4 text-slate-400" />
-            SÄ±rala
+            Sırala
           </button>
           <button className="flex items-center gap-2 px-4 h-[44px] text-[13px] font-semibold rounded-[12px] bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all shadow-sm">
             <Filter className="h-4 w-4 text-slate-400" />
@@ -443,7 +443,7 @@ export default function GonderilerimPage() {
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-2">
         {TABS.map((tab) => {
           const isActive = activeTab === tab;
-          const counts: Record<string, number> = { "TÃ¼mÃ¼": 6, "Taslak": 3, "Ã–deme Bekliyor": 1, "Yolda": 1, "Teslim Edildi": 1 };
+          const counts: Record<string, number> = { "Tümü": 6, "Taslak": 3, "Ödeme Bekliyor": 1, "Yolda": 1, "Teslim Edildi": 1 };
           
           return (
             <button
@@ -480,17 +480,17 @@ export default function GonderilerimPage() {
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
               <Box className="h-8 w-8 text-slate-400" />
             </div>
-            <h3 className="mt-4 text-lg font-semibold">GÃ¶nderi BulunamadÄ±</h3>
+            <h3 className="mt-4 text-lg font-semibold">Gönderi Bulunamadı</h3>
             <p className="mt-2 text-sm text-slate-500 max-w-sm">
               {search
-                ? "Arama kriterlerinize uygun bir gÃ¶nderi bulunamadÄ±."
-                : "HenÃ¼z hiÃ§ gÃ¶nderi oluÅŸturmadÄ±nÄ±z."}
+                ? "Arama kriterlerinize uygun bir gönderi bulunamadı."
+                : "Henüz hiç gönderi oluşturmadınız."}
             </p>
             <Button
               className="mt-6 rounded-full"
               onClick={() => (window.location.href = "/panel/gonderi-olustur")}
             >
-              Yeni GÃ¶nderi OluÅŸtur
+              Yeni Gönderi Oluştur
             </Button>
           </CardContent>
         </Card>
@@ -537,16 +537,16 @@ export default function GonderilerimPage() {
                   {/* Right Actions */}
                   <div className="flex items-center justify-between w-full sm:w-auto gap-4 xl:gap-6 mt-2 sm:mt-0 pl-0 sm:pl-4">
                     <div className="flex flex-col items-start xl:items-end">
-                      <span className="text-[11px] font-semibold text-slate-400 tracking-wide uppercase">Toplam Ãœcret</span>
+                      <span className="text-[11px] font-semibold text-slate-400 tracking-wide uppercase">Toplam Ücret</span>
                       <span className="text-[18px] font-bold text-slate-900 tracking-tight mt-0.5">
                         {s.carrierCurrency === "TRY"
-                          ? `${(s.carrierPriceTry ?? 0).toLocaleString("tr-TR")} â‚º`
+                          ? `${(s.carrierPriceTry ?? 0).toLocaleString("tr-TR")} ₺`
                           : `$${(s.carrierPrice ?? 0).toFixed(2)}`}
                       </span>
                       {s.discountAmountTry && s.discountAmountTry > 0 ? (
                         <div className="mt-1 flex items-center justify-center gap-1 rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
                           <Crown className="h-3 w-3" />
-                          <span>{s.discountAmountTry.toLocaleString("tr-TR")} â‚º Bayi Ä°ndirimi KazanÄ±ldÄ±</span>
+                          <span>{s.discountAmountTry.toLocaleString("tr-TR")} ₺ Bayi İndirimi Kazanıldı</span>
                         </div>
                       ) : null}
                     </div>
@@ -565,7 +565,7 @@ export default function GonderilerimPage() {
                           className="px-6 py-[10px] rounded-full bg-[#10B981] hover:bg-[#10B981] text-white text-[13px] font-bold transition-all shadow-sm"
                           onClick={() => window.location.href = `/panel/odeme/${s.id}`}
                         >
-                          Ã–deme Yap
+                          Ödeme Yap
                         </button>
                       ) : s.status === "shipped" ? (
                         <button
@@ -649,7 +649,7 @@ export default function GonderilerimPage() {
                     </div>
                     <div className="flex items-center gap-1.5">
                       <WeightIcon className="h-3.5 w-3.5" />
-                      <span>AÄŸÄ±rlÄ±k: <span className="font-bold text-slate-700">{s.chargeableWeight ? s.chargeableWeight.toFixed(1) : "0.0"} kg</span></span>
+                      <span>Ağırlık: <span className="font-bold text-slate-700">{s.chargeableWeight ? s.chargeableWeight.toFixed(1) : "0.0"} kg</span></span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Box className="h-3.5 w-3.5" />

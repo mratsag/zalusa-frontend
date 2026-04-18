@@ -201,6 +201,18 @@ export interface CourierStats {
   [key: string]: any;
 }
 
+export interface DomesticMargin {
+  id: number;
+  handlerCode: string;
+  handlerName: string;
+  logoUrl: string;
+  marginType: "percentage" | "fixed";
+  marginValue: number;
+  minMargin: number;
+  isActive: boolean;
+  sortOrder: number;
+}
+
 export interface LiveChat {
   id: number;
   userId: number;
@@ -598,4 +610,37 @@ export const adminService = {
 
   updateCouponStatus: (couponId: number, isActive: boolean) =>
     put<{ message: string }>(`/api/admin/coupons/${couponId}/status`, { isActive }),
+
+  // ── Yurt İçi Kargo Marj Yönetimi ──────────────────────────────────
+  listDomesticMargins: () =>
+    get<{ margins: DomesticMargin[] }>("/api/admin/domestic-margins"),
+
+  updateDomesticMargin: (
+    handlerCode: string,
+    payload: {
+      marginType?: string;
+      marginValue?: number;
+      minMargin?: number;
+      isActive?: boolean;
+      handlerName?: string;
+      logoUrl?: string;
+    },
+  ) => put<{ message: string }>(`/api/admin/domestic-margins/${handlerCode}`, payload),
+
+  uploadDomesticLogo: async (handlerCode: string, file: File): Promise<{ logoUrl: string }> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const token = getToken();
+    const headers: Record<string, string> = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const res = await fetch(`${API}/api/admin/domestic-margins/${handlerCode}/logo`, {
+      method: "POST",
+      headers,
+      credentials: "include",
+      body: formData,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || `Yükleme başarısız (${res.status})`);
+    return data;
+  },
 };
