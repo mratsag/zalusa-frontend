@@ -159,14 +159,14 @@ function getCurrencySymbol(currency: string): string {
   return "$";
 }
 
-function Field({ label, icon: Icon, children }: { label: string; icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
+function Field({ label, icon: Icon, children, error }: { label: string; icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode; error?: string }) {
   return (
     <label className="block group">
-      <div className="mb-2 flex items-center gap-1.5 text-[12px] font-bold text-slate-700 uppercase tracking-wide">
-        {Icon ? <Icon className="h-3.5 w-3.5 text-slate-400" /> : null}
-        <span>{label}</span>
+      <div className="mb-2 flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-700">
+        {Icon ? <Icon className={cn("h-3.5 w-3.5", error ? "text-red-500" : "text-slate-400")} /> : null}
+        <span className={error ? "text-red-500" : ""}>{label}</span>
       </div>
-      <div className="flex items-center h-[52px] rounded-2xl border-[1.5px] border-slate-300 bg-slate-50/50 px-4 transition-all focus-within:border-brand-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-500/20 hover:border-slate-400">
+      <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 transition-all focus-within:bg-white focus-within:ring-2", error ? "border-red-500 bg-red-50/30 ring-2 ring-red-100 focus-within:border-red-500 focus-within:ring-red-200" : "border-slate-300 bg-slate-50/50 hover:border-slate-400 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
         {React.Children.map(children, child => {
           if (React.isValidElement<{ className?: string }>(child)) {
             return React.cloneElement(child, { className: cn(child.props.className, "flex-1 border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent p-0 text-[14px] font-medium text-slate-700 placeholder:text-slate-400") } as any);
@@ -174,6 +174,7 @@ function Field({ label, icon: Icon, children }: { label: string; icon?: React.Co
           return child;
         })}
       </div>
+      {error && <div className="mt-1.5 text-[11px] font-semibold text-red-500 ml-1">{error}</div>}
     </label>
   );
 }
@@ -950,6 +951,27 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           }
           finalSenderAddressId = ""; // No existing ID if creating a new form, rely on flat fields
           update("selectedSenderAddressId", "");
+        }
+
+        const step3Errors: Record<string, string> = {};
+        
+        if (showNewReceiverForm) {
+          if (!draft.receiverName && !draft.receiverCompany) step3Errors.receiverName = "Alıcı adı veya firma adı zorunludur";
+          if (!draft.receiverAddress) step3Errors.receiverAddress = "Adres zorunludur";
+          if (!draft.receiverCity) step3Errors.receiverCity = "Şehir zorunludur";
+          if (!draft.receiverPhone) step3Errors.receiverPhone = "Telefon zorunludur";
+          if (!draft.receiverAddressCountry) step3Errors.receiverAddressCountry = "Ülke zorunludur";
+        } else {
+          if (!draft.selectedReceiverAddressId) {
+            step3Errors.selectedReceiverAddressId = "Lütfen bir alıcı seçin veya yeni adres girin";
+          }
+        }
+
+        if (Object.keys(step3Errors).length > 0) {
+          setFieldErrors(step3Errors);
+          setApiError("Lütfen alıcı bilgilerindeki eksik alanları doldurunuz.");
+          setLoading(false);
+          return;
         }
 
         const senderAddr = SAVED_SENDER_ADDRESSES.find(a => String(a.id) === finalSenderAddressId) || null;
@@ -2036,9 +2058,9 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                           <button type="button" onClick={() => setShowNewReceiverForm(false)} className="text-[12px] font-medium text-[#94A3B8] hover:text-[#475569]">İptal</button>
                         </div>
                         <div className="grid gap-3 sm:grid-cols-3">
-                          <Field label="Ad Soyad" icon={User}><Input value={draft.receiverName} onChange={e => update("receiverName", e.target.value)} placeholder="Alıcı adı soyadı" /></Field>
+                          <Field label="Ad Soyad" icon={User} error={fieldErrors.receiverName}><Input value={draft.receiverName} onChange={e => update("receiverName", e.target.value)} placeholder="Alıcı adı soyadı" /></Field>
                           <Field label="Firma Adı" icon={Building}><Input value={draft.receiverCompany} onChange={e => update("receiverCompany", e.target.value)} placeholder="Firma adı (opsiyonel)" /></Field>
-                          <Field label="Telefon" icon={Phone}>
+                          <Field label="Telefon" icon={Phone} error={fieldErrors.receiverPhone}>
                             <Input
                               value={formatPhoneDisplay(draft.receiverPhone)}
                               onChange={e => {
@@ -2051,7 +2073,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                               })()}
                             />
                           </Field>
-                          <Field label="Ülke" icon={MapPin}>
+                          <Field label="Ülke" icon={MapPin} error={fieldErrors.receiverAddressCountry}>
                             <SearchableSelect
                               options={apiCountries.length > 0 ? apiCountries : RECEIVER_COUNTRIES.map((c) => ({ ...c, label: (<div className="flex items-center gap-2"><span>{c.label}</span></div>) as any, searchableText: c.label }))}
                               value={draft.receiverAddressCountry}
@@ -2079,7 +2101,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                               disabled={!draft.receiverAddressCountry}
                             />
                           </Field>
-                          <Field label="Şehir" icon={MapPin}>
+                          <Field label="Şehir" icon={MapPin} error={fieldErrors.receiverCity}>
                             {receiverHasStates ? (
                               <CitySelect
                                 countryCode={draft.receiverAddressCountry || draft.receiverCountry}
@@ -2100,7 +2122,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                           <Field label="Posta Kodu" icon={MapPin}>
                             <Input value={draft.receiverAddressPostalCode ?? ""} onChange={e => update("receiverAddressPostalCode", e.target.value)} placeholder="Posta kodu (opsiyonel)" />
                           </Field>
-                          <div className="sm:col-span-2"><Field label="Açık Adres" icon={MapPinned}><Input value={draft.receiverAddress} onChange={e => update("receiverAddress", e.target.value)} placeholder="Sokak, cadde, bina no, daire no..." /></Field></div>
+                          <div className="sm:col-span-2"><Field label="Açık Adres" icon={MapPinned} error={fieldErrors.receiverAddress}><Input value={draft.receiverAddress} onChange={e => update("receiverAddress", e.target.value)} placeholder="Sokak, cadde, bina no, daire no..." /></Field></div>
                         </div>
                         <div className="mt-3 flex justify-end">
                           <Button type="button" variant={draft.saveReceiverAddress ? "primary" : "secondary"} onClick={() => update("saveReceiverAddress", !draft.saveReceiverAddress)}

@@ -175,7 +175,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           </svg>
         </a>
         <a
-          href="https://wa.me/YOUR_WHATSAPP_NUMBER?text=merhaba"
+          href="https://wa.me/15551366714?text=merhaba"
           target="_blank"
           rel="noopener noreferrer"
           className="group flex items-center gap-2.5 rounded-[12px] px-3 py-2.5 w-full text-[14.5px] font-semibold transition-all duration-200 text-[#64748B] hover:bg-[#DCFCE7] hover:text-[#16A34A]"
