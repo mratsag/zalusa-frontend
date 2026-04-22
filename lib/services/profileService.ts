@@ -80,6 +80,10 @@ async function apiGet<T = any>(path: string): Promise<T> {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      try { localStorage.removeItem("zalusa.token"); if (typeof window !== "undefined") window.location.href = "/giris"; } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(err.message || `API error: ${res.status}`);
   }
 
@@ -99,6 +103,10 @@ async function apiPut<T = any>(path: string, body: unknown): Promise<T> {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      try { localStorage.removeItem("zalusa.token"); if (typeof window !== "undefined") window.location.href = "/giris"; } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(err.error || err.message || `API error: ${res.status}`);
   }
 
@@ -118,6 +126,10 @@ async function apiPost<T = any>(path: string, body: unknown): Promise<T> {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      try { localStorage.removeItem("zalusa.token"); if (typeof window !== "undefined") window.location.href = "/giris"; } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(err.error || err.message || `API error: ${res.status}`);
   }
 

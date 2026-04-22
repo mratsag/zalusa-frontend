@@ -123,6 +123,12 @@ export default function DomesticMarginsPage() {
   });
   const [formError, setFormError] = React.useState<string | null>(null);
   const [saving, setSaving] = React.useState(false);
+
+  // Bulk margin state
+  const [bulkType, setBulkType] = React.useState<"percentage" | "fixed">("percentage");
+  const [bulkValue, setBulkValue] = React.useState("");
+  const [bulkMin, setBulkMin] = React.useState("");
+  const [bulkSaving, setBulkSaving] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
   const logoInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -240,6 +246,87 @@ export default function DomesticMarginsPage() {
           eklenir.
         </div>
       </div>
+
+      {/* ── Toplu Marj Uygula ────────────────────────────────────────── */}
+      {margins.length > 0 && (
+        <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-100 shadow-sm">
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="text-sm font-bold text-slate-800 shrink-0 self-center mr-2">
+              Tümüne Uygula
+            </div>
+
+            {/* Marj Tipi */}
+            <div className="min-w-[130px]">
+              <label className="mb-1 block text-[11px] font-medium text-slate-400">Marj Tipi</label>
+              <select
+                id="bulk-margin-type"
+                value={bulkType}
+                onChange={(e) => setBulkType(e.target.value as "percentage" | "fixed")}
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400"
+              >
+                <option value="percentage">Yüzde (%)</option>
+                <option value="fixed">Sabit (₺)</option>
+              </select>
+            </div>
+
+            {/* Marj Değeri */}
+            <div className="min-w-[100px]">
+              <label className="mb-1 block text-[11px] font-medium text-slate-400">Marj Değeri</label>
+              <input
+                id="bulk-margin-value"
+                type="number"
+                step="0.01"
+                min="0"
+                value={bulkValue}
+                onChange={(e) => setBulkValue(e.target.value)}
+                placeholder="20"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400"
+              />
+            </div>
+
+            {/* Min Marj */}
+            <div className="min-w-[100px]">
+              <label className="mb-1 block text-[11px] font-medium text-slate-400">Min. Marj (₺)</label>
+              <input
+                id="bulk-min-margin"
+                type="number"
+                step="0.01"
+                min="0"
+                value={bulkMin}
+                onChange={(e) => setBulkMin(e.target.value)}
+                placeholder="0"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400"
+              />
+            </div>
+
+            {/* Uygula Butonu */}
+            <button
+              disabled={bulkSaving || !bulkValue}
+              onClick={async () => {
+                const val = parseFloat(bulkValue);
+                if (isNaN(val) || val < 0) return;
+                setBulkSaving(true);
+                try {
+                  const res = await adminService.bulkUpdateDomesticMargins({
+                    marginType: bulkType,
+                    marginValue: val,
+                    minMargin: parseFloat(bulkMin) || 0,
+                  });
+                  setToast({ type: "success", text: res.message });
+                  await load();
+                } catch (err: any) {
+                  setToast({ type: "error", text: err.message || "Toplu güncelleme başarısız" });
+                } finally {
+                  setBulkSaving(false);
+                }
+              }}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {bulkSaving ? "Uygulanıyor..." : "Tümüne Uygula"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Margins Table */}
       {margins.length === 0 ? (

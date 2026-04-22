@@ -27,6 +27,16 @@ async function request<T = any>(
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
+    // Token expire/invalid → admin otomatik çıkış
+    if (res.status === 401) {
+      try {
+        localStorage.removeItem(ADMIN_TOKEN_KEY);
+        if (typeof window !== "undefined") {
+          window.location.href = "/admin/login";
+        }
+      } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(data?.error || `İstek başarısız (${res.status})`);
   }
 
@@ -627,6 +637,19 @@ export const adminService = {
     },
   ) => put<{ message: string }>(`/api/admin/domestic-margins/${handlerCode}`, payload),
 
+  bulkUpdateDomesticMargins: (payload: {
+    marginType: string;
+    marginValue: number;
+    minMargin?: number;
+  }) => put<{ message: string; affected: number }>("/api/admin/domestic-margins-bulk", payload),
+
+  // ── Raporlar & Analiz ─────────────────────────────────────────────
+  getFinancialReports: () =>
+    get<any>("/api/admin/financial-reports"),
+
+  getSystemLogs: () =>
+    get<any>("/api/admin/system-logs"),
+
   uploadDomesticLogo: async (handlerCode: string, file: File): Promise<{ logoUrl: string }> => {
     const formData = new FormData();
     formData.append("file", file);
@@ -643,4 +666,46 @@ export const adminService = {
     if (!res.ok) throw new Error(data?.error || `Yükleme başarısız (${res.status})`);
     return data;
   },
+
+  // ── Gönderi Detay ──────────────────────────────────────────────────
+  getShipmentDetail: (id: number) =>
+    get<any>(`/api/admin/shipments/${id}`),
+
+  // ── Havale/EFT Ödeme Yönetimi ─────────────────────────────────────
+  listBankTransfers: (status = "pending") =>
+    get<{
+      transfers: BankTransfer[];
+      total: number;
+    }>(`/api/admin/bank-transfers?status=${status}`),
+
+  approveBankTransfer: (id: number, adminNote?: string) =>
+    put<{ message: string; status: string }>(
+      `/api/admin/bank-transfers/${id}/approve`,
+      { adminNote: adminNote || "" },
+    ),
+
+  rejectBankTransfer: (id: number, adminNote: string) =>
+    put<{ message: string; status: string }>(
+      `/api/admin/bank-transfers/${id}/reject`,
+      { adminNote },
+    ),
 };
+
+export interface BankTransfer {
+  id: number;
+  shipmentId: number;
+  userId: number;
+  amount: number;
+  description: string;
+  status: "pending" | "approved" | "rejected";
+  adminNote: string;
+  createdAt: string;
+  reviewedAt?: string;
+  trackingCode: string;
+  receiverCountry: string;
+  shipmentType: string;
+  carrierId: string;
+  userEmail: string;
+  userName: string;
+}
+

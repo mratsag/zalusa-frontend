@@ -4,7 +4,7 @@ import React from "react";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { X, ChevronDown, User, LogOut } from "lucide-react";
+import { X, ChevronDown, User, LogOut, PackageSearch } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/cn";
 import { panelNavItems, resellerNavItems } from "./nav-items";
@@ -160,6 +160,15 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       {/* Telegram & WhatsApp Kargo Bot */}
       <div className="mt-4 px-2.5">
         <div className="mb-2 px-3 text-[12px] font-bold uppercase tracking-widest text-[#0EA5E9]">Hızlı Kargo</div>
+        
+        <Link
+          href="/panel/kargom-nerede"
+          onClick={onNavigate}
+          className="group flex items-center gap-2.5 rounded-[12px] px-3 py-2.5 w-full text-[14.5px] font-semibold transition-all duration-200 text-[#64748B] hover:bg-[#F3E8FF] hover:text-[#9333EA] mb-1"
+        >
+          <PackageSearch className="h-[20px] w-[20px] shrink-0 text-[#A855F7] group-hover:text-[#9333EA] transition-colors" />
+          <span className="truncate pt-0.5">Kargom Nerede?</span>
+        </Link>
         <a
           href="https://t.me/ZalusaAkilliKargoBot?start=true"
           target="_blank"

@@ -5,6 +5,7 @@ import { MessageSquare, ChevronDown, User, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { ChatWidget } from "@/components/ChatWidget";
+import { NotificationBell } from "@/components/panel/notification-bell";
 
 export function PanelHeaderActions() {
   const router = useRouter();
@@ -46,6 +47,9 @@ export function PanelHeaderActions() {
       >
         <MessageSquare className="h-[18px] w-[18px] fill-[#2563EB]" />
       </button>
+
+      {/* Notification Bell */}
+      <NotificationBell />
 
       {/* Chat Widget */}
       <ChatWidget open={chatOpen} onOpenChange={setChatOpen} />

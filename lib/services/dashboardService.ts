@@ -27,8 +27,9 @@ export interface DashboardStats {
 // ─── Dashboard Service ────────────────────────────────────────────────────────
 
 export const dashboardService = {
-  getStats() {
-    return apiGet<DashboardStats>("/api/dashboard/stats");
+  getStats(period?: string) {
+    const query = period && period !== "all" ? `?period=${period}` : "";
+    return apiGet<DashboardStats>(`/api/dashboard/stats${query}`);
   },
 };
 
@@ -43,6 +44,10 @@ async function apiGet<T = any>(path: string): Promise<T> {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      try { localStorage.removeItem("zalusa.token"); if (typeof window !== "undefined") window.location.href = "/giris"; } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(err.message || `API error: ${res.status}`);
   }
 

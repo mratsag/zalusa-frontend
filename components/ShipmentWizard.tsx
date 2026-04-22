@@ -5,7 +5,7 @@ import {
   Package, FileText, BoxSelect, ArrowLeft, ArrowRight, Check,
   Loader2, MapPin, Ruler, Truck, Receipt, CheckCircle2, Globe,
   User, Phone, Building, MapPinned, Shield, AlertTriangle,
-  Clock, Star, Zap, BadgeDollarSign,
+  Clock, Star, Zap, BadgeDollarSign, Search, Plus, BookOpen,
 } from "lucide-react";
 import {
   shipmentService, addressService,
@@ -74,6 +74,8 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
   const [receiverPhone, setReceiverPhone] = useState("");
   const [receiverAddress, setReceiverAddress] = useState("");
   const [receiverCity, setReceiverCity] = useState("");
+  const [addressTab, setAddressTab] = useState<"sender" | "receiver">("sender");
+  const [addressSearch, setAddressSearch] = useState("");
 
   // Step 4: Proforma
   const [proformaDescription, setProformaDescription] = useState("");
@@ -463,83 +465,334 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
 
         {/* ══════════ STEP 3: Adresler ══════════ */}
         {step === 3 && (
-          <div className="space-y-4">
-            {/* Gönderici */}
-            <div>
-              <label className={labelCls}>📤 Gönderici Adresi</label>
-              {senderAddresses.length === 0 ? (
-                <p className="text-[11px] text-slate-500">Kayıtlı gönderici adresi yok. Profil sayfasından ekleyebilirsiniz.</p>
-              ) : (
-                <div className="space-y-2">
-                  {senderAddresses.map(a => (
-                    <button key={a.id} onClick={() => setSelectedSenderAddressId(a.id)}
-                      className={`w-full text-left ${selectedSenderAddressId === a.id ? cardSelectedCls : cardCls}`}>
-                      <div className="flex items-center gap-2">
-                        <User className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[12px] font-semibold truncate">{a.name}</div>
-                          <div className="text-[10px] text-slate-500 truncate">{a.address}, {a.city}</div>
-                        </div>
-                        <div className={`h-5 w-5 rounded-full flex items-center justify-center ring-1 ${selectedSenderAddressId === a.id ? "bg-blue-600 ring-blue-600 text-white" : "ring-slate-300"}`}>
-                          {selectedSenderAddressId === a.id && <Check className="h-3 w-3" />}
-                        </div>
+          <div className="space-y-0">
+            {/* ── White Card Container ── */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+              {/* Header */}
+              <div className="px-6 pt-6 pb-4">
+                <h3 className="text-[18px] font-bold text-slate-900">Adres Bilgileri</h3>
+                <p className="text-[13px] text-slate-400 mt-1">Gönderen ve alıcı adreslerini seçin veya yeni ekleyin.</p>
+              </div>
+
+              {/* ── Tab Switcher ── */}
+              <div className="px-6 pb-5">
+                <div className="flex rounded-full p-[3px] bg-slate-100 border border-slate-200/60">
+                  <button onClick={() => { setAddressTab("sender"); setAddressSearch(""); }}
+                    className={`flex-1 py-3 rounded-full text-[13px] font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+                      addressTab === "sender"
+                        ? "bg-[#1e3a8a] text-white shadow-md"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}>
+                    {selectedSenderAddressId && <Check className={`h-4 w-4 ${addressTab === "sender" ? "text-emerald-300" : "text-emerald-500"}`} />}
+                    Gönderici
+                  </button>
+                  <button onClick={() => { setAddressTab("receiver"); setAddressSearch(""); }}
+                    className={`flex-1 py-3 rounded-full text-[13px] font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+                      addressTab === "receiver"
+                        ? "bg-[#1e3a8a] text-white shadow-md"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}>
+                    {selectedReceiverAddressId && <Check className={`h-4 w-4 ${addressTab === "receiver" ? "text-emerald-300" : "text-emerald-500"}`} />}
+                    {receiverAddresses.length > 0 && <span className={`text-[11px] ${addressTab === "receiver" ? "text-white/70" : "text-slate-400"}`}>{receiverAddresses.length}</span>}
+                    Alıcı
+                  </button>
+                </div>
+              </div>
+
+              {/* ══════ GÖNDERİCİ TAB ══════ */}
+              {addressTab === "sender" && (
+                <div className="px-6 pb-6 space-y-5">
+                  {/* Son Kullanılan Göndericiler */}
+                  {senderAddresses.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-[0.12em] mb-3">Son Kullanılan Göndericiler</p>
+                      <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
+                        {senderAddresses.slice(0, 4).map(a => {
+                          const initials = a.name?.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
+                          const isActive = selectedSenderAddressId === a.id;
+                          return (
+                            <button key={a.id} onClick={() => setSelectedSenderAddressId(a.id)}
+                              className={`flex items-center gap-3 pl-2 pr-4 py-2 rounded-full border-2 transition-all whitespace-nowrap shrink-0 ${
+                                isActive
+                                  ? "border-indigo-500 bg-indigo-50"
+                                  : "border-slate-200 bg-white hover:border-indigo-200"
+                              }`}>
+                              <div className={`h-10 w-10 rounded-full flex items-center justify-center text-[12px] font-bold shrink-0 ${
+                                isActive ? "bg-indigo-600 text-white" : "bg-indigo-100 text-indigo-600"
+                              }`}>
+                                {initials}
+                              </div>
+                              <div className="text-left">
+                                <div className="text-[12px] font-semibold text-slate-800">{a.name}</div>
+                                <div className="text-[10px] text-slate-400">{a.city} · {a.countryCode || "TR"}</div>
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Başlık + Ekle */}
+                  <div className="flex items-center justify-between">
+                    <p className="text-[14px] font-bold text-slate-800">Kayıtlı Gönderici Adresleriniz</p>
+                    <button className="text-[12px] font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
+                      <Plus className="h-4 w-4" />
+                      Yeni Gönderici Adresi Ekle
                     </button>
-                  ))}
+                  </div>
+
+                  {/* Arama */}
+                  <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <input type="text" value={addressSearch} onChange={e => setAddressSearch(e.target.value)}
+                      placeholder="İsim veya adres ile arayın..."
+                      className="w-full h-11 pl-11 pr-4 rounded-xl bg-slate-50 border border-slate-200 text-[13px] text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all placeholder:text-slate-400" />
+                  </div>
+
+                  {/* Adres Kartları */}
+                  {senderAddresses.length === 0 ? (
+                    <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                      <User className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+                      <p className="text-[13px] text-slate-500 font-medium">Kayıtlı gönderici adresi yok.</p>
+                      <p className="text-[12px] text-slate-400 mt-1">Profil sayfasından ekleyebilirsiniz.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {senderAddresses.filter(a => {
+                        if (!addressSearch) return true;
+                        const q = addressSearch.toLowerCase();
+                        return a.name.toLowerCase().includes(q) || a.address.toLowerCase().includes(q) || a.city.toLowerCase().includes(q);
+                      }).map(a => {
+                        const isSelected = selectedSenderAddressId === a.id;
+                        return (
+                          <button key={a.id} onClick={() => setSelectedSenderAddressId(a.id)}
+                            className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all duration-200 ${
+                              isSelected
+                                ? "border-indigo-500 bg-indigo-50/40 shadow-sm"
+                                : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm"
+                            }`}>
+                            <div className="flex items-center gap-4">
+                              <div className={`h-11 w-11 rounded-full flex items-center justify-center shrink-0 ${
+                                isSelected ? "bg-indigo-100" : "bg-slate-100"
+                              }`}>
+                                <User className={`h-5 w-5 ${isSelected ? "text-indigo-500" : "text-slate-400"}`} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <span className="text-[14px] font-semibold text-slate-800">{a.name}</span>
+                                  {a.isDefault && (
+                                    <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wide">Favori</span>
+                                  )}
+                                </div>
+                                <p className="text-[12px] text-slate-500 truncate">
+                                  {a.city} · {a.address}{a.postalCode ? `, ${a.postalCode}` : ""} {a.city}
+                                </p>
+                                {a.phone && <p className="text-[11px] text-slate-400 mt-0.5">{a.phone}</p>}
+                              </div>
+                              <div className={`h-6 w-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-200 ${
+                                isSelected ? "bg-indigo-600 text-white" : "border-2 border-slate-300"
+                              }`}>
+                                {isSelected && <Check className="h-3.5 w-3.5" />}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ══════ ALICI TAB ══════ */}
+              {addressTab === "receiver" && (
+                <div className="px-6 pb-6 space-y-5">
+                  {/* Son Gönderilen Alıcılar */}
+                  {receiverAddresses.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-[0.12em] mb-3">Son Gönderilen Alıcılar</p>
+                      <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
+                        {receiverAddresses.slice(0, 5).map((a, idx) => {
+                          const initials = a.name?.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
+                          const chipColors = [
+                            { bg: "bg-purple-600", light: "bg-purple-100", text: "text-purple-600" },
+                            { bg: "bg-emerald-600", light: "bg-emerald-100", text: "text-emerald-600" },
+                            { bg: "bg-amber-500", light: "bg-amber-100", text: "text-amber-600" },
+                            { bg: "bg-rose-500", light: "bg-rose-100", text: "text-rose-600" },
+                            { bg: "bg-cyan-600", light: "bg-cyan-100", text: "text-cyan-600" },
+                          ];
+                          const color = chipColors[idx % chipColors.length];
+                          const isActive = selectedReceiverAddressId === a.id;
+                          return (
+                            <button key={a.id} onClick={() => { setSelectedReceiverAddressId(a.id); setShowNewReceiver(false); }}
+                              className={`flex items-center gap-3 pl-2 pr-4 py-2 rounded-full border-2 transition-all whitespace-nowrap shrink-0 ${
+                                isActive
+                                  ? "border-indigo-500 bg-indigo-50"
+                                  : "border-slate-200 bg-white hover:border-indigo-200"
+                              }`}>
+                              <div className={`h-10 w-10 rounded-full ${color.bg} text-white flex items-center justify-center text-[12px] font-bold shrink-0`}>
+                                {initials}
+                              </div>
+                              <div className="text-left">
+                                <div className="text-[12px] font-semibold text-slate-800">{a.name}</div>
+                                <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                                  {a.city}
+                                  {a.countryCode && (
+                                    <img src={`https://flagcdn.com/w20/${a.countryCode.toLowerCase()}.png`}
+                                      alt={a.countryCode} className="h-2.5 w-3.5 object-cover rounded-sm" />
+                                  )}
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Arama */}
+                  <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <input type="text" value={addressSearch} onChange={e => setAddressSearch(e.target.value)}
+                      placeholder="İsim veya adres ile ara..."
+                      className="w-full h-11 pl-11 pr-4 rounded-xl bg-slate-50 border border-slate-200 text-[13px] text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all placeholder:text-slate-400" />
+                  </div>
+
+                  {/* Başlık + Ekle */}
+                  <div className="flex items-center justify-between">
+                    <p className="text-[14px] font-bold text-slate-800">Alıcı Adresi <span className="text-red-500">*</span></p>
+                    <button onClick={() => { setShowNewReceiver(true); setSelectedReceiverAddressId(null); }}
+                      className="text-[12px] font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
+                      <Plus className="h-4 w-4" />
+                      Yeni Adres Ekle
+                    </button>
+                  </div>
+
+                  {/* Adres Kartları Grid */}
+                  {!showNewReceiver && receiverAddresses.length > 0 && (
+                    <div className="grid grid-cols-2 gap-3">
+                      {receiverAddresses.filter(a => {
+                        if (!addressSearch) return true;
+                        const q = addressSearch.toLowerCase();
+                        return a.name.toLowerCase().includes(q) || a.address.toLowerCase().includes(q) || a.city.toLowerCase().includes(q);
+                      }).map(a => {
+                        const isSelected = selectedReceiverAddressId === a.id;
+                        return (
+                          <button key={a.id} onClick={() => setSelectedReceiverAddressId(a.id)}
+                            className={`text-left p-5 rounded-xl border-2 transition-all duration-200 relative ${
+                              isSelected
+                                ? "border-indigo-500 bg-indigo-50/60 shadow-md"
+                                : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm"
+                            }`}>
+                            {/* Checkmark */}
+                            {isSelected && (
+                              <div className="absolute top-4 right-4 h-6 w-6 rounded-full bg-indigo-600 text-white flex items-center justify-center">
+                                <Check className="h-3.5 w-3.5" />
+                              </div>
+                            )}
+                            <div className="pr-8">
+                              <span className="text-[14px] font-bold text-slate-800 block">{a.name}</span>
+                              {a.isDefault && (
+                                <span className="inline-block mt-2 px-2 py-0.5 rounded-md text-[9px] font-bold bg-purple-100 text-purple-700 uppercase tracking-wide">Favori</span>
+                              )}
+                            </div>
+                            <p className="text-[12px] text-slate-500 mt-2.5 leading-relaxed">
+                              {a.address}{a.postalCode ? `, ${a.postalCode}` : ""} {a.city}{a.countryCode ? `, ${a.countryCode}` : ""}
+                            </p>
+                            {a.phone && <p className="text-[12px] text-slate-400 mt-1.5">{a.phone}</p>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* + Yeni Adres Ekle (Dashed Button) */}
+                  {!showNewReceiver && (
+                    <button onClick={() => { setShowNewReceiver(true); setSelectedReceiverAddressId(null); }}
+                      className="w-full py-4 rounded-xl border-2 border-dashed border-slate-300 text-[13px] font-semibold text-slate-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30 transition-all flex items-center justify-center gap-2">
+                      <Plus className="h-4 w-4" />
+                      Yeni Adres Ekle
+                    </button>
+                  )}
+
+                  {/* Yeni Alıcı Formu */}
+                  {showNewReceiver && (
+                    <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[14px] font-bold text-slate-800">Yeni Alıcı Adresi</p>
+                        {receiverAddresses.length > 0 && (
+                          <button onClick={() => setShowNewReceiver(false)}
+                            className="text-[12px] text-blue-600 font-semibold hover:text-blue-700 transition-colors">
+                            Kayıtlı adreslerden seç
+                          </button>
+                        )}
+                      </div>
+                      <input type="text" value={receiverName} onChange={e => setReceiverName(e.target.value)}
+                        placeholder="Alıcı adı soyadı" className={inputCls} />
+                      <input type="text" value={receiverCompany} onChange={e => setReceiverCompany(e.target.value)}
+                        placeholder="Firma adı (opsiyonel)" className={inputCls} />
+                      <input type="text" value={receiverPhone} onChange={e => setReceiverPhone(e.target.value)}
+                        placeholder="Telefon" className={inputCls} />
+                      <div>
+                        <label className={labelCls}>Şehir</label>
+                        <CitySelect
+                          countryCode={receiverCountry}
+                          value={receiverCity}
+                          onChange={(v) => setReceiverCity(v)}
+                          placeholder="Şehir seçiniz"
+                          className="h-9 text-[13px]"
+                        />
+                      </div>
+                      <input type="text" value={receiverAddress} onChange={e => setReceiverAddress(e.target.value)}
+                        placeholder="Açık adres" className={inputCls} />
+                    </div>
+                  )}
+
+                  {/* İpucu Bandı */}
+                  <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-indigo-50/80 border border-indigo-100">
+                    <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                      <BookOpen className="h-4 w-4" />
+                    </div>
+                    <p className="text-[12px] text-indigo-700 leading-relaxed">
+                      <span className="font-semibold">İpucu:</span> Adres defterinde kayıtlı adreslere hızlı erişebilirsin.{" "}
+                      <span className="font-bold text-indigo-800 underline cursor-pointer hover:text-indigo-900 transition-colors">Adres Defterim →</span>
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Alıcı */}
-            <div>
-              <label className={labelCls}>📥 Alıcı Adresi</label>
-              {receiverAddresses.length > 0 && !showNewReceiver && (
-                <div className="space-y-2">
-                  {receiverAddresses.map(a => (
-                    <button key={a.id} onClick={() => setSelectedReceiverAddressId(a.id)}
-                      className={`w-full text-left ${selectedReceiverAddressId === a.id ? cardSelectedCls : cardCls}`}>
-                      <div className="flex items-center gap-2">
-                        <User className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[12px] font-semibold truncate">{a.name}</div>
-                          <div className="text-[10px] text-slate-500 truncate">{a.address}, {a.city}</div>
-                        </div>
-                        <div className={`h-5 w-5 rounded-full flex items-center justify-center ring-1 ${selectedReceiverAddressId === a.id ? "bg-blue-600 ring-blue-600 text-white" : "ring-slate-300"}`}>
-                          {selectedReceiverAddressId === a.id && <Check className="h-3 w-3" />}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+            {/* ── Alt Durum Barı ── */}
+            <div className="flex items-center gap-3 px-5 py-3.5 rounded-2xl mt-4" style={{ background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)" }}>
+              <div className={`flex items-center gap-3 flex-1 ${
+                selectedSenderAddressId ? "opacity-100" : "opacity-40"
+              }`}>
+                <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                  <User className="h-4 w-4 text-white" />
                 </div>
-              )}
-
-              <button onClick={() => { setShowNewReceiver(!showNewReceiver); setSelectedReceiverAddressId(null); }}
-                className="mt-2 w-full text-center py-2 rounded-lg text-[11px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors">
-                {showNewReceiver ? "Kayıtlı adreslerden seç" : "+ Yeni alıcı adresi gir"}
-              </button>
-
-              {showNewReceiver && (
-                <div className="mt-3 space-y-2">
-                  <input type="text" value={receiverName} onChange={e => setReceiverName(e.target.value)}
-                    placeholder="Alıcı adı soyadı" className={inputCls} />
-                  <input type="text" value={receiverCompany} onChange={e => setReceiverCompany(e.target.value)}
-                    placeholder="Firma adı (opsiyonel)" className={inputCls} />
-                  <input type="text" value={receiverPhone} onChange={e => setReceiverPhone(e.target.value)}
-                    placeholder="Telefon" className={inputCls} />
-                  <div>
-                    <label className={labelCls}>Şehir</label>
-                    <CitySelect
-                      countryCode={receiverCountry}
-                      value={receiverCity}
-                      onChange={(v) => setReceiverCity(v)}
-                      placeholder="Şehir seçiniz"
-                      className="h-9 text-[13px]"
-                    />
-                  </div>
-                  <input type="text" value={receiverAddress} onChange={e => setReceiverAddress(e.target.value)}
-                    placeholder="Açık adres" className={inputCls} />
+                <div>
+                  <p className="text-[12px] font-semibold text-white">
+                    {selectedSenderAddressId ? senderAddresses.find(a => a.id === selectedSenderAddressId)?.name || "Seçildi" : "Seçilmedi"}
+                  </p>
+                  <p className="text-[10px] text-slate-400">Gönderici</p>
                 </div>
-              )}
+              </div>
+              <div className="flex items-center justify-center shrink-0 px-2">
+                <ArrowRight className="h-4 w-4 text-indigo-400" />
+              </div>
+              <div className={`flex items-center gap-3 flex-1 justify-end ${
+                selectedReceiverAddressId || showNewReceiver ? "opacity-100" : "opacity-40"
+              }`}>
+                <div className="text-right">
+                  <p className="text-[12px] font-semibold text-white">
+                    {selectedReceiverAddressId ? receiverAddresses.find(a => a.id === selectedReceiverAddressId)?.name || "Seçildi" : showNewReceiver ? "Yeni adres" : "Henüz girilmedi"}
+                  </p>
+                  <p className="text-[10px] text-slate-400">Alıcı</p>
+                </div>
+                <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                  <User className="h-4 w-4 text-white" />
+                </div>
+              </div>
             </div>
           </div>
         )}

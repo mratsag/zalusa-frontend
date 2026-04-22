@@ -10,11 +10,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F4F6FA]">
-      <div className="flex">
+    <div className="fixed inset-0 bg-[#F4F6FA] overflow-hidden">
+      <div className="flex h-full">
         <AdminSidebar open={open} onClose={() => setOpen(false)} />
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
           {/* Header (Desktop) */}
           <header className="hidden md:flex h-16 shrink-0 items-center justify-between px-8 sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
             <div className="text-sm font-semibold text-slate-500">Yönetim Paneli</div>

@@ -21,6 +21,7 @@ import {
   Crown,
   TicketCheck,
   Package,
+  Banknote,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
@@ -29,6 +30,7 @@ const adminNavItems = [
   { href: "/admin/kurye-talepleri", label: "Kurye Talepleri", icon: Truck },
   { href: "/admin/canli-destek", label: "Canlı Destek", icon: Headphones },
   { href: "/admin/destek-talepleri", label: "Destek Talepleri", icon: TicketCheck },
+  { href: "/admin/havale-onaylari", label: "Havale Onayları", icon: Banknote },
   { href: "/admin/kargo-sirketleri", label: "Kargo Şirketleri", icon: Building2 },
   { href: "/admin/doviz-kurlari", label: "Döviz Kurları", icon: DollarSign },
   { href: "/admin/margin-rules", label: "Fiyat & Marj Kuralları", icon: Calculator },
@@ -60,7 +62,7 @@ function AdminSidebarLink({
       href={href}
       onClick={onNavigate}
       className={cn(
-        "group flex items-center gap-2 rounded-2xl px-4 py-1 text-[15px] font-semibold transition-all duration-200",
+        "group flex items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-semibold transition-all duration-200",
         active
           ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
           : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
@@ -68,13 +70,13 @@ function AdminSidebarLink({
     >
       <span
         className={cn(
-          "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors",
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
           active ? "bg-white/15" : "bg-transparent group-hover:bg-white",
         )}
       >
         <Icon
           className={cn(
-            "h-5 w-5",
+            "h-4 w-4",
             active ? "text-white" : "text-indigo-600",
           )}
         />
@@ -93,40 +95,40 @@ function AdminSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className="flex h-full flex-col bg-white">
       {/* Brand — sabit üst */}
-      <div className="px-7 pt-8 shrink-0">
+      <div className="px-5 pt-5 shrink-0">
         <Link href="/admin" className="group flex items-center gap-2" onClick={onNavigate}>
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 ring-1 ring-indigo-100">
-            <Image src="/logo-ikon.png" alt="Zalusa" width={26} height={26} />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 ring-1 ring-indigo-100">
+            <Image src="/logo-ikon.png" alt="Zalusa" width={22} height={22} />
           </div>
           <div className="leading-tight">
-            <div className="text-lg font-extrabold text-slate-900">Zalusa</div>
-            <div className="text-sm font-semibold text-indigo-500">Admin Panel</div>
+            <div className="text-base font-extrabold text-slate-900">Zalusa</div>
+            <div className="text-xs font-semibold text-indigo-500">Admin Panel</div>
           </div>
         </Link>
       </div>
 
       {/* Divider */}
-      <div className="mt-6 px-7 shrink-0">
+      <div className="mt-4 px-5 shrink-0">
         <div className="h-px w-full bg-slate-100" />
       </div>
 
       {/* Nav — scroll edilebilir */}
-      <nav className="mt-5 flex-1 min-h-0 overflow-y-auto space-y-1.5 px-5 pb-2">
+      <nav className="mt-3 flex-1 min-h-0 overflow-y-auto space-y-0.5 px-4 pb-2">
         {adminNavItems.map((item) => (
           <AdminSidebarLink key={item.href} {...item} onNavigate={onNavigate} />
         ))}
       </nav>
 
-      {/* Logout — sabit alt */}
-      <div className="px-5 py-4 shrink-0 border-t border-slate-100 bg-white">
+      {/* Logout — alt köşeye sabitli */}
+      <div className="px-4 py-3 shrink-0 border-t border-slate-100 mt-auto">
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-2 rounded-2xl px-4 py-1 text-[15px] font-semibold text-red-500 transition-all duration-200 hover:bg-red-50"
+          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-semibold text-red-500 transition-all duration-200 hover:bg-red-50"
         >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
-            <LogOut className="h-5 w-5" />
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+            <LogOut className="h-4 w-4" />
           </span>
           <span>Çıkış Yap</span>
         </button>
@@ -145,7 +147,7 @@ export function AdminSidebar({
   return (
     <>
       {/* Desktop */}
-      <aside className="hidden h-screen w-[280px] shrink-0 bg-white md:block sticky top-0 border-r border-slate-100">
+      <aside className="hidden h-full w-[280px] shrink-0 bg-white md:block border-r border-slate-100">
         <AdminSidebarContent />
       </aside>
 

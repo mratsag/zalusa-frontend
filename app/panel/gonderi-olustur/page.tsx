@@ -24,8 +24,8 @@ import { useAppState } from "@/hooks/useAppState";
 import Image from "next/image";
 import { ProformaItem, ShipmentDraft, PackageItem } from "@/lib/type";
 import {
-  shipmentService, addressService, measurementService, documentService,
-  type ApiCarrierQuote, type ApiAddress, type ApiMeasurement, type ShipmentAttachment
+  shipmentService, addressService, measurementService, documentService, domesticService,
+  type ApiCarrierQuote, type ApiAddress, type ApiMeasurement, type ShipmentAttachment, type DomesticCarrierQuote
 } from "@/lib/services/shipmentService";
 import { CitySelect } from "@/components/ui/city-select";
 import { StateSelect } from "@/components/ui/state-select";
@@ -46,7 +46,7 @@ const DEFAULT_DRAFT: ShipmentDraft = {
   packages: [{ ...EMPTY_PACKAGE_ITEM, id: crypto.randomUUID() }],
   selectedCarrierId: "", carrierQuotes: [],
   selectedSenderAddressId: "sender-1", selectedReceiverAddressId: "",
-  senderName: "", senderCompany: "", senderPhone: "+90", senderAddress: "", senderCity: "", senderStateId: null, saveSenderAddress: false,
+  senderName: "", senderCompany: "", senderPhone: "+90", senderAddress: "", senderCity: "", senderTown: "", senderStateId: null, saveSenderAddress: false,
   receiverName: "", receiverCompany: "", receiverPhone: "", receiverAddress: "", receiverCity: "",
   receiverStateProvince: "", receiverAddressCountry: "", receiverAddressPostalCode: "",
   saveReceiverAddress: false,
@@ -405,6 +405,12 @@ export default function GonderiOlusturPage() {
   const [domesticTrackingCode, setDomesticTrackingCode] = React.useState<string>("");
   const [domesticCarrierCompany, setDomesticCarrierCompany] = React.useState<string>("");
   const [createdShipmentTrackingCode, setCreatedShipmentTrackingCode] = React.useState<string>("");
+  // ── Domestic Carrier Selection (Yurt İçi Kargo Seçimi) ─────────────────────
+  const [domesticCarriers, setDomesticCarriers] = React.useState<DomesticCarrierQuote[]>([]);
+  const [selectedDomesticHandler, setSelectedDomesticHandler] = React.useState<string>("");
+  const [domesticLoading, setDomesticLoading] = React.useState(false);
+  const [showDomesticSelection, setShowDomesticSelection] = React.useState(false);
+  const [domesticValidationError, setDomesticValidationError] = React.useState("");
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [errorModal, setErrorModal] = React.useState<{ title: string; message: string } | null>(null);
   const [showNewSenderForm, setShowNewSenderForm] = React.useState(false);
@@ -428,6 +434,64 @@ const [descriptionTypes, setDescriptionTypes] = React.useState<{ id: number; lab
 const [showPackageExcel, setShowPackageExcel] = React.useState(false);
   const [showMoreCarriers, setShowMoreCarriers] = React.useState(true);
   const [addressTab, setAddressTab] = React.useState<"sender" | "receiver">("sender");
+
+  // ── Adım Geçiş Toast ──
+  const [stepToast, setStepToast] = React.useState<{ step: number; visible: boolean } | null>(null);
+  const stepToastTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const STEP_TOAST_MESSAGES: Record<number, { title: string; desc: string }> = {
+    0: { title: "1. Adım Tamam!", desc: "Kargo bilgileri girildi, sırada paket ölçüleri." },
+    1: { title: "2. Adım Tamam!", desc: "Paket ölçüleri belirlendi, sırada fiyatlandırma." },
+    2: { title: "3. Adım Tamam!", desc: "Kargo firması seçildi, sırada adres seçimi." },
+    3: { title: "4. Adım Tamam!", desc: "Adresler girildi, sırada gümrük beyanı." },
+    4: { title: "5. Adım Tamam!", desc: "Gönderi tamamlandı, harika!" },
+  };
+  function showStepToast(completedStep: number) {
+    if (stepToastTimer.current) clearTimeout(stepToastTimer.current);
+    setStepToast({ step: completedStep, visible: true });
+    stepToastTimer.current = setTimeout(() => {
+      setStepToast(prev => prev ? { ...prev, visible: false } : null);
+      setTimeout(() => setStepToast(null), 400);
+    }, 3000);
+  }
+
+  // ── Posta Kodu Lookup ──
+  const [postalLookupLoading, setPostalLookupLoading] = React.useState(false);
+  const [postalLookupResult, setPostalLookupResult] = React.useState<{ city: string; countryCode: string; countryName: string } | null>(null);
+  const [postalLookupError, setPostalLookupError] = React.useState<string | null>(null);
+  const postalLookupTimer = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Posta kodu değiştiğinde 800ms debounce ile lookup yap
+  React.useEffect(() => {
+    const code = draft.receiverPostalCode?.trim();
+    const country = draft.receiverCountry;
+    setPostalLookupResult(null);
+    setPostalLookupError(null);
+
+    if (!code || code.length < 3) return;
+
+    if (postalLookupTimer.current) clearTimeout(postalLookupTimer.current);
+    postalLookupTimer.current = setTimeout(async () => {
+      setPostalLookupLoading(true);
+      try {
+        const params = new URLSearchParams({ code });
+        if (country) params.set("country", country);
+        const res = await fetch(`${API_BASE}/api/postal-lookup?${params}`);
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          const match = data.results[0];
+          setPostalLookupResult({ city: match.city, countryCode: match.countryCode, countryName: match.countryName });
+        } else {
+          setPostalLookupError("Bu posta kodu için sonuç bulunamadı");
+        }
+      } catch {
+        setPostalLookupError("Posta kodu sorgulanamadı");
+      } finally {
+        setPostalLookupLoading(false);
+      }
+    }, 800);
+
+    return () => { if (postalLookupTimer.current) clearTimeout(postalLookupTimer.current); };
+  }, [draft.receiverPostalCode, draft.receiverCountry]);
 
   // ── Gümrük Belgeleri Yükleme State'leri ──
   const [docFileType, setDocFileType] = React.useState("INVOICE");
@@ -712,6 +776,25 @@ const [showPackageExcel, setShowPackageExcel] = React.useState(false);
     if (!addressesLoaded) return;
     if (SAVED_SENDER_ADDRESSES.length === 0) {
       setShowNewSenderForm(true);
+    } else {
+      // İlk kayıtlı gönderici adresini otomatik seç ve flat alanları TEK SEFERDE doldur
+      const firstSender = SAVED_SENDER_ADDRESSES[0];
+      if (firstSender) {
+        setDraft(d => {
+          // Zaten dolu ise dokunma
+          if (d.senderName) return d;
+          return {
+            ...d,
+            selectedSenderAddressId: String(firstSender.id),
+            senderName: firstSender.name || "",
+            senderPhone: firstSender.phone || "+90",
+            senderAddress: firstSender.address || "",
+            senderCity: firstSender.city || "",
+            senderTown: (firstSender as any).town || "",
+            senderCompany: firstSender.company || "",
+          };
+        });
+      }
     }
     if (SAVED_RECEIVER_ADDRESSES.length === 0) {
       setShowNewReceiverForm(true);
@@ -832,7 +915,16 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
       if (step === 0) {
         const step0Errors: Record<string, string> = {};
         if (!draft.receiverCountry) step0Errors.receiverCountry = "Zorunlu";
-        if (!draft.receiverPostalCode) step0Errors.receiverPostalCode = "Zorunlu";
+        if (!draft.receiverPostalCode) {
+          step0Errors.receiverPostalCode = "Posta kodu zorunludur";
+          step0Errors.receiverCity = "Şehir bilgisi zorunludur";
+        } else if (postalLookupError || !postalLookupResult) {
+          step0Errors.receiverPostalCode = postalLookupError || "Geçerli bir posta kodu girin";
+          step0Errors.receiverCity = "Şehir bilgisi bulunamadı";
+        }
+        if (postalLookupLoading) {
+          step0Errors.receiverPostalCode = "Posta kodu doğrulanıyor, lütfen bekleyin";
+        }
         if (Object.keys(step0Errors).length > 0) {
           setFieldErrors(step0Errors);
           setApiError("Lütfen zorunlu alanları doldurunuz.");
@@ -896,6 +988,21 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           return;
         }
       } else if (step === 1) {
+        // Paket ölçüleri validasyonu
+        const step1Errors: Record<string, string> = {};
+        draft.packages.forEach((p, idx) => {
+          if (toNumber(p.widthCm) <= 0) step1Errors[`pkg_${idx}_widthCm`] = "Zorunlu";
+          if (toNumber(p.lengthCm) <= 0) step1Errors[`pkg_${idx}_lengthCm`] = "Zorunlu";
+          if (toNumber(p.heightCm) <= 0) step1Errors[`pkg_${idx}_heightCm`] = "Zorunlu";
+          if (toNumber(p.weightKg) <= 0) step1Errors[`pkg_${idx}_weightKg`] = "Zorunlu";
+        });
+        if (Object.keys(step1Errors).length > 0) {
+          setFieldErrors(step1Errors);
+          setApiError("Lütfen tüm paket ölçülerini eksiksiz doldurunuz.");
+          setLoading(false);
+          return;
+        }
+        setFieldErrors({});
         // Paketleri kaydet
         if (!shipmentId) { setApiError("Taslak bulunamadı."); setLoading(false); return; }
         const packages = draft.packages.map(p => ({
@@ -977,13 +1084,26 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
         const senderAddr = SAVED_SENDER_ADDRESSES.find(a => String(a.id) === finalSenderAddressId) || null;
         const receiverAddr = SAVED_RECEIVER_ADDRESSES.find(a => String(a.id) === draft.selectedReceiverAddressId) || null;
         
-        await shipmentService.updateDraft(shipmentId, 3, {
-          senderAddressId: senderAddr ? senderAddr.id : null,
-          senderName: draft.senderName,
-          senderCompany: draft.senderCompany,
-          senderPhone: draft.senderPhone,
-          senderAddress: draft.senderAddress,
-          senderCity: draft.senderCity,
+        // Kayıtlı adres seçilmişse flat alanları doldur (boşsa)
+        // Hiçbir kaynak bulunamazsa → ilk kayıtlı gönderici adresini kullan
+        const fallbackSender = senderAddr || (SAVED_SENDER_ADDRESSES.length > 0 ? SAVED_SENDER_ADDRESSES[0] : null);
+        const finalSenderName = draft.senderName || fallbackSender?.name || "";
+        const finalSenderPhone = draft.senderPhone || fallbackSender?.phone || "";
+        const finalSenderAddress = draft.senderAddress || fallbackSender?.address || "";
+        const finalSenderCity = draft.senderCity || fallbackSender?.city || "";
+        const finalSenderTown = draft.senderTown || (fallbackSender as any)?.town || "";
+        const finalSenderCompany = draft.senderCompany || fallbackSender?.company || "";
+        // senderAddressId: numeric ID gönder
+        const numericSenderAddrId = fallbackSender ? fallbackSender.id : (finalSenderAddressId ? parseInt(finalSenderAddressId) || null : null);
+
+        const step3Result = await shipmentService.updateDraft(shipmentId, 3, {
+          senderAddressId: numericSenderAddrId,
+          senderName: finalSenderName,
+          senderCompany: finalSenderCompany,
+          senderPhone: finalSenderPhone,
+          senderAddress: finalSenderAddress,
+          senderCity: finalSenderCity,
+          senderTown: finalSenderTown,
           senderStateId: draft.senderStateId,
           saveSenderAddress: draft.saveSenderAddress,
           receiverAddressId: receiverAddr ? receiverAddr.id : null,
@@ -996,8 +1116,32 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           receiverAddressCountry: draft.receiverAddressCountry,
           receiverAddressPostalCode: draft.receiverAddressPostalCode,
           saveReceiverAddress: draft.saveReceiverAddress,
+          domesticHandlerCode: selectedDomesticHandler || undefined,
         });
         
+        // ── Yurt içi kargo seçimi gerekiyor mu? ──
+        if (step3Result?.requiresDomesticTransfer && !selectedDomesticHandler) {
+          // Domestic carrier seçim modalini göster
+          setShowDomesticSelection(true);
+          setDomesticLoading(true);
+          try {
+            const pkgs = draft.packages.map(p => ({
+              width: parseFloat(p.widthCm) || 10,
+              height: parseFloat(p.heightCm) || 10,
+              depth: parseFloat(p.lengthCm) || 10,
+              weight: parseFloat(p.weightKg) || 1,
+            }));
+            const res = await domesticService.getPrices(pkgs, shipmentId);
+            setDomesticCarriers(res.carriers || []);
+          } catch (err: any) {
+            setApiError("Yurt içi kargo fiyatları alınamadı: " + (err?.message || ""));
+          } finally {
+            setDomesticLoading(false);
+          }
+          setLoading(false);
+          return; // Step 4'e geçme, kullanıcı seçim yapsın
+        }
+
         // Adres listesini yenile (yeni adres kaydedildiyse)
         if (draft.saveReceiverAddress || (showNewSenderForm && draft.saveSenderAddress)) {
           addressService.list().then(r => setApiAddresses(r.addresses)).catch(() => {});
@@ -1029,7 +1173,10 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           proformaItems,
         });
       }
-      setStep(s => Math.min(s + 1, STEPS.length - 1));
+      setStep(s => {
+        showStepToast(s);
+        return Math.min(s + 1, STEPS.length - 1);
+      });
       setDone(false);
     } catch (err: any) {
       const msg = err?.message || "Bir hata oluştu.";
@@ -1053,7 +1200,10 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
         selectedCarrierId: draft.selectedCarrierId,
         hasInsurance: draft.hasInsurance,
       });
-      setStep(s => Math.min(s + 1, STEPS.length - 1));
+      setStep(s => {
+        showStepToast(s);
+        return Math.min(s + 1, STEPS.length - 1);
+      });
       setDone(false);
     } catch (err: any) {
       const msg = err?.message || "Bir hata oluştu.";
@@ -1089,34 +1239,11 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           throw new Error("Belgeler yüklenirken hata oluştu: " + (err?.message || "Bilinmeyen Hata"));
         });
       }
-      // Adım 5 → pending_payment'a al, domestic transfer varsa backend otomatik işledi
+      // Adım 5 → pending_payment'a al
       await shipmentService.updateDraft(shipmentId, 5, {});
 
-      // ── Ödeme başlat: Iyzico checkout sayfasına yönlendir ──
-      const token = (() => { try { return localStorage.getItem("zalusa.token") ?? ""; } catch { return ""; } })();
-      const payRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? ""}/api/payment/start`,
-        {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ shipmentId: Number(shipmentId) })
-        }
-      );
-      if (!payRes.ok) {
-        const payErr = await payRes.json().catch(() => ({}));
-        throw new Error(payErr?.error || "Ödeme başlatılamadı");
-      }
-      const payData = await payRes.json();
-      if (payData.paymentPageUrl) {
-        // Iyzico ödeme sayfasına yönlendir
-        window.location.href = payData.paymentPageUrl;
-        return;
-      } else {
-        throw new Error("Ödeme sayfası URL'i alınamadı");
-      }
+      // Ödeme seçenekleri sayfasına yönlendir (Havale/EFT + iyzico)
+      window.location.href = `/panel/odeme/${shipmentId}`;
     } catch (err: any) {
       const msg = err?.message || "Gönderi tamamlanamadı.";
       if (msg.includes("taslak değil") || msg.includes("düzenlenemez")) {
@@ -1155,6 +1282,35 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
 
   return (
     <div className="space-y-5">
+      {/* ── ADİM GEÇİŞ TOAST ── */}
+      {stepToast && (
+        <div className={`fixed z-[100] w-[92%] max-w-md transition-all duration-400
+          top-4 left-1/2 -translate-x-1/2
+          md:left-auto md:translate-x-0 md:right-6 md:top-6
+          ${
+          stepToast.visible
+            ? "opacity-100 translate-y-0 md:translate-x-0"
+            : "opacity-0 -translate-y-4 md:translate-y-0 md:translate-x-[120%]"
+        }`}>
+          <div className="flex items-center gap-3.5 rounded-2xl bg-white px-5 py-4 shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-2 ring-[#4F46E5]/20">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#4F46E5] shadow-lg shadow-indigo-500/30">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-white">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FCD34D" stroke="#FBBF24" strokeWidth="1" />
+                <path d="M9 12.5L11 14.5L15 10.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div className="min-w-0">
+              <div className="text-[15px] font-extrabold text-[#1E293B]">
+                {STEP_TOAST_MESSAGES[stepToast.step]?.title}
+              </div>
+              <div className="text-[13px] text-[#64748B] mt-0.5">
+                {STEP_TOAST_MESSAGES[stepToast.step]?.desc}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── TASLAK DEVAM BANNER ── */}
       {showDraftBanner && (
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 p-4 sm:p-5 ring-1 ring-amber-200 shadow-sm animate-in slide-in-from-top-2 fade-in duration-300">
@@ -1243,9 +1399,10 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
               <CardTitle className="text-xl font-bold">Kargo Bilgileri</CardTitle>
               <p className="mt-1 text-sm text-muted font-medium">Gönderi tipi ve alıcı bilgilerini belirleyin.</p>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-2 text-sm font-semibold text-muted">
-              <Save className="h-4 w-4" />
-              <span>Taslak kaydediliyor</span>
+            <div className="inline-flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-2 text-sm font-semibold text-[#334155]">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#64748B]"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span>Taslak</span>
             </div>
           </CardHeader>
         ) : step === 1 ? (
@@ -1365,39 +1522,85 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                 </div>
               </div>
 
-              {/* ── Alıcı Posta Kodu + Hızlı İpucu (yan yana, eşit genişlik) ── */}
+              {/* ── Alıcı Posta Kodu + Şehir (yan yana) ── */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Alıcı Posta Kodu */}
                 <div>
                   <div className="mb-2 text-xs font-bold uppercase tracking-widest">
-                    Alıcı Posta Kodu / Şehir <span className="text-red-500">*</span>
+                    Alıcı Posta Kodu <span className="text-red-500">*</span>
                   </div>
-                  <div className={cn("relative rounded-2xl ring-1 bg-surface overflow-hidden", fieldErrors.receiverPostalCode ? "ring-2 ring-red-500" : "ring-border")}>
+                  <div
+                    className={cn(
+                      "relative rounded-2xl ring-1 bg-surface overflow-hidden transition-all",
+                      !draft.receiverCountry && "opacity-60 cursor-not-allowed",
+                      fieldErrors.receiverPostalCode ? "ring-2 ring-red-500" : postalLookupResult ? "ring-2 ring-emerald-400" : "ring-border"
+                    )}
+                    onClick={() => {
+                      if (!draft.receiverCountry) {
+                        setFieldErrors(prev => ({ ...prev, receiverCountry: "Önce ülke seçin" }));
+                        setTimeout(() => setFieldErrors(prev => { const n = { ...prev }; delete n.receiverCountry; return n; }), 2500);
+                      }
+                    }}
+                  >
                     <Input
                       value={draft.receiverPostalCode}
                       onChange={(e) => update("receiverPostalCode", e.target.value)}
-                      placeholder="Alıcı Posta Kodu veya Şehir Adı"
+                      placeholder={!draft.receiverCountry ? "Önce alıcı ülke seçin" : "Posta Kodu"}
                       disabled={!draft.receiverCountry}
-                      className="h-12 border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent text-sm pr-10 disabled:opacity-100"
+                      className="h-12 border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent text-sm pr-10 disabled:cursor-not-allowed"
                     />
-                    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
-                      <MapPin className="h-5 w-5" />
+                    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                      {postalLookupLoading ? (
+                        <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                      ) : postalLookupResult ? (
+                        <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                      ) : (
+                        <MapPin className="h-5 w-5 text-muted" />
+                      )}
                     </div>
                   </div>
-                  <div className="mt-1.5 text-xs text-muted">Örn: 10115 veya Berlin</div>
+                  {fieldErrors.receiverCountry && !draft.receiverCountry && (
+                    <div className="mt-1.5 text-xs font-medium text-red-500 flex items-center gap-1 animate-pulse">
+                      <AlertTriangle className="h-3 w-3" />
+                      Önce yukarıdan alıcı ülke seçmelisiniz
+                    </div>
+                  )}
+                  {postalLookupResult && (
+                    <div className="mt-1.5 text-xs font-medium text-emerald-600 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      {postalLookupResult.city} olarak belirlendi
+                    </div>
+                  )}
+                  {postalLookupError && (
+                    <div className="mt-1.5 text-xs font-medium text-amber-600 flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      {postalLookupError}
+                    </div>
+                  )}
+                  {draft.receiverCountry && !postalLookupResult && !postalLookupError && !postalLookupLoading && (
+                    <div className="mt-1.5 text-xs text-muted">Örn: 10115 veya 75001</div>
+                  )}
                 </div>
 
-                {/* Hızlı ipucu */}
-                <div className="flex flex-col justify-center">
-                  <div className="flex items-center gap-2.5 rounded-2xl bg-emerald-50/60 px-4 h-12 ring-1 ring-emerald-200">
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100/80 text-emerald-600">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-foreground">Hızlı ipucu</div>
-                      <div className="text-[10px] text-muted leading-tight">Ülke + posta kodu doğru olursa fiyat daha isabetli çıkar.</div>
-                    </div>
+                {/* Şehir — Otomatik Doldurulan */}
+                <div>
+                  <div className={cn("mb-2 text-xs font-bold uppercase tracking-widest", fieldErrors.receiverCity ? "text-red-500" : "")}>Şehir {fieldErrors.receiverCity && <span className="text-red-500">*</span>}</div>
+                  <div className={cn("relative rounded-2xl ring-1 bg-surface overflow-hidden transition-all", fieldErrors.receiverCity ? "ring-2 ring-red-500 bg-red-50/30" : "ring-border")}>
+                    <Input
+                      value={postalLookupResult?.city || ""}
+                      readOnly
+                      placeholder={postalLookupLoading ? "Aranıyor..." : "Otomatik doldurulur"}
+                      className="h-12 border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent text-sm disabled:opacity-100"
+                    />
                   </div>
+                  {fieldErrors.receiverCity ? (
+                    <div className="mt-1.5 text-xs font-medium text-red-500 flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      {fieldErrors.receiverCity}
+                    </div>
+                  ) : (
+                    <div className="mt-1.5 text-xs text-muted">Otomatik doldurulur.</div>
+                  )}
                 </div>
               </div>
 
@@ -1571,24 +1774,24 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                             {/* Row 1: Genişlik, Uzunluk, Yükseklik */}
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                               <div>
-                                <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Genişlik</div>
-                                <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
+                                <div className={cn("mb-1.5 text-[11px] font-semibold", fieldErrors[`pkg_${idx}_widthCm`] ? "text-red-500" : "text-[#64748B]")}>Genişlik {fieldErrors[`pkg_${idx}_widthCm`] && <span className="text-red-500">*</span>}</div>
+                                <div className={cn("flex items-center rounded-lg ring-1 bg-[#F8FAFC] overflow-hidden transition-colors", fieldErrors[`pkg_${idx}_widthCm`] ? "ring-2 ring-red-500 bg-red-50/30" : "ring-[#E2E8F0] focus-within:ring-[#3B82F6]")}>
                                   <span className="pl-2.5 text-[#94A3B8]"><Ruler className="h-3.5 w-3.5" /></span>
                                   <Input inputMode="decimal" maxLength={7} value={pkg.widthCm} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "widthCm", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                 </div>
                               </div>
                               <div>
-                                <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Uzunluk</div>
-                                <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
+                                <div className={cn("mb-1.5 text-[11px] font-semibold", fieldErrors[`pkg_${idx}_lengthCm`] ? "text-red-500" : "text-[#64748B]")}>Uzunluk {fieldErrors[`pkg_${idx}_lengthCm`] && <span className="text-red-500">*</span>}</div>
+                                <div className={cn("flex items-center rounded-lg ring-1 bg-[#F8FAFC] overflow-hidden transition-colors", fieldErrors[`pkg_${idx}_lengthCm`] ? "ring-2 ring-red-500 bg-red-50/30" : "ring-[#E2E8F0] focus-within:ring-[#3B82F6]")}>
                                   <span className="pl-2.5 text-[#94A3B8]"><Ruler className="h-3.5 w-3.5 rotate-90" /></span>
                                   <Input inputMode="decimal" maxLength={7} value={pkg.lengthCm} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "lengthCm", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                 </div>
                               </div>
                               <div>
-                                <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Yükseklik</div>
-                                <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
+                                <div className={cn("mb-1.5 text-[11px] font-semibold", fieldErrors[`pkg_${idx}_heightCm`] ? "text-red-500" : "text-[#64748B]")}>Yükseklik {fieldErrors[`pkg_${idx}_heightCm`] && <span className="text-red-500">*</span>}</div>
+                                <div className={cn("flex items-center rounded-lg ring-1 bg-[#F8FAFC] overflow-hidden transition-colors", fieldErrors[`pkg_${idx}_heightCm`] ? "ring-2 ring-red-500 bg-red-50/30" : "ring-[#E2E8F0] focus-within:ring-[#3B82F6]")}>
                                   <span className="pl-2.5 text-[#94A3B8]"><Ruler className="h-3.5 w-3.5" /></span>
                                   <Input inputMode="decimal" maxLength={7} value={pkg.heightCm} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "heightCm", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
@@ -1598,8 +1801,8 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                             {/* Row 2: Ağırlık, Adet */}
                             <div className="grid grid-cols-2 gap-3 mb-5">
                               <div>
-                                <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Ağırlık</div>
-                                <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
+                                <div className={cn("mb-1.5 text-[11px] font-semibold", fieldErrors[`pkg_${idx}_weightKg`] ? "text-red-500" : "text-[#64748B]")}>Ağırlık {fieldErrors[`pkg_${idx}_weightKg`] && <span className="text-red-500">*</span>}</div>
+                                <div className={cn("flex items-center rounded-lg ring-1 bg-[#F8FAFC] overflow-hidden transition-colors", fieldErrors[`pkg_${idx}_weightKg`] ? "ring-2 ring-red-500 bg-red-50/30" : "ring-[#E2E8F0] focus-within:ring-[#3B82F6]")}>
                                   <span className="pl-2.5 text-[#94A3B8]"><Package className="h-3.5 w-3.5" /></span>
                                   <Input inputMode="decimal" maxLength={7} value={pkg.weightKg} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "weightKg", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">kg</span>
@@ -1938,6 +2141,39 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                 {/* ===== Gönderici Tab ===== */}
                 {addressTab === "sender" && (
                   <div className="space-y-3">
+
+                    {/* ── Son Kullanılan Göndericiler ── */}
+                    {SAVED_SENDER_ADDRESSES.length > 0 && (
+                      <div>
+                        <div className="text-[11px] font-bold uppercase text-[#94A3B8] tracking-widest mb-2">Son Kullanılan Göndericiler</div>
+                        <div className="flex flex-wrap gap-2">
+                          {SAVED_SENDER_ADDRESSES.slice(0, 5).map((a) => {
+                            const initials = (a.name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+                            const isSelected = draft.selectedSenderAddressId === String(a.id);
+                            return (
+                              <button
+                                key={String(a.id)}
+                                type="button"
+                                onClick={() => { setDraft(d => ({ ...d, selectedSenderAddressId: String(a.id), senderName: a.name || "", senderPhone: a.phone || "+90", senderAddress: a.address || "", senderCity: a.city || "", senderTown: (a as any).town || "", senderCompany: a.company || "" })); setShowNewSenderForm(false); }}
+                                className={cn(
+                                  "flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3 text-left ring-1 transition-all hover:shadow-md",
+                                  isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-sm" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1]"
+                                )}
+                              >
+                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-[10px] font-bold text-white shadow-sm">
+                                  {initials}
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="text-[12px] font-bold text-[#0F172A] truncate leading-tight">{a.name}</div>
+                                  <div className="text-[10px] text-[#94A3B8] truncate leading-tight">{a.city} · {a.countryCode}</div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between">
                       <div className="text-[14px] font-semibold text-[#0F172A]">Kayıtlı Gönderici Adresleriniz</div>
                       <button type="button" onClick={() => { setShowNewSenderForm(!showNewSenderForm); if (!showNewSenderForm) update("selectedSenderAddressId", ""); }} className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#4F46E5] hover:text-[#4338CA] transition-colors">
@@ -1955,7 +2191,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                           {filteredSenderAddresses.map(a => {
                             const isSelected = draft.selectedSenderAddressId === String(a.id);
                             return (
-                              <button key={String(a.id)} type="button" onClick={() => { update("selectedSenderAddressId", String(a.id)); setShowNewSenderForm(false); }} className={cn("group flex w-full items-center justify-between rounded-xl p-3 text-left ring-1 transition-all", isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-sm" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1] hover:shadow-sm")}>
+                              <button key={String(a.id)} type="button" onClick={() => { setDraft(d => ({ ...d, selectedSenderAddressId: String(a.id), senderName: a.name || "", senderPhone: a.phone || "+90", senderAddress: a.address || "", senderCity: a.city || "", senderTown: (a as any).town || "", senderCompany: a.company || "" })); setShowNewSenderForm(false); }} className={cn("group flex w-full items-center justify-between rounded-xl p-3 text-left ring-1 transition-all", isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-sm" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1] hover:shadow-sm")}>
                                 <div className="flex items-center gap-3">
                                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F1F5F9] text-[#94A3B8]">
                                     <User className="h-4 w-4" />
@@ -1995,6 +2231,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                               className="h-10 border-0 ring-0 focus:ring-0 bg-transparent text-sm px-2"
                             />
                           </Field>
+                          <Field label="İlçe" icon={MapPin}><Input value={draft.senderTown} onChange={e => update("senderTown", e.target.value)} placeholder="İlçe giriniz" /></Field>
                           <div className="sm:col-span-2"><Field label="Açık Adres" icon={MapPinned}><Input value={draft.senderAddress} onChange={e => update("senderAddress", e.target.value)} placeholder="Sokak, cadde, bina no, daire no..." /></Field></div>
                         </div>
                         <div className="mt-3 flex justify-end">
@@ -2014,6 +2251,41 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                 {/* ===== Alıcı Tab ===== */}
                 {addressTab === "receiver" && (
                   <div className="space-y-3">
+
+                    {/* ── Son Gönderilen Alıcılar ── */}
+                    {SAVED_RECEIVER_ADDRESSES.length > 0 && (
+                      <div>
+                        <div className="text-[11px] font-bold uppercase text-[#94A3B8] tracking-widest mb-2">Son Gönderilen Alıcılar</div>
+                        <div className="flex flex-wrap gap-2">
+                          {SAVED_RECEIVER_ADDRESSES.slice(0, 5).map((a) => {
+                            const initials = (a.name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+                            const isSelected = draft.selectedReceiverAddressId === String(a.id);
+                            const colors = ["bg-gradient-to-br from-violet-500 to-indigo-600", "bg-gradient-to-br from-emerald-500 to-teal-600", "bg-gradient-to-br from-amber-500 to-orange-600", "bg-gradient-to-br from-rose-500 to-pink-600", "bg-gradient-to-br from-sky-500 to-blue-600"];
+                            const colorIdx = a.id % colors.length;
+                            return (
+                              <button
+                                key={String(a.id)}
+                                type="button"
+                                onClick={() => { update("selectedReceiverAddressId", String(a.id)); setShowNewReceiverForm(false); }}
+                                className={cn(
+                                  "flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3 text-left ring-1 transition-all hover:shadow-md",
+                                  isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-sm" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1]"
+                                )}
+                              >
+                                <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm", colors[colorIdx])}>
+                                  {initials}
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="text-[12px] font-bold text-[#0F172A] truncate leading-tight">{a.name}</div>
+                                  <div className="text-[10px] text-[#94A3B8] truncate leading-tight">{a.city} · {a.countryCode}</div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between">
                       <div className="text-[14px] font-semibold text-[#0F172A]">Kayıtlı Alıcı Adresleri</div>
                       <button type="button" onClick={() => { setShowNewReceiverForm(!showNewReceiverForm); if (!showNewReceiverForm) update("selectedReceiverAddressId", ""); }} className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#4F46E5] hover:text-[#4338CA] transition-colors">
@@ -3029,6 +3301,160 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
   </div>
   );
 })()}
+
+{/* ── Yurt İçi Kargo Seçim Modalı ──────────────────────────────────────────── */}
+{showDomesticSelection && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      {/* Header */}
+      <div className="px-6 py-5 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-violet-50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+            <Package className="h-5 w-5 text-indigo-600" />
+          </div>
+          <div>
+            <h3 className="text-[17px] font-bold text-[#0F172A]">Yurt İçi Kargo Firması Seçin</h3>
+            <p className="text-[12px] text-[#64748B] mt-0.5">
+              Paketiniz önce İstanbul merkezimize transfer edilecektir. Size en uygun kargo firmasını seçin.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Validation Error (Top of the modal) */}
+      {domesticValidationError && (
+        <div className="px-6 py-3 bg-red-50 border-b border-red-100 flex items-start gap-2.5 shrink-0 animate-in slide-in-from-top-2">
+          <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span className="text-red-500 text-[11px] font-bold">!</span>
+          </div>
+          <div>
+            <p className="text-[13px] font-bold text-red-700">Kargo Firması Uygun Değil</p>
+            <p className="text-[12px] text-red-600 mt-0.5 leading-relaxed">{domesticValidationError}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Body */}
+      <div className="flex-1 overflow-y-auto px-6 py-4">
+        {domesticLoading ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+            <p className="text-sm text-slate-500">Kargo firmaları yükleniyor...</p>
+          </div>
+        ) : domesticCarriers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-3">
+            <AlertTriangle className="h-8 w-8 text-amber-500" />
+            <p className="text-sm text-slate-600 text-center">
+              Uygun kargo firması bulunamadı. Lütfen daha sonra tekrar deneyin.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {domesticCarriers.map((carrier) => (
+              <button
+                key={carrier.handlerCode}
+                type="button"
+                onClick={() => { setSelectedDomesticHandler(carrier.handlerCode); setDomesticValidationError(""); }}
+                className={cn(
+                  "w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-150 text-left",
+                  selectedDomesticHandler === carrier.handlerCode
+                    ? "border-indigo-500 bg-indigo-50/50 shadow-sm"
+                    : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                )}
+              >
+                {/* Radio dot */}
+                <div className={cn(
+                  "w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors",
+                  selectedDomesticHandler === carrier.handlerCode
+                    ? "border-indigo-500 bg-indigo-500"
+                    : "border-slate-300"
+                )}>
+                  {selectedDomesticHandler === carrier.handlerCode && (
+                    <div className="w-2 h-2 rounded-full bg-white" />
+                  )}
+                </div>
+
+                {/* Logo */}
+                <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {carrier.logoUrl ? (
+                    <img src={carrier.logoUrl} alt={carrier.name} className="w-8 h-8 object-contain" />
+                  ) : (
+                    <span className="text-[14px] font-bold text-slate-500">
+                      {carrier.handlerCode.slice(0, 2)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-semibold text-[#0F172A] truncate">{carrier.name}</p>
+                  <p className="text-[11px] text-[#94A3B8] mt-0.5">
+                    {carrier.estimatedDays}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => {
+            setShowDomesticSelection(false);
+            setSelectedDomesticHandler("");
+          }}
+          className="rounded-xl bg-white hover:bg-slate-50 border border-slate-200 px-5 py-2.5 text-[13px] font-bold text-[#0F172A] transition-colors"
+        >
+          Geri Dön
+        </button>
+        <button
+          type="button"
+          disabled={!selectedDomesticHandler || domesticLoading}
+          onClick={async () => {
+            if (!selectedDomesticHandler || !shipmentId) return;
+            try {
+              setLoading(true);
+              setDomesticValidationError("");
+              
+              // 1. Önce Basit Kargo ile kargo firmasını doğrula
+              const valResult = await domesticService.validateCarrier(String(shipmentId), selectedDomesticHandler);
+              if (!valResult.valid) {
+                setDomesticValidationError(valResult.error || "Bu kargo firması güzergahınızı desteklemiyor. Lütfen başka bir firma seçin.");
+                setLoading(false);
+                return;
+              }
+              
+              // 2. Doğrulama başarılı → seçimi backend'e kaydet
+              await shipmentService.updateDraft(shipmentId, 3, {
+                domesticHandlerCode: selectedDomesticHandler,
+              });
+              setShowDomesticSelection(false);
+              setDomesticValidationError("");
+              // Step 4'e geç
+              setStep(4);
+            } catch (err: any) {
+              setDomesticValidationError("Kargo firması doğrulanamadı: " + (err?.message || ""));
+            } finally {
+              setLoading(false);
+            }
+          }}
+          className={cn(
+            "rounded-xl px-6 py-2.5 text-[13px] font-bold text-white transition-all flex items-center gap-2",
+            selectedDomesticHandler
+              ? "bg-indigo-600 hover:bg-indigo-700 shadow-sm"
+              : "bg-slate-300 cursor-not-allowed"
+          )}
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+          Seç ve Devam Et
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

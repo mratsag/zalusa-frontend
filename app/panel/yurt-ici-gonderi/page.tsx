@@ -330,22 +330,13 @@ export default function YurtIciGonderiPage() {
       });
       setResultData(res);
 
-      // Ödeme başlat
-      try {
-        const payRes = await apiFetch<{ paymentPageUrl: string }>("/api/payment/start", {
-          method: "POST",
-          body: JSON.stringify({ shipmentId: res.shipmentId }),
-        });
-        if (payRes.paymentPageUrl) {
-          window.location.href = payRes.paymentPageUrl;
-          return;
-        }
-      } catch (payErr: any) {
-        // Ödeme başlatılamadıysa gönderi oluştu, gönderilerim'e yönlendir
-        console.error("Ödeme başlatma hatası:", payErr);
+      // Ödeme sayfasına yönlendir (Havale/EFT + iyzico)
+      if (res.shipmentId) {
+        window.location.href = `/panel/odeme/${res.shipmentId}`;
+        return;
       }
 
-      setStep(5); // Tamamlandı (ödeme redirect yoksa)
+      setStep(5); // Tamamlandı (shipmentId yoksa)
     } catch (err: any) {
       setApiError(err.message || "Gönderi oluşturulamadı");
     } finally {

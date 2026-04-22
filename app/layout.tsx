@@ -15,6 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Zalusa",
   description: "Uluslararası standartlarda güvenli teslimat.",
+  icons: {
+    icon: "/logo-ikon.png",
+    shortcut: "/logo-ikon.png",
+    apple: "/logo-ikon.png",
+  },
 };
 
 export default function RootLayout({

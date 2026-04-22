@@ -65,6 +65,10 @@ async function authFetch<T = any>(path: string, options: RequestInit = {}): Prom
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
+    if (res.status === 401) {
+      try { localStorage.removeItem("zalusa.token"); if (typeof window !== "undefined") window.location.href = "/giris"; } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(data?.error || `İstek başarısız (${res.status})`);
   }
 

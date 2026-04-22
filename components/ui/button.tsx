@@ -2,7 +2,7 @@ import type React from "react";
 
 import { cn } from "@/lib/cn";
 
-type Variant = "primary" | "secondary" | "ghost" | "danger";
+type Variant = "primary" | "secondary" | "ghost" | "danger" | "outline";
 type Size = "sm" | "md" | "lg";
 
 export function Button({
@@ -29,6 +29,8 @@ export function Button({
           "bg-transparent text-foreground hover:bg-brand-50/70 dark:hover:bg-white/5",
         variant === "danger" &&
           "bg-red-600 text-white hover:bg-red-500 shadow-sm hover:shadow-red-600/30",
+        variant === "outline" &&
+          "bg-transparent text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50 hover:ring-slate-400",
         className,
       )}
       {...props}

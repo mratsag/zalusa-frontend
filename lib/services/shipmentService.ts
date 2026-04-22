@@ -29,6 +29,16 @@ async function apiFetch<T = any>(
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    // Token expire/invalid → otomatik çıkış yap
+    if (res.status === 401) {
+      try {
+        localStorage.removeItem("zalusa.token");
+        if (typeof window !== "undefined") {
+          window.location.href = "/giris";
+        }
+      } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(data?.error || `İstek başarısız (${res.status})`);
   }
   return data as T;
@@ -239,7 +249,7 @@ export const shipmentService = {
     step: number,
     payload: Record<string, unknown>
   ) {
-    return apiPut<{ message: string; step: number }>(
+    return apiPut<{ message: string; step: number; requiresDomesticTransfer?: boolean }>(
       `/api/shipments/draft/${id}`,
       { step, ...payload }
     );
@@ -320,6 +330,30 @@ export const shipmentService = {
   /** PUT /api/shipments/:id/cancel — Gönderi iptal et */
   cancel(id: number) {
     return apiPut<{ message: string }>(`/api/shipments/${id}/cancel`, {});
+  },
+};
+
+// ── Domestic (Yurt İçi) Kargo Service ─────────────────────────────────────────
+
+export interface DomesticCarrierQuote {
+  handlerCode: string;
+  name: string;
+  logoUrl: string;
+  price: number;
+  currency: string;
+  estimatedDays: string;
+  desiKg: number;
+}
+
+export const domesticService = {
+  /** POST /api/domestic/prices — Yurt içi kargo fiyatları */
+  getPrices(packages: { width: number; height: number; depth: number; weight: number }[], shipmentId?: number | string | null) {
+    return apiPost<{ carriers: DomesticCarrierQuote[] }>("/api/domestic/prices", { packages, shipmentId: shipmentId ? Number(shipmentId) : undefined });
+  },
+
+  /** POST /api/domestic/validate-carrier — Ödeme öncesi kargo doğrulama */
+  validateCarrier(shipmentId: string, handlerCode: string) {
+    return apiPost<{ valid: boolean; error?: string; handlerCode: string }>("/api/domestic/validate-carrier", { shipmentId, handlerCode });
   },
 };
 

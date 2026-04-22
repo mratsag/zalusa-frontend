@@ -445,7 +445,7 @@ export function AuthPage() {
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                   </svg>
-                  Google ile Giriş Yap
+                  {tab === "login" ? "Google ile Giriş Yap" : "Google ile Hızlı Üye Ol"}
                 </button>
               </div>
             )}
@@ -625,6 +625,18 @@ export function AuthPage() {
                   {busy && <Loader2 className="h-4 w-4 animate-spin" />}
                   Giriş Yap
                 </button>
+
+                {/* Müşteri Hizmetleri Destek Bandı */}
+                <div className="mt-5 flex items-center gap-3 rounded-[12px] bg-[#F0FDF4] p-4 ring-1 ring-[#BBF7D0]">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] font-bold text-[#14532D]">Giriş yapamıyor musun?</div>
+                    <div className="text-[12px] text-[#16A34A]">Müşteri hizmetleri 7/24 hizmetinizde</div>
+                  </div>
+                  <a href="tel:08502551840" className="text-[15px] font-extrabold text-[#16A34A] hover:underline underline-offset-2 whitespace-nowrap">0850 255 18 40</a>
+                </div>
               </form>
             ) : (
               /* ═══ REGISTER FORM ═══ */
@@ -664,16 +676,7 @@ export function AuthPage() {
 
                 {/* Fatura bilgileri */}
                 {kind === "individual" ? (
-                  <>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"><CreditCard className="h-4 w-4" /></div>
-                      <input placeholder="TC Kimlik No" value={tc} onChange={e => setTc(e.target.value)} required className={fieldInputClass} />
-                    </div>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"><MapPin className="h-4 w-4" /></div>
-                      <input placeholder="Adres" value={address} onChange={e => setAddress(e.target.value)} required className={fieldInputClass} />
-                    </div>
-                  </>
+                  <>{/* Bireysel: TC ve Adres artık kayıt sırasında alınmıyor */}</>
                 ) : (
                   <>
                     <div className="relative">
@@ -768,7 +771,7 @@ export function AuthPage() {
                   className="flex h-[44px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#4F46E5] text-white text-[14px] font-semibold transition-all hover:bg-[#4338CA] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Kayıt Ol
+                  Ücretsiz Kayıt Ol
                 </button>
               </form>
             )}

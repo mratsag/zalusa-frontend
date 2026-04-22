@@ -65,6 +65,10 @@ async function apiGet<T = unknown>(path: string): Promise<T> {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      try { localStorage.removeItem("zalusa.token"); if (typeof window !== "undefined") window.location.href = "/giris"; } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(err.error || `API hatası: ${res.status}`);
   }
   return res.json();
@@ -81,6 +85,10 @@ async function apiPut<T = unknown>(path: string, body: object): Promise<T> {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      try { localStorage.removeItem("zalusa.token"); if (typeof window !== "undefined") window.location.href = "/giris"; } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(err.error || `API hatası: ${res.status}`);
   }
   return res.json();
@@ -97,6 +105,10 @@ async function apiPost<T = unknown>(path: string, body?: object): Promise<T> {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      try { localStorage.removeItem("zalusa.token"); if (typeof window !== "undefined") window.location.href = "/giris"; } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(err.error || `API hatası: ${res.status}`);
   }
   return res.json();
@@ -112,6 +124,10 @@ async function adminGet<T = unknown>(path: string): Promise<T> {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      try { localStorage.removeItem("zalusa.admin.token"); if (typeof window !== "undefined") window.location.href = "/admin/login"; } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(err.error || `API hatası: ${res.status}`);
   }
   return res.json();
@@ -129,6 +145,10 @@ async function adminPost<T = unknown>(path: string, body?: object): Promise<T> {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      try { localStorage.removeItem("zalusa.admin.token"); if (typeof window !== "undefined") window.location.href = "/admin/login"; } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(err.error || `API hatası: ${res.status}`);
   }
   return res.json();
@@ -177,6 +197,10 @@ async function apiPatch<T = unknown>(path: string, body: object): Promise<T> {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      try { localStorage.removeItem("zalusa.token"); if (typeof window !== "undefined") window.location.href = "/giris"; } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(err.error || `API hatası: ${res.status}`);
   }
   return res.json();
@@ -192,6 +216,10 @@ async function apiDelete<T = unknown>(path: string): Promise<T> {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      try { localStorage.removeItem("zalusa.token"); if (typeof window !== "undefined") window.location.href = "/giris"; } catch {}
+      throw new Error("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+    }
     throw new Error(err.error || `API hatası: ${res.status}`);
   }
   return res.json();

@@ -85,9 +85,20 @@ export function CitySelect({
           limit: 20,
         });
         if (append) {
-          setCities((prev) => [...prev, ...res.cities]);
+          setCities((prev) => {
+            const existingIds = new Set(prev.map(c => c.id));
+            const newCities = res.cities.filter((c: ApiCity) => !existingIds.has(c.id));
+            return [...prev, ...newCities];
+          });
         } else {
-          setCities(res.cities);
+          // İlk yüklemede de unique yap
+          const seen = new Set<number>();
+          const uniqueCities = res.cities.filter((c: ApiCity) => {
+            if (seen.has(c.id)) return false;
+            seen.add(c.id);
+            return true;
+          });
+          setCities(uniqueCities);
         }
         setHasMore(res.hasMore);
         setTotal(res.total);
@@ -244,9 +255,9 @@ export function CitySelect({
             ) : (
               /* ── Diğer ülkeler: cities listesi ── */
               <>
-                {cities.map((city) => (
+                {cities.map((city, idx) => (
                   <button
-                    key={city.id}
+                    key={`city-${city.id}-${idx}`}
                     type="button"
                     onClick={() => {
                       onChange(city.cityName);
