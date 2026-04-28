@@ -1021,7 +1021,7 @@ function LabelModal({
                       ✦ Zalusa&apos;yı tercih ettiğiniz için teşekkür ederiz
                     </span>
                     <span className="mx-6 text-[12px] font-bold text-amber-400 tracking-wider">
-                      ⚠️ Lütfen MSDS belgesini ve PTS etiketinizi çıktı olarak çıkarınız
+                      ⚠️ Lütfen MSDS belgesini ve etiketinizi çıktı olarak çıkarınız
                     </span>
                     <span className="mx-6 text-[12px] font-bold text-slate-400 tracking-wider">
                       📦 Çıktıları kolinin üzerine yapıştırınız
