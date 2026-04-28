@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import {
   Wallet,
   TrendingUp,
@@ -13,11 +14,15 @@ import {
   Ticket,
   Hash,
   Infinity,
+  Package,
+  Loader2,
 } from "lucide-react";
 import {
   resellerService,
   type ResellerDashboardData,
   type AdminCouponInfo,
+  type ResellerCustomer,
+  type CustomerShipment,
 } from "@/lib/services/resellerService";
 
 // ─── Yardımcı: Tarih formatlama ──────────────────────────────────────────────
@@ -54,9 +59,14 @@ function formatCurrency(val: number): string {
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function ResellerDashboardPage() {
+  const router = useRouter();
   const [data, setData] = React.useState<ResellerDashboardData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+
+  // Müşteri gönderileri
+  const [allShipments, setAllShipments] = React.useState<(CustomerShipment & { customerName: string })[]>([]);
+  const [shipmentsLoading, setShipmentsLoading] = React.useState(true);
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
@@ -73,6 +83,26 @@ export default function ResellerDashboardPage() {
 
   React.useEffect(() => {
     fetchData();
+    // Müşteri gönderilerini yükle
+    (async () => {
+      setShipmentsLoading(true);
+      try {
+        const custRes = await resellerService.listCustomers();
+        const customers = custRes.customers || [];
+        const allShips: (CustomerShipment & { customerName: string })[] = [];
+        for (const c of customers) {
+          try {
+            const shipRes = await resellerService.customerShipments(c.id);
+            for (const s of (shipRes.shipments || [])) {
+              allShips.push({ ...s, customerName: `${c.firstName} ${c.lastName}` });
+            }
+          } catch { /* skip */ }
+        }
+        allShips.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setAllShipments(allShips);
+      } catch { /* skip */ }
+      setShipmentsLoading(false);
+    })();
   }, [fetchData]);
 
   // ── Loading skeleton ─────────────────────────────────────────────────
@@ -335,6 +365,82 @@ export default function ResellerDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* ── Müşteri Gönderileri ───────────────────────────────────────────── */}
+      <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-100 shadow-sm">
+        <div className="mb-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
+              <Package className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">Müşteri Gönderileri</h2>
+              <p className="text-xs text-slate-500">Müşterilerinizin son gönderileri</p>
+            </div>
+          </div>
+          <span className="text-xs font-medium text-slate-400">{allShipments.length} gönderi</span>
+        </div>
+
+        {shipmentsLoading ? (
+          <div className="flex items-center justify-center py-12 gap-2">
+            <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+            <span className="text-sm text-slate-500">Gönderiler yükleniyor...</span>
+          </div>
+        ) : allShipments.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Package className="mb-3 h-10 w-10 text-slate-300" />
+            <p className="text-sm font-medium text-slate-400">Henüz müşteri gönderisi bulunmuyor</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-100">
+                  <th className="whitespace-nowrap px-4 pb-3 pt-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Müşteri</th>
+                  <th className="whitespace-nowrap px-4 pb-3 pt-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Takip Kodu</th>
+                  <th className="whitespace-nowrap px-4 pb-3 pt-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Durum</th>
+                  <th className="whitespace-nowrap px-4 pb-3 pt-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Güzergah</th>
+                  <th className="whitespace-nowrap px-4 pb-3 pt-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Kargo</th>
+                  <th className="whitespace-nowrap px-4 pb-3 pt-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Ücret</th>
+                  <th className="whitespace-nowrap px-4 pb-3 pt-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Tarih</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allShipments.slice(0, 20).map((s) => {
+                  const statusColors: Record<string, string> = {
+                    pending: "bg-amber-50 text-amber-700", processing: "bg-blue-50 text-blue-700",
+                    shipped: "bg-indigo-50 text-indigo-700", delivered: "bg-emerald-50 text-emerald-700",
+                    cancelled: "bg-red-50 text-red-700", paid: "bg-green-50 text-green-700",
+                    label_created: "bg-purple-50 text-purple-700",
+                  };
+                  const statusLabels: Record<string, string> = {
+                    pending: "Bekliyor", processing: "İşleniyor", shipped: "Yolda",
+                    delivered: "Teslim", cancelled: "İptal", paid: "Ödendi", label_created: "Etiket",
+                  };
+                  return (
+                    <tr key={s.id} onClick={() => router.push(`/panel/bayi/musterilerim/gonderi/${s.id}`)} className="border-b border-slate-50 transition hover:bg-blue-50/30 cursor-pointer">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-slate-700">{s.customerName}</td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-mono font-semibold text-slate-600">{s.trackingCode || "—"}</span>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusColors[s.status] || "bg-slate-100 text-slate-600"}`}>
+                          <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                          {statusLabels[s.status] || s.status}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-xs text-slate-600">{s.senderCountry} → {s.receiverCountry}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-xs text-slate-600">{s.carrierName}{s.serviceName ? ` / ${s.serviceName}` : ""}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-slate-700">{s.carrierPriceTry?.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-xs text-slate-500">{formatDateShort(s.createdAt)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* ── Son Cüzdan İşlemleri Tablosu ───────────────────────────────── */}
       <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-100 shadow-sm">

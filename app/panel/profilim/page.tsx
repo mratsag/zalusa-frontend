@@ -106,7 +106,7 @@ export default function ProfilPage() {
   const [apiCountries, setApiCountries] = React.useState<{ value: string; label: React.ReactNode; searchableText: string }[]>([]);
 
   // New address forms
-  const EMPTY_ADDR = { label: "", name: "", company: "", phone: "", countryCode: "", stateProvince: "", city: "", postalCode: "", address: "" };
+  const EMPTY_ADDR = { label: "", name: "", company: "", phone: "", countryCode: "", stateProvince: "", city: "", town: "", postalCode: "", address: "" };
   const [showNewSenderForm, setShowNewSenderForm] = React.useState(false);
   const [newSenderAddr, setNewSenderAddr] = React.useState(EMPTY_ADDR);
   const [savingSender, setSavingSender] = React.useState(false);
@@ -219,7 +219,7 @@ export default function ProfilPage() {
       await profileService.update({ firstName, lastName, phone });
       setProfile((prev) => prev ? { ...prev, firstName, lastName, phone } : prev);
       // Keep localStorage in sync for other components that might read it
-      localStorage.setItem("zalusa.fullName", `${firstName} ${lastName}`.trim());
+      localStorage.setItem("zalusa.fullName", `${firstName || ""} ${lastName || ""}`.trim());
       localStorage.setItem("zalusa.phone", phone);
       setMessage("Hesap bilgileri kaydedildi.");
     } catch (err: any) {
@@ -310,9 +310,19 @@ export default function ProfilPage() {
   async function handleAddAddress(type: "sender" | "receiver") {
     const addr = type === "sender" ? newSenderAddr : newReceiverAddr;
     const setSaving = type === "sender" ? setSavingSender : setSavingReceiver;
-    if (!addr.label || !addr.name || !addr.address || !addr.city || !addr.countryCode) {
-      setMessage("Lütfen zorunlu alanları (Başlık, Ad Soyad, Ülke, Şehir, Açık Adres) doldurun.");
-      return;
+
+    // Sender: eyalet hariç tümü zorunlu
+    // Receiver: eyalet ve ilçe hariç tümü zorunlu
+    if (type === "sender") {
+      if (!addr.label || !addr.name || !addr.company || !addr.phone || !addr.address || !addr.city || !addr.countryCode || !addr.town || !addr.postalCode) {
+        setMessage("Lütfen tüm zorunlu alanları doldurun. (Eyalet / Bölge hariç tümü zorunludur)");
+        return;
+      }
+    } else {
+      if (!addr.label || !addr.name || !addr.company || !addr.phone || !addr.address || !addr.city || !addr.countryCode || !addr.postalCode) {
+        setMessage("Lütfen tüm zorunlu alanları doldurun. (Eyalet ve İlçe hariç tümü zorunludur)");
+        return;
+      }
     }
     // TR telefon validasyonu
     if (addr.countryCode === "TR" && addr.phone) {
@@ -341,6 +351,7 @@ export default function ProfilPage() {
         address: addr.address,
         postalCode: addr.postalCode,
         city: addr.city,
+        town: addr.town,
         stateProvince: addr.stateProvince,
         countryCode: addr.countryCode,
       });
@@ -536,36 +547,38 @@ export default function ProfilPage() {
         </div>
       )}
 
-      {/* TABS */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-2">
-        {TABS.map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
+      {/* TABS - horizontally scrollable on mobile */}
+      <div className="-mx-3 sm:mx-0 overflow-x-auto">
+        <div className="flex items-center gap-1.5 sm:gap-2 border-b border-slate-100 pb-2 px-3 sm:px-0 min-w-max sm:min-w-0 sm:flex-wrap">
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-[12px] sm:text-[13px] font-bold rounded-[10px] border transition-all whitespace-nowrap ${
+                  isActive
+                    ? "bg-white border-slate-200 text-slate-900 shadow-sm"
+                    : "bg-transparent border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+          {profile?.reseller && (
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 text-[13px] font-bold rounded-[10px] border transition-all ${
-                isActive
+              onClick={() => setActiveTab("bayi")}
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-[12px] sm:text-[13px] font-bold rounded-[10px] border transition-all whitespace-nowrap ${
+                activeTab === "bayi"
                   ? "bg-white border-slate-200 text-slate-900 shadow-sm"
                   : "bg-transparent border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
               }`}
             >
-              {tab.label}
+              Bayi Bilgileri
             </button>
-          );
-        })}
-        {profile?.reseller && (
-          <button
-            onClick={() => setActiveTab("bayi")}
-            className={`flex items-center gap-2 px-4 py-2 text-[13px] font-bold rounded-[10px] border transition-all ${
-              activeTab === "bayi"
-                ? "bg-white border-slate-200 text-slate-900 shadow-sm"
-                : "bg-transparent border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            Bayi Bilgileri
-          </button>
-        )}
+          )}
+        </div>
       </div>
 
       {/* TAB CONTENT */}
@@ -573,19 +586,19 @@ export default function ProfilPage() {
         {/* ═══ HESAP ═══ */}
         {activeTab === "hesap" && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="bg-white rounded-[16px] border border-slate-200 p-6 shadow-sm flex flex-col gap-6">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4">
-                <h2 className="text-[18px] font-bold tracking-tight text-slate-900">Genel Bilgiler</h2>
+            <div className="bg-white rounded-[16px] border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col gap-5 sm:gap-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4">
+                <h2 className="text-[16px] sm:text-[18px] font-bold tracking-tight text-slate-900">Genel Bilgiler</h2>
                 <button
                   onClick={onSaveAccount}
                   disabled={savingProfile}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[13px] font-bold transition-all shadow-sm shrink-0 disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[13px] font-bold transition-all shadow-sm shrink-0 disabled:opacity-50"
                 >
                   {savingProfile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   Değişiklikleri Kaydet
                 </button>
               </div>
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
                 <label className="block">
                   <div className="mb-2 inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700">
                     <User className="h-4 w-4 text-slate-400" /> Ad
@@ -627,7 +640,7 @@ export default function ProfilPage() {
               <button
                 onClick={onSaveAccount}
                 disabled={savingProfile}
-                className="flex items-center gap-2 px-6 py-3 rounded-full bg-[#10B981] hover:bg-[#059669] text-white text-[14px] font-bold transition-all shadow-sm shrink-0 disabled:opacity-50"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-full bg-[#10B981] hover:bg-[#059669] text-white text-[14px] font-bold transition-all shadow-sm shrink-0 disabled:opacity-50"
               >
                 {savingProfile ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
                 Hesap Bilgilerini Kaydet
@@ -639,13 +652,13 @@ export default function ProfilPage() {
         {/* ═══ BAYİ BİLGİLERİ ═══ */}
         {activeTab === "bayi" && profile?.reseller && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="bg-white rounded-[16px] border border-slate-200 p-6 shadow-sm flex flex-col gap-6">
+            <div className="bg-white rounded-[16px] border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col gap-5 sm:gap-6">
               <div className="flex flex-col gap-2 border-b border-slate-100 pb-4">
                 <h2 className="text-[18px] font-bold tracking-tight text-slate-900">Bayi Bilgileri</h2>
                 <p className="text-[13px] text-slate-500 font-medium">Size özel fiyatlandırma ve destek hizmeti sağlayan bayinizin iletişim bilgileri.</p>
               </div>
 
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
                 <label className="block md:col-span-2">
                   <div className="mb-2 inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700">
                     <ShieldCheck className="h-4 w-4 text-slate-400" /> Bayi Adı / Şirket Ünvanı
@@ -672,19 +685,19 @@ export default function ProfilPage() {
         {/* ═══ FATURA ═══ */}
         {activeTab === "fatura" && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="bg-white rounded-[16px] border border-slate-200 p-6 shadow-sm flex flex-col gap-6">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4">
-                <h2 className="text-[18px] font-bold tracking-tight text-slate-900">Fatura Bilgileri</h2>
+            <div className="bg-white rounded-[16px] border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col gap-5 sm:gap-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4">
+                <h2 className="text-[16px] sm:text-[18px] font-bold tracking-tight text-slate-900">Fatura Bilgileri</h2>
                 <button
                   onClick={onSaveInvoice}
                   disabled={savingInvoice}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[13px] font-bold transition-all shadow-sm shrink-0 disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[13px] font-bold transition-all shadow-sm shrink-0 disabled:opacity-50"
                 >
                   {savingInvoice ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   Değişiklikleri Kaydet
                 </button>
               </div>
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
                 {profile.kind === "corporate" ? (
                   <>
                     <label className="block">
@@ -712,7 +725,7 @@ export default function ProfilPage() {
               <button
                 onClick={onSaveInvoice}
                 disabled={savingInvoice}
-                className="flex items-center gap-2 px-6 py-3 rounded-full bg-[#10B981] hover:bg-[#059669] text-white text-[14px] font-bold transition-all shadow-sm shrink-0 disabled:opacity-50"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-full bg-[#10B981] hover:bg-[#059669] text-white text-[14px] font-bold transition-all shadow-sm shrink-0 disabled:opacity-50"
               >
                 {savingInvoice ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
                 Fatura Bilgilerini Kaydet
@@ -726,7 +739,7 @@ export default function ProfilPage() {
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
 
             {/* ── GÖNDERİCİ ADRESLERİ ── */}
-            <div className="bg-white rounded-[16px] border border-slate-200 p-6 shadow-sm flex flex-col gap-6">
+            <div className="bg-white rounded-[16px] border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col gap-5 sm:gap-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
@@ -754,7 +767,7 @@ export default function ProfilPage() {
                       <div className="text-[15px] font-bold text-slate-900">Yeni Gönderici Adresi</div>
                       <button onClick={() => { setShowNewSenderForm(false); setNewSenderAddr(EMPTY_ADDR); }} className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-200 text-slate-500"><X className="h-4 w-4" /></button>
                     </div>
-                    <div className="grid gap-5 sm:grid-cols-3">
+                    <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                       <div className="sm:col-span-3">
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Adres Başlığı <span className="text-red-500">*</span></div>
                         <Input value={newSenderAddr.label} onChange={e => setNewSenderAddr(p => ({ ...p, label: e.target.value }))} placeholder="Örn: Ev, Ofis..." className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
@@ -764,8 +777,8 @@ export default function ProfilPage() {
                         <Input value={newSenderAddr.name} onChange={e => setNewSenderAddr(p => ({ ...p, name: e.target.value }))} placeholder="Gönderici adı soyadı" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
                       </div>
                       <div>
-                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Firma Adı</div>
-                        <Input value={newSenderAddr.company} onChange={e => setNewSenderAddr(p => ({ ...p, company: e.target.value }))} placeholder="Firma adı (opsiyonel)" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
+                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Firma Adı <span className="text-red-500">*</span></div>
+                        <Input value={newSenderAddr.company} onChange={e => setNewSenderAddr(p => ({ ...p, company: e.target.value }))} placeholder="Firma adı" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
                       </div>
                       <div>
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Telefon <span className="text-red-500">*</span></div>
@@ -774,15 +787,13 @@ export default function ProfilPage() {
                       </div>
                       <div>
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Ülke <span className="text-red-500">*</span></div>
-                        <div className="rounded-[12px] border border-slate-200 bg-white overflow-hidden shadow-sm h-[44px]">
-                          <SearchableSelect
+                        <SearchableSelect
                             options={apiCountries}
                             value={newSenderAddr.countryCode}
                             onChange={v => setNewSenderAddr(p => ({ ...p, countryCode: v as string, stateProvince: "", postalCode: "" }))}
                             placeholder="Ülke seçiniz"
-                            className="h-full border-0 focus:ring-0 bg-transparent text-[14px] font-medium px-3"
+                            className="h-[44px] rounded-[12px] text-[14px] font-medium"
                           />
-                        </div>
                       </div>
                       <div>
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Eyalet / Bölge</div>
@@ -793,8 +804,12 @@ export default function ProfilPage() {
                         <Input value={newSenderAddr.city} onChange={e => setNewSenderAddr(p => ({ ...p, city: e.target.value }))} placeholder="Şehir giriniz" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
                       </div>
                       <div>
-                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Posta Kodu</div>
-                        <Input value={newSenderAddr.postalCode} onChange={e => setNewSenderAddr(p => ({ ...p, postalCode: e.target.value }))} placeholder="Posta kodu" disabled={!newSenderAddr.countryCode} className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
+                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">İlçe <span className="text-red-500">*</span></div>
+                        <Input value={newSenderAddr.town} onChange={e => setNewSenderAddr(p => ({ ...p, town: e.target.value }))} placeholder="İlçe giriniz" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
+                      </div>
+                      <div>
+                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Posta Kodu <span className="text-red-500">*</span></div>
+                        <Input value={newSenderAddr.postalCode} onChange={e => setNewSenderAddr(p => ({ ...p, postalCode: e.target.value }))} placeholder="Posta kodu" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
                       </div>
                       <div className="sm:col-span-2">
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Açık Adres <span className="text-red-500">*</span></div>
@@ -829,7 +844,7 @@ export default function ProfilPage() {
             </div>
 
             {/* ── ALICI ADRESLERİ ── */}
-            <div className="bg-white rounded-[16px] border border-slate-200 p-6 shadow-sm flex flex-col gap-6">
+            <div className="bg-white rounded-[16px] border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col gap-5 sm:gap-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
@@ -857,7 +872,7 @@ export default function ProfilPage() {
                       <div className="text-[15px] font-bold text-slate-900">Yeni Alıcı Adresi</div>
                       <button onClick={() => { setShowNewReceiverForm(false); setNewReceiverAddr(EMPTY_ADDR); }} className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-200 text-slate-500"><X className="h-4 w-4" /></button>
                     </div>
-                    <div className="grid gap-5 sm:grid-cols-3">
+                    <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                       <div className="sm:col-span-3">
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Adres Başlığı <span className="text-red-500">*</span></div>
                         <Input value={newReceiverAddr.label} onChange={e => setNewReceiverAddr(p => ({ ...p, label: e.target.value }))} placeholder="Örn: Berlin Ofisi, Müşteri X..." className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
@@ -867,24 +882,22 @@ export default function ProfilPage() {
                         <Input value={newReceiverAddr.name} onChange={e => setNewReceiverAddr(p => ({ ...p, name: e.target.value }))} placeholder="Alıcı adı soyadı" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
                       </div>
                       <div>
-                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Firma Adı</div>
-                        <Input value={newReceiverAddr.company} onChange={e => setNewReceiverAddr(p => ({ ...p, company: e.target.value }))} placeholder="Firma adı (opsiyonel)" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
+                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Firma Adı <span className="text-red-500">*</span></div>
+                        <Input value={newReceiverAddr.company} onChange={e => setNewReceiverAddr(p => ({ ...p, company: e.target.value }))} placeholder="Firma adı" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
                       </div>
                       <div>
-                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Telefon</div>
+                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Telefon <span className="text-red-500">*</span></div>
                         <Input value={newReceiverAddr.phone} onChange={e => setNewReceiverAddr(p => ({ ...p, phone: e.target.value }))} placeholder="+49 ..." className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
                       </div>
                       <div>
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Ülke <span className="text-red-500">*</span></div>
-                        <div className="rounded-[12px] border border-slate-200 bg-white overflow-hidden shadow-sm h-[44px]">
-                          <SearchableSelect
+                        <SearchableSelect
                             options={apiCountries}
                             value={newReceiverAddr.countryCode}
                             onChange={v => setNewReceiverAddr(p => ({ ...p, countryCode: v as string, stateProvince: "", postalCode: "" }))}
                             placeholder="Ülke seçiniz"
-                            className="h-full border-0 focus:ring-0 bg-transparent text-[14px] font-medium px-3"
+                            className="h-[44px] rounded-[12px] text-[14px] font-medium"
                           />
-                        </div>
                       </div>
                       <div>
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Eyalet / Bölge</div>
@@ -895,8 +908,12 @@ export default function ProfilPage() {
                         <Input value={newReceiverAddr.city} onChange={e => setNewReceiverAddr(p => ({ ...p, city: e.target.value }))} placeholder="Şehir giriniz" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
                       </div>
                       <div>
-                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Posta Kodu</div>
-                        <Input value={newReceiverAddr.postalCode} onChange={e => setNewReceiverAddr(p => ({ ...p, postalCode: e.target.value }))} placeholder="Posta kodu" disabled={!newReceiverAddr.countryCode} className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
+                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">İlçe</div>
+                        <Input value={newReceiverAddr.town} onChange={e => setNewReceiverAddr(p => ({ ...p, town: e.target.value }))} placeholder="İlçe giriniz" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
+                      </div>
+                      <div>
+                        <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Posta Kodu <span className="text-red-500">*</span></div>
+                        <Input value={newReceiverAddr.postalCode} onChange={e => setNewReceiverAddr(p => ({ ...p, postalCode: e.target.value }))} placeholder="Posta kodu" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
                       </div>
                       <div className="sm:col-span-2">
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Açık Adres <span className="text-red-500">*</span></div>
@@ -935,7 +952,7 @@ export default function ProfilPage() {
         {/* ═══ ÖLÇÜLER ═══ */}
         {activeTab === "olcu" && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="bg-white rounded-[16px] border border-slate-200 p-6 shadow-sm flex flex-col gap-6">
+            <div className="bg-white rounded-[16px] border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col gap-5 sm:gap-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-50 text-amber-600">
@@ -962,7 +979,7 @@ export default function ProfilPage() {
                       <div className="text-[15px] font-bold text-slate-900">Yeni Ölçü Ekle</div>
                       <button type="button" onClick={() => setShowNewMeasForm(false)} className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-200 text-slate-500"><X className="h-4 w-4" /></button>
                     </div>
-                    <div className="grid gap-5 sm:grid-cols-5">
+                    <div className="grid gap-4 sm:gap-5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
                       <label className="block sm:col-span-1">
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Ölçü Adı</div>
                         <Input value={newMeas.label} onChange={(e) => setNewMeas({ ...newMeas, label: e.target.value })} placeholder="Örn: Küçük Paket" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
@@ -1017,7 +1034,7 @@ export default function ProfilPage() {
                     <div className="mt-1 text-[13px] text-slate-500">Aynı ebatlardaki kutuları daha hızlı seçmek için ölçülerinizi kaydedin.</div>
                   </div>
                 ) : (
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-4 sm:grid-cols-2">
                     {measurements.map((m) => (
                       <div key={m.id} className="group relative flex items-center justify-between gap-4 rounded-[16px] p-5 border border-slate-200 bg-white transition-all hover:shadow-md">
                         <div className="flex items-center gap-4">
@@ -1056,7 +1073,7 @@ export default function ProfilPage() {
         {activeTab === "sifre" && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {/* Şifre Değiştir */}
-            <div className="bg-white rounded-[16px] border border-slate-200 p-6 shadow-sm flex flex-col gap-6">
+            <div className="bg-white rounded-[16px] border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col gap-5 sm:gap-6">
               <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-white shadow-sm">
                   <Lock className="h-5 w-5" />
@@ -1077,7 +1094,7 @@ export default function ProfilPage() {
                     {passwordMessage.text}
                   </div>
                 )}
-                <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
                   <label className="block">
                     <div className="mb-2 inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700">
                       <KeyRound className="h-4 w-4 text-slate-400" /> Mevcut Şifre
@@ -1135,7 +1152,7 @@ export default function ProfilPage() {
                   <button type="button" onClick={openForgotModal} className="text-[13px] font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline underline-offset-2 transition-colors">
                     Mevcut şifremi hatırlamıyorum
                   </button>
-                  <button onClick={onChangePassword} disabled={savingPassword} className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[13px] font-bold transition-all shadow-sm shrink-0 disabled:opacity-50">
+                  <button onClick={onChangePassword} disabled={savingPassword} className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-2.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[13px] font-bold transition-all shadow-sm shrink-0 disabled:opacity-50">
                     {savingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     Şifreyi Güncelle
                   </button>
@@ -1144,7 +1161,7 @@ export default function ProfilPage() {
             </div>
 
             {/* Güvenlik İpuçları */}
-            <div className="bg-white rounded-[16px] border border-slate-200 p-6 shadow-sm">
+            <div className="bg-white rounded-[16px] border border-slate-200 p-4 sm:p-6 shadow-sm">
               <div className="flex items-start gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
                   <ShieldCheck className="h-5 w-5" />

@@ -100,7 +100,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       .then((data) => {
         if (cancelled) return;
         const full = `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim();
-        setName(full || data.email?.split("@")[0] || "Kullanıcı");
+        const displayName = full || data.email?.split("@")[0] || "Kullanıcı";
+        setName(displayName);
+        localStorage.setItem("zalusa.fullName", displayName);
         setEmail(data.email ?? "");
         if (data.role) {
           setUserRole(data.role);
@@ -295,7 +297,7 @@ export function Sidebar({
         />
         <aside
           className={cn(
-            "absolute left-0 top-0 h-[100dvh] w-[82vw] max-w-[260px] bg-white shadow-2xl transition-transform",
+            "absolute left-0 top-0 h-[100dvh] w-[82vw] max-w-[260px] bg-white shadow-2xl transition-transform overflow-y-auto",
             open ? "translate-x-0" : "-translate-x-full",
           )}
           aria-hidden={!open}

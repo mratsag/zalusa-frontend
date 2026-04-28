@@ -9,7 +9,7 @@ import {
   Save, Printer, PlusCircle, Sparkles, Loader2, RotateCcw, X,
   FileSpreadsheet, ArrowLeft, AlertTriangle, Box, Globe, ChevronUp,
   ChevronDown, Barcode, UploadCloud, Calendar, Scale, PlusSquare, ArrowRightSquare, ArrowLeftSquare,
-  FileUp, CheckCircle, File as FileIcon
+  FileUp, CheckCircle, File as FileIcon, Pencil
 } from "lucide-react";
 import { HSCodeCombobox } from "@/components/HSCodeCombobox";
 import { Stepper } from "@/components/panel/stepper";
@@ -132,10 +132,15 @@ function getLogoSrc(url: string): string {
 }
 function CarrierLogo({ q, size = "h-11 w-11", textSize = "text-sm" }: { q: ApiCarrierQuote; size?: string; textSize?: string }) {
   if (q.logoUrl) {
-    // Görsel varsa: Arka planı her zaman beyaz (bg-white) yapıp, dışına hafif bir çerçeve (ring-1 ring-slate-200) koyuyoruz.
-    // İçindeki resmi de object-contain ile taşmadan merkeze oturtuyoruz.
+    // Görsel varsa: Carrier'ın marka rengini arka plan olarak kullan
+    // (logolar beyaz/şeffaf olduğu için renkli arka plan gerekli)
+    const color = getLogoColor(q);
+    const hex = isHexColor(color);
     return (
-      <div className={cn("flex shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden", size)}>
+      <div
+        className={cn("flex shrink-0 items-center justify-center rounded-full shadow-sm overflow-hidden", size, !hex && color)}
+        style={hex ? { backgroundColor: color } : undefined}
+      >
         <img src={getLogoSrc(q.logoUrl)} alt={q.carrierName} className="h-[70%] w-[70%] object-contain" />
       </div>
     );
@@ -193,12 +198,12 @@ function CarrierCard({ quote: q, selected, onSelect }: { quote: ApiCarrierQuote;
   const logoColor = getLogoColor(q);
   const sym = getCurrencySymbol(q.currency);
   return (
-    <button type="button" onClick={onSelect} className={cn("group relative flex flex-col rounded-2xl p-5 text-left ring-1 transition-all", selected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : "bg-surface ring-border hover:ring-brand-200 hover:shadow-sm", q.tags.includes("recommended") && !selected && "bg-amber-50/30")}>
+    <button type="button" onClick={onSelect} className={cn("group relative flex flex-col rounded-2xl p-5 text-left ring-1 transition-all", selected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : "bg-white ring-border hover:ring-brand-200 hover:shadow-sm", q.tags.includes("recommended") && !selected && "bg-amber-50/30")}>
       {q.tags.length > 0 && <div className="mb-3 flex flex-wrap items-center gap-1.5">{q.tags.map((t: string) => <CarrierTag key={t} tag={t} />)}</div>}
       <div className="flex items-center gap-3">
         <CarrierLogo q={q} />
         <div className="min-w-0 flex-1"><div className="text-sm font-semibold leading-tight">{q.carrierName}</div><div className="text-xs text-muted">{q.serviceName}</div></div>
-        <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1", selected ? "bg-brand-600 ring-brand-600 text-white" : "bg-surface ring-border group-hover:ring-brand-300")}>{selected && <Check className="h-3.5 w-3.5" />}</div>
+        <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1", selected ? "bg-brand-600 ring-brand-600 text-white" : "bg-white ring-border group-hover:ring-brand-300")}>{selected && <Check className="h-3.5 w-3.5" />}</div>
       </div>
       <div className="mt-3 flex items-center gap-1.5 text-xs text-muted"><Clock className="h-3.5 w-3.5" /><span>Teslimat: <span className="font-medium text-foreground">{q.deliveryLabel}</span></span></div>
       <div className="mt-3 flex items-baseline gap-2"><span className="text-2xl font-bold tracking-tight">{sym}{q.price.toFixed(2)}</span><span className="text-sm text-muted">({q.priceTry.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺)</span></div>
@@ -227,7 +232,7 @@ function CarrierListItem({ quote: q, selected, onSelect }: { quote: ApiCarrierQu
     : ""
     : "";
   return (
-    <button type="button" onClick={onSelect} className={cn("group flex w-full flex-col rounded-2xl p-4 text-left ring-1 transition-all", selected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : tagBg || "bg-surface ring-border hover:ring-brand-200 hover:shadow-sm")}>
+    <button type="button" onClick={onSelect} className={cn("group flex w-full flex-col rounded-2xl p-4 text-left ring-1 transition-all", selected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : tagBg || "bg-white ring-border hover:ring-brand-200 hover:shadow-sm")}>
       {hasTag && <div className="mb-2.5 flex flex-wrap items-center gap-1.5">{q.tags.map((t: string) => <CarrierTag key={t} tag={t} />)}</div>}
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-4">
@@ -248,7 +253,7 @@ function CarrierListItem({ quote: q, selected, onSelect }: { quote: ApiCarrierQu
             </div>
             <div className="mt-0.5 text-[10px] text-muted">İade Masrafı: {sym}{q.returnCost.toFixed(2)}</div>
           </div>
-          <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1", selected ? "bg-brand-600 ring-brand-600 text-white" : "bg-surface ring-border group-hover:ring-brand-300")}>{selected && <Check className="h-3.5 w-3.5" />}</div>
+          <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1", selected ? "bg-brand-600 ring-brand-600 text-white" : "bg-white ring-border group-hover:ring-brand-300")}>{selected && <Check className="h-3.5 w-3.5" />}</div>
         </div>
       </div>
     </button>
@@ -261,17 +266,17 @@ function RouteSummaryBar({ senderCountry, senderName, senderFlag, receiverCountr
     : <CountryFlag code={code} size="lg" />;
   return (
     <div className="flex items-center justify-between rounded-2xl p-3 sm:p-4 text-white" style={{ backgroundColor: "#3959F2", minHeight: 66, boxShadow: "0 0 0 1px rgba(0,0,0,0.02), 0 1px 3px 0 rgba(0,0,0,0.08)" }}>
-      <div className="flex items-center gap-1.5">{flagImg(senderFlag, senderCountry)}<div><div className="text-[9px] sm:text-[10px] font-medium uppercase tracking-wider text-white/50">Çıkış</div><div className="text-[12px] sm:text-[14px] font-bold leading-tight">{senderName || (COUNTRY_NAMES[senderCountry] ?? senderCountry)}</div></div></div>
-      <div className="flex items-center gap-1 sm:gap-2 shrink min-w-0"><div className="h-px w-4 sm:w-12 bg-white/20" /><div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[12px] text-white/50"><Plane className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" /><span className="hidden sm:inline">Kargo Ağırlığı </span><span className="font-semibold text-white/80">{chargeableWeight.toFixed(2)} kg</span></div><div className="h-px w-4 sm:w-12 bg-white/20" /></div>
-      <div className="flex items-center gap-1.5"><div className="text-right"><div className="text-[9px] sm:text-[10px] font-medium uppercase tracking-wider text-white/50">Varış</div><div className="text-[12px] sm:text-[14px] font-bold leading-tight">{receiverName || COUNTRY_NAMES[receiverCountry] || receiverCountry}</div></div>{flagImg(receiverFlag, receiverCountry)}</div>
+      <div className="flex items-center gap-1.5 min-w-0 flex-1">{flagImg(senderFlag, senderCountry)}<div className="min-w-0"><div className="text-[9px] sm:text-[10px] font-medium uppercase tracking-wider text-white/50">Çıkış</div><div className="text-[11px] sm:text-[14px] font-bold leading-tight truncate">{senderName || (COUNTRY_NAMES[senderCountry] ?? senderCountry)}</div></div></div>
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0 px-1 sm:px-0"><div className="h-px w-3 sm:w-12 bg-white/20" /><div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[12px] text-white/50"><Plane className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" /><span className="hidden sm:inline">Kargo Ağırlığı </span><span className="font-semibold text-white/80">{chargeableWeight.toFixed(2)} kg</span></div><div className="h-px w-3 sm:w-12 bg-white/20" /></div>
+      <div className="flex items-center gap-1.5 min-w-0 flex-1 justify-end"><div className="text-right min-w-0"><div className="text-[9px] sm:text-[10px] font-medium uppercase tracking-wider text-white/50">Varış</div><div className="text-[11px] sm:text-[14px] font-bold leading-tight truncate">{receiverName || COUNTRY_NAMES[receiverCountry] || receiverCountry}</div></div>{flagImg(receiverFlag, receiverCountry)}</div>
     </div>
   );
 }
 
 function AddressCard({ addr, selected, onSelect, onDelete }: { addr: ApiAddress; selected: boolean; onSelect: () => void; onDelete?: () => void }) {
   return (
-    <button type="button" onClick={onSelect} className={cn("group relative flex flex-col rounded-2xl p-4 text-left ring-1 transition-all", selected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : "bg-surface ring-border hover:ring-brand-200 hover:shadow-sm")}>
-      <div className="absolute right-3 top-3"><div className={cn("flex h-6 w-6 items-center justify-center rounded-full ring-1", selected ? "bg-brand-600 ring-brand-600 text-white" : "bg-surface ring-border group-hover:ring-brand-300")}>{selected && <Check className="h-3.5 w-3.5" />}</div></div>
+    <button type="button" onClick={onSelect} className={cn("group relative flex flex-col rounded-2xl p-4 text-left ring-1 transition-all", selected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : "bg-white ring-border hover:ring-brand-200 hover:shadow-sm")}>
+      <div className="absolute right-3 top-3"><div className={cn("flex h-6 w-6 items-center justify-center rounded-full ring-1", selected ? "bg-brand-600 ring-brand-600 text-white" : "bg-white ring-border group-hover:ring-brand-300")}>{selected && <Check className="h-3.5 w-3.5" />}</div></div>
       <div className="text-sm font-semibold text-foreground pr-8">{addr.label}</div>
       <div className="mt-2 space-y-1 text-xs text-muted">
         <div className="flex items-center gap-1.5"><User className="h-3 w-3 shrink-0 text-brand-500" /><span>{addr.name}</span>{addr.company && <span className="text-muted">/ {addr.company}</span>}</div>
@@ -414,7 +419,11 @@ export default function GonderiOlusturPage() {
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [errorModal, setErrorModal] = React.useState<{ title: string; message: string } | null>(null);
   const [showNewSenderForm, setShowNewSenderForm] = React.useState(false);
+  const [editingSenderAddr, setEditingSenderAddr] = React.useState<ApiAddress | null>(null);
+  const [editSenderBusy, setEditSenderBusy] = React.useState(false);
   const [showNewReceiverForm, setShowNewReceiverForm] = React.useState(false);
+  const [editingReceiverAddr, setEditingReceiverAddr] = React.useState<ApiAddress | null>(null);
+  const [editReceiverBusy, setEditReceiverBusy] = React.useState(false);
   const [showServicesModal, setShowServicesModal] = React.useState(false);
   const [senderSearch, setSenderSearch] = React.useState("");
   const [receiverSearch, setReceiverSearch] = React.useState("");
@@ -480,7 +489,9 @@ const [showPackageExcel, setShowPackageExcel] = React.useState(false);
         if (data.results && data.results.length > 0) {
           const match = data.results[0];
           setPostalLookupResult({ city: match.city, countryCode: match.countryCode, countryName: match.countryName });
+          setPostalLookupError(null);
         } else {
+          setPostalLookupResult(null);
           setPostalLookupError("Bu posta kodu için sonuç bulunamadı");
         }
       } catch {
@@ -898,13 +909,25 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
       if (!item.unitPrice || toNumber(item.unitPrice) <= 0) errors[`item_${idx}_unitPrice`] = "Zorunlu";
     });
 
+    // Belge yükleme zorunluluğu
+    if (docUploadedFiles.length === 0) {
+      errors.documentUpload = "Zorunlu";
+      setDocError("Belge yüklemeden ilerleyemezsiniz. Lütfen en az bir gümrük belgesi yükleyiniz.");
+      // Belge bölümüne scroll
+      const docSection = document.getElementById("customs-documents-section");
+      if (docSection) docSection.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      setApiError("Lütfen zorunlu alanları doldurunuz.");
+      setApiError(docUploadedFiles.length === 0 
+        ? "Belge yüklemeden ilerleyemezsiniz. Lütfen en az bir gümrük belgesi yükleyiniz." 
+        : "Lütfen zorunlu alanları doldurunuz.");
       return;
     }
 
     setFieldErrors({});
+    setDocError(null);
     await next();
   }
 
@@ -1313,34 +1336,34 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
 
       {/* ── TASLAK DEVAM BANNER ── */}
       {showDraftBanner && (
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 p-4 sm:p-5 ring-1 ring-amber-200 shadow-sm animate-in slide-in-from-top-2 fade-in duration-300">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 p-3 sm:p-5 ring-1 ring-amber-200 shadow-sm animate-in slide-in-from-top-2 fade-in duration-300">
           {/* Dekoratif arka plan */}
           <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-amber-200/20" />
           <div className="pointer-events-none absolute -left-4 -bottom-4 h-16 w-16 rounded-full bg-orange-200/20" />
 
-          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {/* Sol: Bilgi */}
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 shadow-sm">
-                <RotateCcw className="h-6 w-6" />
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="flex h-9 w-9 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-amber-100 text-amber-600 shadow-sm">
+                <RotateCcw className="h-4 w-4 sm:h-6 sm:w-6" />
               </div>
-              <div>
-                <div className="text-[15px] font-bold text-slate-900">Yarım kalan bir gönderiniz var</div>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+              <div className="min-w-0">
+                <div className="text-[13px] sm:text-[15px] font-bold text-slate-900">Yarım kalan bir gönderiniz var</div>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5 sm:gap-2">
                   {pendingDraft?.shipmentType && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
-                      <Package className="h-3 w-3 text-amber-500" />
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+                      <Package className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-amber-500" />
                       {pendingDraft.shipmentType}
                     </span>
                   )}
                   {draftCountryLabel && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
-                      <MapPin className="h-3 w-3 text-amber-500" />
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+                      <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-amber-500" />
                       {draftCountryLabel}
                     </span>
                   )}
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
-                    <Clock className="h-3 w-3 text-amber-500" />
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+                    <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-amber-500" />
                     Adım: {draftStepLabel}
                   </span>
                 </div>
@@ -1353,7 +1376,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                 type="button"
                 variant="secondary"
                 onClick={dismissDraftBanner}
-                className="gap-1.5 text-sm text-slate-600 hover:text-slate-800"
+                className="flex-1 sm:flex-none gap-1.5 text-xs sm:text-sm text-slate-600 hover:text-slate-800 h-9 sm:h-10"
               >
                 <X className="h-3.5 w-3.5" />
                 Kapat
@@ -1362,9 +1385,9 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                 type="button"
                 onClick={resumeFromDraft}
                 disabled={draftLoading}
-                className="gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-sm"
+                className="flex-1 sm:flex-none gap-1.5 sm:gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-sm text-xs sm:text-sm h-9 sm:h-10"
               >
-                {draftLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+                {draftLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
                 Taslaktan Devam Et
               </Button>
             </div>
@@ -1372,8 +1395,8 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
         </div>
       )}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div><div className="text-lg font-semibold tracking-tight">Gönderi Oluştur</div><div className="mt-1 text-sm text-muted">6 adımda gönderini hazırla. Taslak otomatik kaydedilir.</div></div>
+      <div className="flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div><div className="text-base sm:text-lg font-semibold tracking-tight">Gönderi Oluştur</div><div className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-muted">6 adımda gönderini hazırla. Taslak otomatik kaydedilir.</div></div>
         {selectedQuote ? <Badge className="w-fit">{selectedQuote.carrierName} · {getCurrencySymbol(selectedQuote.currency)}{selectedQuote.price.toFixed(2)} ({selectedQuote.priceTry.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺)</Badge> : <Badge className="w-fit">Kargo seçilmedi</Badge>}
       </div>
 
@@ -1396,10 +1419,10 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
         {step === 0 ? (
           <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <CardTitle className="text-xl font-bold">Kargo Bilgileri</CardTitle>
+          <CardTitle className="text-lg sm:text-xl font-bold">Kargo Bilgileri</CardTitle>
               <p className="mt-1 text-sm text-muted font-medium">Gönderi tipi ve alıcı bilgilerini belirleyin.</p>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-2 text-sm font-semibold text-[#334155]">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-border bg-white px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-[#334155]">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#64748B]"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
               <span>Taslak</span>
@@ -1411,11 +1434,11 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
               <CardTitle>Paket Ölçüleri</CardTitle>
               <p className="mt-1 text-sm text-muted">Kayıtlı ölçülerden seçebilir veya ölçüleri manuel girebilirsiniz.</p>
             </div>
-            <div className="flex items-center gap-2">
-              <button type="button" onClick={back} className="flex items-center gap-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 px-4 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-[14px] font-bold text-[#0F172A] transition-colors shadow-sm">
+            <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+              <button type="button" onClick={back} className="flex items-center gap-1.5 sm:gap-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 px-3 sm:px-6 py-2 sm:py-3 text-[12px] sm:text-[14px] font-bold text-[#0F172A] transition-colors shadow-sm">
                 <span>←</span> Geri
               </button>
-              <button type="button" onClick={next} disabled={loading} className="flex items-center gap-2 rounded-xl bg-[#3959F2] hover:bg-[#4338CA] px-4 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-[14px] font-bold text-white transition-colors disabled:opacity-50">
+              <button type="button" onClick={next} disabled={loading} className="flex items-center gap-1.5 sm:gap-2 rounded-xl bg-[#3959F2] hover:bg-[#4338CA] px-3 sm:px-6 py-2 sm:py-3 text-[12px] sm:text-[14px] font-bold text-white transition-colors disabled:opacity-50">
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 Devam <span>→</span>
               </button>
@@ -1427,12 +1450,12 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
             {step < STEPS.length - 1 && (
               <div className="flex flex-col items-end gap-1">
                 {apiError && <p className="text-xs text-red-500 font-medium">{apiError}</p>}
-                <div className="flex items-center gap-2">
-                  <button type="button" onClick={back} disabled={step === 0 || loading} className="flex items-center gap-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 px-4 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-[14px] font-bold text-[#0F172A] transition-colors shadow-sm disabled:opacity-40">
+                <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+                  <button type="button" onClick={back} disabled={step === 0 || loading} className="flex items-center gap-1.5 sm:gap-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 px-3 sm:px-6 py-2 sm:py-3 text-[12px] sm:text-[14px] font-bold text-[#0F172A] transition-colors shadow-sm disabled:opacity-40">
                     <span>←</span> Geri
                   </button>
                   {step !== 3 && (
-                    <button type="button" onClick={next} disabled={loading} className="flex items-center gap-2 rounded-xl bg-[#3959F2] hover:bg-[#4338CA] px-4 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-[14px] font-bold text-white transition-colors disabled:opacity-50">
+                    <button type="button" onClick={next} disabled={loading} className="flex items-center gap-1.5 sm:gap-2 rounded-xl bg-[#3959F2] hover:bg-[#4338CA] px-3 sm:px-6 py-2 sm:py-3 text-[12px] sm:text-[14px] font-bold text-white transition-colors disabled:opacity-50">
                       {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                       Devam <span>→</span>
                     </button>
@@ -1446,7 +1469,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
         <CardContent>
           {/* ===== STEP 0 — Kargo Bilgileri ===== */}
           {step === 0 && (
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-5 sm:gap-8">
               {/* ── Gönderi Tipi ── */}
               <div>
                 <div className="mb-4 text-[14px] font-bold text-[#0F172A]">Gönderi Tipi</div>
@@ -1509,7 +1532,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                   <div className="mb-2 text-xs font-bold uppercase tracking-widest">
                     Alıcı Ülke <span className="text-red-500">*</span>
                   </div>
-                  <div className={cn("rounded-2xl ring-1 bg-surface", fieldErrors.receiverCountry ? "ring-2 ring-red-500" : "ring-border")}>
+                  <div className={cn("rounded-2xl ring-1 bg-white", fieldErrors.receiverCountry ? "ring-2 ring-red-500" : "ring-border")}>
                     <SearchableSelect
                       options={apiCountries.length > 0 ? apiCountries : RECEIVER_COUNTRIES.map((c) => ({ ...c, label: (<div className="flex items-center gap-2"><CountryFlag code={c.value} size="sm" /><span>{c.label}</span></div>) as any, searchableText: c.label }))}
                       value={draft.receiverCountry}
@@ -1531,7 +1554,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                   </div>
                   <div
                     className={cn(
-                      "relative rounded-2xl ring-1 bg-surface overflow-hidden transition-all",
+                      "relative rounded-2xl ring-1 bg-white overflow-hidden transition-all",
                       !draft.receiverCountry && "opacity-60 cursor-not-allowed",
                       fieldErrors.receiverPostalCode ? "ring-2 ring-red-500" : postalLookupResult ? "ring-2 ring-emerald-400" : "ring-border"
                     )}
@@ -1571,7 +1594,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       {postalLookupResult.city} olarak belirlendi
                     </div>
                   )}
-                  {postalLookupError && (
+                  {postalLookupError && !postalLookupResult && (
                     <div className="mt-1.5 text-xs font-medium text-amber-600 flex items-center gap-1">
                       <AlertTriangle className="h-3 w-3" />
                       {postalLookupError}
@@ -1585,7 +1608,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                 {/* Şehir — Otomatik Doldurulan */}
                 <div>
                   <div className={cn("mb-2 text-xs font-bold uppercase tracking-widest", fieldErrors.receiverCity ? "text-red-500" : "")}>Şehir {fieldErrors.receiverCity && <span className="text-red-500">*</span>}</div>
-                  <div className={cn("relative rounded-2xl ring-1 bg-surface overflow-hidden transition-all", fieldErrors.receiverCity ? "ring-2 ring-red-500 bg-red-50/30" : "ring-border")}>
+                  <div className={cn("relative rounded-2xl ring-1 bg-white overflow-hidden transition-all", fieldErrors.receiverCity ? "ring-2 ring-red-500 bg-red-50/30" : "ring-border")}>
                     <Input
                       value={postalLookupResult?.city || ""}
                       readOnly
@@ -1928,22 +1951,24 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
               const logoColor = getLogoColor(q);
               const qSym = getCurrencySymbol(q.currency);
               return (
-                <button key={q.carrierId} type="button" onClick={() => update("selectedCarrierId", q.carrierId)} className={cn("group flex w-full items-center justify-between rounded-2xl px-5 py-4 text-left ring-1 transition-all", isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-sm" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1] hover:shadow-sm")}>
-                  <div className="flex items-center gap-4 min-w-0">
+                <button key={q.carrierId} type="button" onClick={() => update("selectedCarrierId", q.carrierId)} className={cn("group flex w-full items-center justify-between rounded-2xl px-3 sm:px-5 py-3 sm:py-4 text-left ring-1 transition-all", isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-sm" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1] hover:shadow-sm")}>
+                  <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
 <CarrierLogo q={q} />
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[14px] font-bold text-[#0F172A]">{q.carrierName}</span>
-                        <span className="text-[12px] text-[#94A3B8]">{q.serviceName}</span>
+                      <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                        <span className="text-[13px] sm:text-[14px] font-bold text-[#0F172A]">{q.carrierName}</span>
+                        <span className="text-[11px] sm:text-[12px] text-[#94A3B8]">{q.serviceName}</span>
                       </div>
-                      <div className="mt-0.5 flex items-center gap-1.5 text-[12px] text-[#94A3B8]">
-                        <Clock className="h-3 w-3" /> Teslimat: <span className="font-medium text-[#475569]">{q.deliveryLabel}</span>
+                      <div className="mt-0.5 flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-[12px] text-[#94A3B8]">
+                        <Clock className="h-3 w-3 shrink-0" />
+                        <span className="hidden sm:inline">Teslimat:</span>
+                        <span className="font-medium text-[#475569]">{q.deliveryLabel}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 shrink-0">
+                  <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                     <div className="text-right">
-                      <div className="text-[18px] font-bold text-[#0F172A]">{qSym}{q.price.toFixed(2)}</div>
+                      <div className="text-[15px] sm:text-[18px] font-bold text-[#0F172A]">{qSym}{q.price.toFixed(2)}</div>
                       <div className="text-[11px] text-[#94A3B8]">≈ ₺{q.priceTry.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
                     </div>
                     <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-2 transition-colors", isSelected ? "bg-[#3959F2] ring-[#4F46E5] text-white" : "bg-white ring-[#CBD5E1] group-hover:ring-[#94A3B8]")}>
@@ -1960,33 +1985,35 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
   return (
     <button key={q.carrierId} type="button" onClick={() => update("selectedCarrierId", q.carrierId)} className={cn("group w-full text-left rounded-2xl overflow-hidden transition-all", isSelected ? cn("bg-white shadow-lg", cardRing ? "ring-2 ring-[#4F46E5]" : "shadow-[0_0_0_2px_rgba(79,70,229,0.15)]") : cn("bg-white hover:shadow-sm", cardRing))}>
       {/* Tag header */}
-      <div className={cn("flex items-center justify-between border-b px-5 pt-3 pb-2", headerBg, borderColor)}>
-        <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ", tagColor)}>
+      <div className={cn("flex items-center justify-between border-b px-3 sm:px-5 pt-2.5 sm:pt-3 pb-1.5 sm:pb-2", headerBg, borderColor)}>
+        <span className={cn("inline-flex items-center gap-1 rounded-full px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold ", tagColor)}>
           <TagIcon className="h-3 w-3" />{tagLabel}
         </span>
-        {showBestLabel && <span className="text-[11px] font-medium flex items-center gap-1 text-[#6366F1]"><Star className="h-3 w-3" /> En iyi fiyat / performans</span>}
+        {showBestLabel && <span className="text-[10px] sm:text-[11px] font-medium flex items-center gap-1 text-[#6366F1]"><Star className="h-3 w-3" /><span className="hidden sm:inline">En iyi fiyat / performans</span><span className="sm:hidden">En iyi</span></span>}
       </div>
       {/* Content */}
-      <div className="flex items-center justify-between px-5 py-4">
-        <div className="flex items-center gap-4 min-w-0">
+      <div className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4">
+        <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
           
           {/* 🚀 DEĞİŞEN TEK SATIR BURASI: Manuel div yerine CarrierLogo component'ini çağırdık 🚀 */}
           <CarrierLogo q={q} />
 
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-[14px] font-bold text-[#0F172A]">{q.carrierName}</span>
-              <span className="text-[12px] text-[#94A3B8]">{q.serviceName}</span>
+            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+              <span className="text-[13px] sm:text-[14px] font-bold text-[#0F172A]">{q.carrierName}</span>
+              <span className="text-[11px] sm:text-[12px] text-[#94A3B8]">{q.serviceName}</span>
             </div>
-            <div className="mt-0.5 flex items-center gap-1.5 text-[12px] text-[#94A3B8]">
-              <Clock className="h-3 w-3" /> Teslimat: <span className="font-medium text-[#475569]">{q.deliveryLabel}</span>
+            <div className="mt-0.5 flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-[12px] text-[#94A3B8]">
+              <Clock className="h-3 w-3 shrink-0" />
+              <span className="hidden sm:inline">Teslimat:</span>
+              <span className="font-medium text-[#475569]">{q.deliveryLabel}</span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           <div className="text-right">
-            <div className="text-[18px] font-bold text-[#0F172A]">{qSym}{q.price.toFixed(2)}</div>
-            <div className="text-[11px] text-[#94A3B8]">≈ ₺{q.priceTry.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+            <div className="text-[15px] sm:text-[18px] font-bold text-[#0F172A]">{qSym}{q.price.toFixed(2)}</div>
+            <div className="text-[10px] sm:text-[11px] text-[#94A3B8]">≈ ₺{q.priceTry.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
           </div>
           <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-2 transition-colors", isSelected ? "bg-[#3959F2] ring-[#4F46E5] text-white" : "bg-white ring-[#CBD5E1] group-hover:ring-[#94A3B8]")}>
             {isSelected && <div className="h-2 w-2 rounded-full bg-white" />}
@@ -2145,8 +2172,13 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                     {/* ── Son Kullanılan Göndericiler ── */}
                     {SAVED_SENDER_ADDRESSES.length > 0 && (
                       <div>
-                        <div className="text-[11px] font-bold uppercase text-[#94A3B8] tracking-widest mb-2">Son Kullanılan Göndericiler</div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="flex h-5 w-5 items-center justify-center rounded-md bg-indigo-50">
+                            <Clock className="h-3 w-3 text-indigo-500" />
+                          </div>
+                          <span className="text-[12px] sm:text-[13px] font-semibold text-slate-600">Son Kullanılan Göndericiler</span>
+                        </div>
+                        <div className="flex gap-2 sm:gap-2.5 overflow-x-auto pt-1 pb-2 scrollbar-none -mx-1 px-1">
                           {SAVED_SENDER_ADDRESSES.slice(0, 5).map((a) => {
                             const initials = (a.name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
                             const isSelected = draft.selectedSenderAddressId === String(a.id);
@@ -2156,16 +2188,28 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                 type="button"
                                 onClick={() => { setDraft(d => ({ ...d, selectedSenderAddressId: String(a.id), senderName: a.name || "", senderPhone: a.phone || "+90", senderAddress: a.address || "", senderCity: a.city || "", senderTown: (a as any).town || "", senderCompany: a.company || "" })); setShowNewSenderForm(false); }}
                                 className={cn(
-                                  "flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3 text-left ring-1 transition-all hover:shadow-md",
-                                  isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-sm" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1]"
+                                  "group relative flex flex-col items-center gap-1.5 sm:gap-2 rounded-2xl p-3 sm:p-4 min-w-[90px] sm:min-w-[110px] text-center transition-all duration-200 shrink-0",
+                                  isSelected
+                                    ? "bg-indigo-50 ring-2 ring-indigo-500 shadow-md shadow-indigo-100"
+                                    : "bg-white ring-1 ring-slate-200 hover:ring-indigo-200 hover:shadow-md hover:shadow-indigo-50 hover:-translate-y-0.5"
                                 )}
                               >
-                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-[10px] font-bold text-white shadow-sm">
+                                {isSelected && (
+                                  <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-indigo-500 text-white">
+                                    <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                                  </div>
+                                )}
+                                <div className={cn(
+                                  "flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl text-[11px] sm:text-[13px] font-bold text-white shadow-sm transition-transform group-hover:scale-105",
+                                  isSelected
+                                    ? "bg-gradient-to-br from-indigo-500 to-indigo-700"
+                                    : "bg-gradient-to-br from-slate-400 to-slate-600"
+                                )}>
                                   {initials}
                                 </div>
-                                <div className="min-w-0">
-                                  <div className="text-[12px] font-bold text-[#0F172A] truncate leading-tight">{a.name}</div>
-                                  <div className="text-[10px] text-[#94A3B8] truncate leading-tight">{a.city} · {a.countryCode}</div>
+                                <div className="min-w-0 w-full">
+                                  <div className="text-[11px] sm:text-[12px] font-bold text-slate-800 truncate leading-tight">{a.name}</div>
+                                  <div className="text-[9px] sm:text-[10px] text-slate-400 truncate leading-tight mt-0.5">{a.city} · {a.countryCode}</div>
                                 </div>
                               </button>
                             );
@@ -2190,21 +2234,80 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       ? <div className="flex flex-col gap-2">
                           {filteredSenderAddresses.map(a => {
                             const isSelected = draft.selectedSenderAddressId === String(a.id);
+                            const isEditing = editingSenderAddr?.id === a.id;
+
+                            if (isEditing) {
+                              return (
+                                <div key={String(a.id)} className="rounded-xl bg-white p-4 ring-2 ring-[#4F46E5] shadow-sm">
+                                  <div className="mb-3 flex items-center justify-between">
+                                    <div className="text-[13px] font-semibold text-[#0F172A]">Adresi Düzenle</div>
+                                    <button type="button" onClick={() => setEditingSenderAddr(null)} className="text-[12px] font-medium text-[#94A3B8] hover:text-[#475569]">İptal</button>
+                                  </div>
+                                  <div className="grid gap-3 sm:grid-cols-2">
+                                    <Field label="Ad Soyad" icon={User}><Input value={editingSenderAddr.name} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); setEditingSenderAddr({ ...editingSenderAddr, name: v }); }} placeholder="Ad soyad" maxLength={60} /></Field>
+                                    <Field label="Firma Adı" icon={Building}><Input value={editingSenderAddr.company || ""} onChange={e => setEditingSenderAddr({ ...editingSenderAddr, company: e.target.value })} placeholder="Firma (opsiyonel)" /></Field>
+                                    <Field label="Telefon" icon={Phone}><Input value={editingSenderAddr.phone || ""} onChange={e => setEditingSenderAddr({ ...editingSenderAddr, phone: e.target.value })} placeholder="+90 5XX XXX XX XX" /></Field>
+                                    <Field label="Şehir" icon={MapPin}><Input value={editingSenderAddr.city} onChange={e => setEditingSenderAddr({ ...editingSenderAddr, city: e.target.value })} placeholder="Şehir" /></Field>
+                                    <Field label="İlçe" icon={MapPin}><Input value={(editingSenderAddr as any).town || ""} onChange={e => setEditingSenderAddr({ ...editingSenderAddr, town: e.target.value } as any)} placeholder="İlçe" /></Field>
+                                    <div className="sm:col-span-2"><Field label="Açık Adres" icon={MapPinned}><Input value={editingSenderAddr.address} onChange={e => setEditingSenderAddr({ ...editingSenderAddr, address: e.target.value })} placeholder="Sokak, cadde, bina no..." /></Field></div>
+                                  </div>
+                                  <div className="mt-3 flex justify-end gap-2">
+                                    <Button type="button" variant="secondary" onClick={() => setEditingSenderAddr(null)} className="gap-1 text-[12px]"><X className="h-3.5 w-3.5" />Vazgeç</Button>
+                                    <Button type="button" disabled={editSenderBusy} onClick={async () => {
+                                      setEditSenderBusy(true);
+                                      try {
+                                        await addressService.update(editingSenderAddr.id, {
+                                          label: editingSenderAddr.label || editingSenderAddr.name,
+                                          name: editingSenderAddr.name,
+                                          company: editingSenderAddr.company,
+                                          phone: editingSenderAddr.phone,
+                                          address: editingSenderAddr.address,
+                                          postalCode: editingSenderAddr.postalCode,
+                                          city: editingSenderAddr.city,
+                                          town: (editingSenderAddr as any).town,
+                                          stateProvince: editingSenderAddr.stateProvince,
+                                          countryCode: editingSenderAddr.countryCode,
+                                        });
+                                        const res = await addressService.list();
+                                        setApiAddresses(res.addresses);
+                                        if (isSelected) {
+                                          setDraft(d => ({ ...d, senderName: editingSenderAddr.name, senderPhone: editingSenderAddr.phone || "+90", senderAddress: editingSenderAddr.address, senderCity: editingSenderAddr.city, senderTown: (editingSenderAddr as any).town || "", senderCompany: editingSenderAddr.company || "" }));
+                                        }
+                                        setEditingSenderAddr(null);
+                                      } catch { }
+                                      finally { setEditSenderBusy(false); }
+                                    }} className="gap-1 text-[12px] bg-[#4F46E5] hover:bg-[#4338CA] text-white">
+                                      {editSenderBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                                      Kaydet
+                                    </Button>
+                                  </div>
+                                </div>
+                              );
+                            }
+
                             return (
-                              <button key={String(a.id)} type="button" onClick={() => { setDraft(d => ({ ...d, selectedSenderAddressId: String(a.id), senderName: a.name || "", senderPhone: a.phone || "+90", senderAddress: a.address || "", senderCity: a.city || "", senderTown: (a as any).town || "", senderCompany: a.company || "" })); setShowNewSenderForm(false); }} className={cn("group flex w-full items-center justify-between rounded-xl p-3 text-left ring-1 transition-all", isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-sm" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1] hover:shadow-sm")}>
-                                <div className="flex items-center gap-3">
+                              <div key={String(a.id)} className={cn("group flex w-full items-center justify-between rounded-xl p-3 ring-1 transition-all", isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-sm" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1] hover:shadow-sm")}>
+                                <button type="button" onClick={() => { setDraft(d => ({ ...d, selectedSenderAddressId: String(a.id), senderName: a.name || "", senderPhone: a.phone || "+90", senderAddress: a.address || "", senderCity: a.city || "", senderTown: (a as any).town || "", senderCompany: a.company || "" })); setShowNewSenderForm(false); }} className="flex items-center gap-3 text-left flex-1 min-w-0">
                                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F1F5F9] text-[#94A3B8]">
                                     <User className="h-4 w-4" />
                                   </div>
-                                  <div>
+                                  <div className="min-w-0">
                                     <div className="text-[13px] font-bold text-[#0F172A]">{a.name}</div>
-                                    <div className="text-[11px] text-[#94A3B8]">{a.company && <>{a.company} · </>}{a.city} · {a.address}</div>
+                                    <div className="text-[11px] text-[#94A3B8] truncate">{a.company && <>{a.company} · </>}{a.city} · {a.address}</div>
+                                  </div>
+                                </button>
+                                <div className="flex items-center gap-1 shrink-0 ml-2">
+                                  <button type="button" onClick={(e) => { e.stopPropagation(); setEditingSenderAddr({ ...a }); }} className="grid h-7 w-7 place-items-center rounded-lg text-[#94A3B8] hover:bg-[#EEF2FF] hover:text-[#4F46E5] transition-colors opacity-0 group-hover:opacity-100" title="Düzenle">
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </button>
+                                  <button type="button" onClick={async (e) => { e.stopPropagation(); if (!confirm("Bu adresi silmek istediğinize emin misiniz?")) return; try { await addressService.delete(a.id); const res = await addressService.list(); setApiAddresses(res.addresses); if (isSelected) update("selectedSenderAddressId", ""); } catch {} }} className="grid h-7 w-7 place-items-center rounded-lg text-[#94A3B8] hover:bg-red-50 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100" title="Sil">
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                  <div className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-2 transition-colors ml-1", isSelected ? "bg-[#3959F2] ring-[#4F46E5]" : "bg-white ring-[#CBD5E1] group-hover:ring-[#94A3B8]")}>
+                                    {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
                                   </div>
                                 </div>
-                                <div className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-2 transition-colors", isSelected ? "bg-[#3959F2] ring-[#4F46E5]" : "bg-white ring-[#CBD5E1] group-hover:ring-[#94A3B8]")}>
-                                  {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
-                                </div>
-                              </button>
+                              </div>
                             );
                           })}
                         </div>
@@ -2218,7 +2321,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                           <button type="button" onClick={() => setShowNewSenderForm(false)} className="text-[12px] font-medium text-[#94A3B8] hover:text-[#475569]">İptal</button>
                         </div>
                         <div className="grid gap-3 sm:grid-cols-2">
-                          <Field label="Ad Soyad" icon={User}><Input value={draft.senderName} onChange={e => update("senderName", e.target.value)} placeholder="Gönderici adı soyadı" /></Field>
+                          <Field label="Ad Soyad" icon={User}><Input value={draft.senderName} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); if (v.length <= 60) update("senderName", v); }} placeholder="Gönderici adı soyadı" maxLength={60} /></Field>
                           <Field label="Firma Adı" icon={Building}><Input value={draft.senderCompany} onChange={e => update("senderCompany", e.target.value)} placeholder="Firma adı (opsiyonel)" /></Field>
                           <Field label="Telefon" icon={Phone}><Input value={formatPhoneDisplay(draft.senderPhone)} onChange={e => { const raw = cleanPhoneDigits(e.target.value); update("senderPhone", raw); }} placeholder="+90 5XX XXX XX XX" /></Field>
                           <Field label="Şehir" icon={MapPin}>
@@ -2302,25 +2405,98 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       ? <div className="flex flex-col gap-2">
                           {filteredReceiverAddresses.map(a => {
                             const isSelected = draft.selectedReceiverAddressId === String(a.id);
+                            const isEditing = editingReceiverAddr?.id === a.id;
+                            const initials = (a.name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+                            const colors = ["bg-gradient-to-br from-violet-500 to-indigo-600", "bg-gradient-to-br from-emerald-500 to-teal-600", "bg-gradient-to-br from-amber-500 to-orange-600", "bg-gradient-to-br from-rose-500 to-pink-600", "bg-gradient-to-br from-sky-500 to-blue-600"];
+                            const colorIdx = a.id % colors.length;
+
+                            if (isEditing) {
+                              return (
+                                <div key={String(a.id)} className="rounded-2xl bg-white p-5 ring-2 ring-[#4F46E5] shadow-lg shadow-indigo-100/50 animate-in fade-in">
+                                  <div className="mb-4 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm", colors[colorIdx])}>{initials}</div>
+                                      <div className="text-[13px] font-semibold text-[#0F172A]">Adresi Düzenle</div>
+                                    </div>
+                                    <button type="button" onClick={() => setEditingReceiverAddr(null)} className="text-[12px] font-medium text-[#94A3B8] hover:text-[#475569] transition-colors">İptal</button>
+                                  </div>
+                                  <div className="grid gap-3 sm:grid-cols-2">
+                                    <Field label="Ad Soyad" icon={User}><Input value={editingReceiverAddr.name} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); setEditingReceiverAddr({ ...editingReceiverAddr, name: v }); }} placeholder="Ad soyad" maxLength={60} /></Field>
+                                    <Field label="Firma Adı" icon={Building}><Input value={editingReceiverAddr.company || ""} onChange={e => setEditingReceiverAddr({ ...editingReceiverAddr, company: e.target.value })} placeholder="Firma (opsiyonel)" /></Field>
+                                    <Field label="Telefon" icon={Phone}><Input value={editingReceiverAddr.phone || ""} onChange={e => setEditingReceiverAddr({ ...editingReceiverAddr, phone: e.target.value })} placeholder="Telefon" /></Field>
+                                    <Field label="Şehir" icon={MapPin}><Input value={editingReceiverAddr.city} onChange={e => setEditingReceiverAddr({ ...editingReceiverAddr, city: e.target.value })} placeholder="Şehir" /></Field>
+                                    <Field label="Posta Kodu" icon={MapPin}><Input value={editingReceiverAddr.postalCode || ""} onChange={e => setEditingReceiverAddr({ ...editingReceiverAddr, postalCode: e.target.value })} placeholder="Posta kodu" /></Field>
+                                    <Field label="Ülke Kodu" icon={Globe}><Input value={editingReceiverAddr.countryCode || ""} onChange={e => setEditingReceiverAddr({ ...editingReceiverAddr, countryCode: e.target.value.toUpperCase() })} placeholder="DE, US..." maxLength={2} /></Field>
+                                    <div className="sm:col-span-2"><Field label="Açık Adres" icon={MapPinned}><Input value={editingReceiverAddr.address} onChange={e => setEditingReceiverAddr({ ...editingReceiverAddr, address: e.target.value })} placeholder="Sokak, cadde, bina no..." /></Field></div>
+                                  </div>
+                                  <div className="mt-4 flex justify-end gap-2">
+                                    <Button type="button" variant="secondary" onClick={() => setEditingReceiverAddr(null)} className="gap-1.5 text-[12px] rounded-xl"><X className="h-3.5 w-3.5" />Vazgeç</Button>
+                                    <Button type="button" disabled={editReceiverBusy} onClick={async () => {
+                                      setEditReceiverBusy(true);
+                                      try {
+                                        await addressService.update(editingReceiverAddr.id, {
+                                          label: editingReceiverAddr.label || editingReceiverAddr.name,
+                                          name: editingReceiverAddr.name,
+                                          company: editingReceiverAddr.company,
+                                          phone: editingReceiverAddr.phone,
+                                          address: editingReceiverAddr.address,
+                                          postalCode: editingReceiverAddr.postalCode,
+                                          city: editingReceiverAddr.city,
+                                          town: (editingReceiverAddr as any).town,
+                                          stateProvince: editingReceiverAddr.stateProvince,
+                                          countryCode: editingReceiverAddr.countryCode,
+                                        });
+                                        const res = await addressService.list();
+                                        setApiAddresses(res.addresses);
+                                        if (isSelected) {
+                                          setDraft(d => ({ ...d, receiverName: editingReceiverAddr.name, receiverPhone: editingReceiverAddr.phone || "", receiverAddress: editingReceiverAddr.address, receiverCity: editingReceiverAddr.city, receiverCompany: editingReceiverAddr.company || "" }));
+                                        }
+                                        setEditingReceiverAddr(null);
+                                      } catch { }
+                                      finally { setEditReceiverBusy(false); }
+                                    }} className="gap-1.5 text-[12px] bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-xl shadow-md shadow-indigo-200/50">
+                                      {editReceiverBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                                      Kaydet
+                                    </Button>
+                                  </div>
+                                </div>
+                              );
+                            }
+
                             return (
-                              <button key={String(a.id)} type="button" onClick={() => { update("selectedReceiverAddressId", String(a.id)); setShowNewReceiverForm(false); }} className={cn("group flex w-full items-center justify-between rounded-xl p-3 text-left ring-1 transition-all", isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-sm" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1] hover:shadow-sm")}>
-                                <div className="flex items-center gap-3">
-                                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F1F5F9] text-[#94A3B8]">
-                                    <User className="h-4 w-4" />
+                              <div key={String(a.id)} className={cn("group flex w-full items-center justify-between rounded-2xl p-3.5 ring-1 transition-all", isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-md shadow-indigo-100/50" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1] hover:shadow-md")}>
+                                <button type="button" onClick={() => { update("selectedReceiverAddressId", String(a.id)); setShowNewReceiverForm(false); }} className="flex items-center gap-3 text-left flex-1 min-w-0">
+                                  <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold text-white shadow-sm", colors[colorIdx])}>
+                                    {initials}
                                   </div>
-                                  <div>
-                                    <div className="text-[13px] font-bold text-[#0F172A]">{a.name}</div>
-                                    <div className="text-[11px] text-[#94A3B8]">{a.company && <>{a.company} · </>}{a.city} · {a.address}</div>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[13px] font-bold text-[#0F172A]">{a.name}</span>
+                                      {a.countryCode && <span className="text-[10px] font-semibold text-white bg-slate-400 rounded px-1.5 py-0.5 leading-none">{a.countryCode}</span>}
+                                    </div>
+                                    <div className="text-[11px] text-[#94A3B8] truncate mt-0.5">{a.company && <>{a.company} · </>}{a.city}{a.postalCode && <> · {a.postalCode}</>}</div>
+                                    <div className="text-[10px] text-[#CBD5E1] truncate">{a.address}</div>
+                                  </div>
+                                </button>
+                                <div className="flex items-center gap-1 shrink-0 ml-2">
+                                  <button type="button" onClick={(e) => { e.stopPropagation(); setEditingReceiverAddr({ ...a }); }} className="grid h-8 w-8 place-items-center rounded-xl text-[#94A3B8] hover:bg-[#EEF2FF] hover:text-[#4F46E5] transition-all opacity-0 group-hover:opacity-100" title="Düzenle">
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </button>
+                                  <button type="button" onClick={async (e) => { e.stopPropagation(); if (!confirm("Bu adresi silmek istediğinize emin misiniz?")) return; try { await addressService.delete(a.id); const res = await addressService.list(); setApiAddresses(res.addresses); if (isSelected) update("selectedReceiverAddressId", ""); } catch {} }} className="grid h-8 w-8 place-items-center rounded-xl text-[#94A3B8] hover:bg-red-50 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100" title="Sil">
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                  <div className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-2 transition-colors ml-1", isSelected ? "bg-[#3959F2] ring-[#4F46E5]" : "bg-white ring-[#CBD5E1] group-hover:ring-[#94A3B8]")}>
+                                    {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
                                   </div>
                                 </div>
-                                <div className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-2 transition-colors", isSelected ? "bg-[#3959F2] ring-[#4F46E5]" : "bg-white ring-[#CBD5E1] group-hover:ring-[#94A3B8]")}>
-                                  {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
-                                </div>
-                              </button>
+                              </div>
                             );
                           })}
                         </div>
-                      : <div className="rounded-xl bg-[#F8FAFC] p-4 text-center text-[12px] text-[#94A3B8] ring-1 ring-[#E2E8F0]">{receiverSearch ? "Arama kriterlerinize uygun kayıtlı alıcı adresi bulunamadı." : "Bu posta koduna kayıtlı alıcı adresiniz bulunmamaktadır."}</div>
+                      : <div className="rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/50 p-6 text-center ring-1 ring-[#E2E8F0]">
+                          <User className="h-8 w-8 text-[#CBD5E1] mx-auto mb-2" />
+                          <p className="text-[12px] text-[#94A3B8] font-medium">{receiverSearch ? "Arama kriterlerinize uygun kayıtlı alıcı adresi bulunamadı." : "Bu posta koduna kayıtlı alıcı adresiniz bulunmamaktadır."}</p>
+                        </div>
                     )}
 
                     {showNewReceiverForm && (
@@ -2330,7 +2506,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                           <button type="button" onClick={() => setShowNewReceiverForm(false)} className="text-[12px] font-medium text-[#94A3B8] hover:text-[#475569]">İptal</button>
                         </div>
                         <div className="grid gap-3 sm:grid-cols-3">
-                          <Field label="Ad Soyad" icon={User} error={fieldErrors.receiverName}><Input value={draft.receiverName} onChange={e => update("receiverName", e.target.value)} placeholder="Alıcı adı soyadı" /></Field>
+                          <Field label="Ad Soyad" icon={User} error={fieldErrors.receiverName}><Input value={draft.receiverName} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); if (v.length <= 60) update("receiverName", v); }} placeholder="Alıcı adı soyadı" maxLength={60} /></Field>
                           <Field label="Firma Adı" icon={Building}><Input value={draft.receiverCompany} onChange={e => update("receiverCompany", e.target.value)} placeholder="Firma adı (opsiyonel)" /></Field>
                           <Field label="Telefon" icon={Phone} error={fieldErrors.receiverPhone}>
                             <Input
@@ -2409,27 +2585,72 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                 )}
 
                 {/* Route summary strip */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl bg-[#F8FAFC] ring-1 ring-[#E2E8F0] p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F1F5F9] text-[#94A3B8]"><User className="h-4 w-4" /></div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[14px] font-bold text-[#0F172A]">{senderLabel || "Seçilmedi"}</span>
-                        <span className="text-[10px] font-semibold text-[#94A3B8] bg-[#F1F5F9] rounded px-1.5 py-0.5">Gönderici</span>
+                <div className="rounded-2xl bg-gradient-to-br from-slate-50 to-white ring-1 ring-slate-200 overflow-hidden">
+                  {/* Mobile layout */}
+                  <div className="flex sm:hidden flex-col relative p-4">
+                    {/* Sender */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-sm z-10">
+                        <User className="h-4 w-4" />
                       </div>
-                      {senderCompanyLabel && <div className="text-[12px] text-[#94A3B8] mt-0.5">{senderCompanyLabel} · {senderCityLabel}</div>}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[13px] font-bold text-slate-800 truncate">{senderLabel || "Seçilmedi"}</span>
+                          <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 rounded-full px-2 py-0.5 shrink-0">Gönderici</span>
+                        </div>
+                        {senderCompanyLabel && <div className="text-[11px] text-slate-400 truncate mt-0.5">{senderCompanyLabel} · {senderCityLabel}</div>}
+                      </div>
+                    </div>
+                    {/* Connector */}
+                    <div className="flex items-center gap-2 pl-5 py-1.5">
+                      <div className="w-px h-5 border-l-2 border-dashed border-slate-200" />
+                      <ArrowRight className="h-3 w-3 text-slate-300 rotate-90" />
+                    </div>
+                    {/* Receiver */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-sm z-10">
+                        <User className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[13px] font-bold text-slate-800 truncate">{receiverLabel || "Henüz girilmedi"}</span>
+                          <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 rounded-full px-2 py-0.5 shrink-0">Alıcı</span>
+                        </div>
+                        {receiverCompanyLabel && <div className="text-[11px] text-slate-400 truncate mt-0.5">{receiverCompanyLabel} · {receiverCityLabel}</div>}
+                      </div>
                     </div>
                   </div>
-                  <div className="text-[#CBD5E1]"><ArrowRight className="h-5 w-5" /></div>
-                  <div className="flex items-center gap-3">
-                    <div>
-                      <div className="flex items-center gap-2 justify-end">
-                        <span className="text-[10px] font-semibold text-[#94A3B8] bg-[#F1F5F9] rounded px-1.5 py-0.5">Alıcı</span>
-                        <span className="text-[14px] font-bold text-[#0F172A]">{receiverLabel || "Henüz girilmedi"}</span>
+                  {/* Desktop layout */}
+                  <div className="hidden sm:flex items-center justify-between gap-3 p-4">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-sm">
+                        <User className="h-4 w-4" />
                       </div>
-                      {receiverCompanyLabel && <div className="text-[12px] text-[#94A3B8] text-right mt-0.5">{receiverCompanyLabel} · {receiverCityLabel}</div>}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[14px] font-bold text-slate-800">{senderLabel || "Seçilmedi"}</span>
+                          <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 rounded-full px-2 py-0.5">Gönderici</span>
+                        </div>
+                        {senderCompanyLabel && <div className="text-[12px] text-slate-400 mt-0.5">{senderCompanyLabel} · {senderCityLabel}</div>}
+                      </div>
                     </div>
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F1F5F9] text-[#94A3B8]"><User className="h-4 w-4" /></div>
+                    <div className="shrink-0 flex items-center gap-2 px-2">
+                      <div className="h-px w-6 bg-slate-200" />
+                      <ArrowRight className="h-4 w-4 text-slate-300" />
+                      <div className="h-px w-6 bg-slate-200" />
+                    </div>
+                    <div className="flex items-center gap-3 min-w-0 flex-1 justify-end">
+                      <div className="min-w-0 text-right">
+                        <div className="flex items-center gap-2 justify-end">
+                          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 rounded-full px-2 py-0.5">Alıcı</span>
+                          <span className="text-[14px] font-bold text-slate-800">{receiverLabel || "Henüz girilmedi"}</span>
+                        </div>
+                        {receiverCompanyLabel && <div className="text-[12px] text-slate-400 mt-0.5">{receiverCompanyLabel} · {receiverCityLabel}</div>}
+                      </div>
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-sm">
+                        <User className="h-4 w-4" />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -2538,7 +2759,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       <div className="flex items-center gap-3">
                         <div className="flex h-[32px] w-[32px] items-center justify-center rounded-full bg-slate-100 text-[14px] font-bold text-slate-600">{idx + 1}</div>
                         <div className="text-[17px] font-bold text-slate-900 flex items-center gap-3">
-                          Ürün İsmi 
+                          Ürün Detayı 
                           <span className="text-[11px] font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full">HS: {item.hsCode || "—"}</span>
                         </div>
                       </div>
@@ -2568,10 +2789,10 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
 
                       {/* Ürün Adı */}
                       <div className="sm:col-span-12 lg:col-span-7 flex flex-col gap-2">
-                        <label className="text-[12px] font-bold text-slate-700 mt-1">Ürün Adı <span className="text-red-500 text-sm ml-0.5">*</span></label>
+                        <label className="text-[12px] font-bold text-slate-700 mt-1">Ürün Detayı <span className="text-red-500 text-sm ml-0.5">*</span></label>
                         <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 focus-within:bg-white focus-within:ring-2 transition-all", fieldErrors[`item_${idx}_productName`] ? "border-red-500 bg-red-50/30 ring-2 ring-red-100 focus-within:border-red-500 focus-within:ring-red-200" : "border-slate-300 bg-slate-50/50 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
                           <Tag className="mr-3 h-4 w-4 text-slate-400 shrink-0" />
-                          <Input value={item.productDescription} onChange={e => updateProformaItem(item.id, "productDescription", e.target.value)} placeholder="Zalusa Surprise Box" className="flex-1 border-0 ring-0 shadow-none bg-transparent p-0 text-[14px] font-medium text-slate-700 focus:ring-0 placeholder:text-slate-400" />
+                          <Input value={item.productDescription} onChange={e => updateProformaItem(item.id, "productDescription", e.target.value)} placeholder="Lütfen detaylı olarak ürünün adını yazınız" className="flex-1 border-0 ring-0 shadow-none bg-transparent p-0 text-[14px] font-medium text-slate-700 focus:ring-0 placeholder:text-slate-400" />
                         </div>
                       </div>
 
@@ -2613,7 +2834,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       <div className="sm:col-span-12 lg:col-span-2 flex flex-col gap-2">
                          <label className="text-[12px] font-bold text-slate-700 mt-1">Birim Fiyat ({getCurrencySymbol(draft.proformaCurrency)}) <span className="text-red-500 text-sm ml-0.5">*</span></label>
                          <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 focus-within:bg-white focus-within:ring-2 transition-all justify-between", fieldErrors[`item_${idx}_unitPrice`] ? "border-red-500 bg-red-50/30 ring-2 ring-red-100 focus-within:border-red-500 focus-within:ring-red-200" : "border-slate-300 bg-slate-50/50 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
-                          <Input inputMode="decimal" value={item.unitPrice} onChange={e => updateProformaItem(item.id, "unitPrice", e.target.value)} placeholder="0.00" className="w-[60px] border-0 ring-0 shadow-none bg-transparent p-0 text-[15px] font-semibold text-slate-700 focus:ring-0" />
+                          <Input inputMode="decimal" value={item.unitPrice} onChange={e => { const v = e.target.value; if (v === "" || /^\d{0,7}(\.\d{0,2})?$/.test(v)) updateProformaItem(item.id, "unitPrice", v); }} placeholder="0.00" maxLength={10} className="w-[60px] border-0 ring-0 shadow-none bg-transparent p-0 text-[15px] font-semibold text-slate-700 focus:ring-0" />
                           <div className="flex flex-col gap-[2px] border-l border-slate-100 pl-2">
                             <button type="button" onClick={() => updateProformaItem(item.id, "unitPrice", String(toNumber(item.unitPrice) + 1))} className="flex h-[18px] w-[24px] items-center justify-center rounded-[6px] bg-[#F1F5F9] hover:bg-[#E2E8F0] text-slate-500 transition-colors"><ChevronUp className="h-3 w-3" /></button>
                             <button type="button" onClick={() => updateProformaItem(item.id, "unitPrice", String(Math.max(0, toNumber(item.unitPrice) - 1)))} className="flex h-[18px] w-[24px] items-center justify-center rounded-[6px] bg-[#F1F5F9] hover:bg-[#E2E8F0] text-slate-500 transition-colors"><ChevronDown className="h-3 w-3" /></button>
@@ -2636,11 +2857,12 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
               </div>
 
               {/* ═══════════ GÜMRÜK BELGELERİ YÜKLEME ALANI ═══════════ */}
-              <div className="mt-8">
-                <div className="flex items-center gap-2 mb-4">
-                  <FileUp className="h-5 w-5 text-slate-500" />
-                  <h3 className="text-[15px] font-semibold text-slate-800">Gümrük Belgeleri</h3>
-                  <span className="text-[11px] text-slate-400 ml-1">(opsiyonel)</span>
+              <div className="mt-8" id="customs-documents-section">
+                <div className={cn("flex items-center gap-2 mb-4 p-3 rounded-xl transition-all", fieldErrors.documentUpload ? "bg-red-50 ring-2 ring-red-300" : "")}>
+                  <FileUp className={cn("h-5 w-5", fieldErrors.documentUpload ? "text-red-500" : "text-slate-500")} />
+                  <h3 className={cn("text-[15px] font-semibold", fieldErrors.documentUpload ? "text-red-600" : "text-slate-800")}>Gümrük Belgeleri</h3>
+                  <span className="text-red-500 text-sm font-bold">*</span>
+                  {docUploadedFiles.length > 0 && <span className="text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold ml-1">{docUploadedFiles.length} belge yüklendi</span>}
                 </div>
 
                 {/* Belge Türü Seçici */}
@@ -2776,34 +2998,56 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                   </div>
 
                   {/* Route Banner */}
-                  <div className="w-full bg-[#1F2937] rounded-[16px] px-6 py-4 flex items-center justify-between mb-8 shadow-sm relative overflow-hidden">
-                    <div className="flex items-center gap-4 relative z-10 w-1/3">
+                  <div className="w-full bg-[#1F2937] rounded-[16px] px-4 sm:px-6 py-4 mb-8 shadow-sm relative overflow-hidden">
+                    {/* Mobile: stacked layout */}
+                    <div className="flex sm:hidden items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <img src={getFlagImageUrl(draft.senderCountry || "TR", 80)} alt="TR" className="w-[32px] h-[22px] rounded-[4px] object-cover ring-2 ring-white/10 shrink-0" />
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[9px] font-medium text-white/50 uppercase tracking-wider">Çıkış</span>
+                          <span className="text-[13px] font-bold text-white truncate">{apiCountries.find(x => x.value === draft.senderCountry)?.name || COUNTRY_NAMES[draft.senderCountry] || "Türkiye"}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-center shrink-0 px-1">
+                        <Plane className="w-4 h-4 text-white/40 mb-0.5" />
+                        <span className="text-[9px] text-white/40 font-medium">{totalActualWeight.toFixed(1)} kg</span>
+                      </div>
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1 justify-end">
+                        <div className="flex flex-col items-end min-w-0">
+                          <span className="text-[9px] font-medium text-white/50 uppercase tracking-wider">Varış</span>
+                          <span className="text-[13px] font-bold text-white truncate">{apiCountries.find(x => x.value === draft.receiverCountry)?.name || COUNTRY_NAMES[draft.receiverCountry] || "İspanya"}</span>
+                        </div>
+                        <img src={getFlagImageUrl(draft.receiverCountry || "ES", 80)} alt="ES" className="w-[32px] h-[22px] rounded-[4px] object-cover ring-2 ring-white/10 shrink-0" />
+                      </div>
+                    </div>
+                    {/* Desktop: original horizontal layout */}
+                    <div className="hidden sm:flex items-center justify-between">
+                      <div className="flex items-center gap-4 relative z-10 w-1/3">
                         <img src={getFlagImageUrl(draft.senderCountry || "TR", 80)} alt="TR" className="w-[42px] h-[30px] rounded-[6px] object-cover ring-2 ring-white/10" />
                         <div className="flex flex-col">
                           <span className="text-[12px] font-medium text-white/50 relative -bottom-0.5">Çıkış</span>
                           <span className="text-[16px] font-bold text-white tracking-wide">{apiCountries.find(x => x.value === draft.senderCountry)?.name || COUNTRY_NAMES[draft.senderCountry] || "Türkiye"}</span>
                         </div>
-                    </div>
-                    
-                    <div className="flex-1 flex flex-col items-center justify-center relative z-10">
+                      </div>
+                      <div className="flex-1 flex flex-col items-center justify-center relative z-10">
                         <Plane className="w-5 h-5 text-white/50 mb-1" />
                         <span className="text-[11px] font-medium text-white/40">Kargo Ağırlığı <strong className="text-white/80 font-bold ml-1">{totalActualWeight.toFixed(2)} kg</strong></span>
-                    </div>
-                    
-                    <div className="flex items-center gap-4 justify-end relative z-10 w-1/3">
+                      </div>
+                      <div className="flex items-center gap-4 justify-end relative z-10 w-1/3">
                         <div className="flex flex-col items-end">
                           <span className="text-[12px] font-medium text-white/50 relative -bottom-0.5">Varış</span>
                           <span className="text-[16px] font-bold text-white tracking-wide">{apiCountries.find(x => x.value === draft.receiverCountry)?.name || COUNTRY_NAMES[draft.receiverCountry] || "İspanya"}</span>
                         </div>
                         <img src={getFlagImageUrl(draft.receiverCountry || "ES", 80)} alt="ES" className="w-[42px] h-[30px] rounded-[6px] object-cover ring-2 ring-white/10" />
+                      </div>
                     </div>
                   </div>
 
                   {/* Details Section */}
                   <div className="bg-white rounded-[24px] border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)] p-6 sm:p-8 relative">
-                    <div className="flex items-center justify-between mb-8">
-                      <h3 className="text-[18px] font-bold text-slate-800">Gönderi Detayları</h3>
-                      <span className="text-[13px] font-medium text-slate-400 tracking-wide">Aşağıdaki bilgilerin doğruluğunu kontrol edin</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-1">
+                      <h3 className="text-[16px] sm:text-[18px] font-bold text-slate-800">Gönderi Detayları</h3>
+                      <span className="text-[11px] sm:text-[13px] font-medium text-slate-400 tracking-wide">Aşağıdaki bilgilerin doğruluğunu kontrol edin</span>
                     </div>
 
                     <div className="relative pb-16">
@@ -3176,35 +3420,17 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
             </div>
             
             <div className="p-6 overflow-y-auto">
-              {/* Sigorta Card */}
-              <div 
-                className={cn(
-                  "rounded-2xl border-2 p-5 cursor-pointer transition-all bg-white relative",
-                  draft.hasInsurance ? "border-brand-500 shadow-[0_4px_16px_rgba(37,99,235,0.15)] ring-4 ring-brand-50" : "border-slate-200 hover:border-slate-300 hover:shadow-sm"
-                )}
-                onClick={() => update("hasInsurance", !draft.hasInsurance)}
-              >
+              {/* Kargo onayı */}
+              <div className="rounded-2xl border-2 border-brand-500 p-5 bg-white relative shadow-[0_4px_16px_rgba(37,99,235,0.15)] ring-4 ring-brand-50">
                 <div className="flex items-start gap-4">
-                  <div className={cn(
-                    "flex shrink-0 h-6 w-6 mt-0.5 items-center justify-center rounded-[6px] transition-colors border-2",
-                    draft.hasInsurance ? "bg-brand-600 border-brand-600 text-white" : "border-slate-300 bg-white"
-                  )}>
-                    {draft.hasInsurance && <Check className="h-4 w-4" strokeWidth={3} />}
+                  <div className="flex shrink-0 h-6 w-6 mt-0.5 items-center justify-center rounded-[6px] bg-brand-600 border-brand-600 text-white border-2">
+                    <Check className="h-4 w-4" strokeWidth={3} />
                   </div>
-                  
                   <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div className="text-[16px] font-bold text-slate-900">Gönderimi Sigortala</div>
-                      <div className="text-[15px] font-extrabold text-slate-900">{getCurrencySymbol(selectedQuote?.currency ?? "EUR")} 52.20</div>
-                    </div>
+                    <div className="text-[16px] font-bold text-slate-900">Kargo Firması Seçildi</div>
                     <p className="mt-2 text-[14px] text-slate-500 font-medium leading-relaxed pr-2">
-                      Kayıp veya hasar durumunda gönderi bedelinizi güvence altına almak için sigorta seçmenizi öneririz.
+                      Seçtiğiniz kargo firması ile gönderiyi onaylayabilirsiniz.
                     </p>
-                    <div className="mt-4">
-                      <a href="#" className="text-[14px] font-bold text-brand-600 hover:underline inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                        Sigorta Koşulları Nelerdir?
-                      </a>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -3212,14 +3438,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
 
             <div className="p-6 border-t border-slate-100 bg-slate-50 flex items-center justify-center gap-4">
               <div className="flex items-center gap-3">
-                <Button 
-                  variant="secondary" 
-                  onClick={() => { update("hasInsurance", false); confirmServicesAndNext(); }}
-                  className="font-bold px-6 h-12 rounded-xl"
-                >
-                  Seçmeden Devam Et
-                </Button>
-                <Button onClick={confirmServicesAndNext} className="bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 h-12 rounded-xl">
+                <Button onClick={() => { update("hasInsurance", false); confirmServicesAndNext(); }} className="bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 h-12 rounded-xl">
                   Onayla ve Devam Et
                 </Button>
               </div>

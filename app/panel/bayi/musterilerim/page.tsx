@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import {
   Users,
   UserPlus,
@@ -19,10 +20,12 @@ import {
   AlertCircle,
   UserMinus,
   AlertTriangle,
+  ChevronDown,
 } from "lucide-react";
 import {
   resellerService,
   type ResellerCustomer,
+  type CustomerShipment,
 } from "@/lib/services/resellerService";
 
 // ─── Yardımcılar ──────────────────────────────────────────────────────────────
@@ -41,6 +44,7 @@ function formatDate(iso: string): string {
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function ResellerCustomersPage() {
+  const router = useRouter();
   const [customers, setCustomers] = React.useState<ResellerCustomer[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -58,6 +62,11 @@ export default function ResellerCustomersPage() {
   // Unlink modal state
   const [unlinkTarget, setUnlinkTarget] = React.useState<ResellerCustomer | null>(null);
   const [unlinking, setUnlinking] = React.useState(false);
+
+  // Müşteri kargo görüntüleme
+  const [expandedCustomerId, setExpandedCustomerId] = React.useState<number | null>(null);
+  const [customerShipments, setCustomerShipments] = React.useState<CustomerShipment[]>([]);
+  const [shipmentsLoading, setShipmentsLoading] = React.useState(false);
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -107,6 +116,25 @@ export default function ResellerCustomersPage() {
       showToast("error", err instanceof Error ? err.message : "İşlem başarısız");
     } finally {
       setUnlinking(false);
+    }
+  };
+
+  // Müşteri kargolarını aç/kapat
+  const toggleCustomerShipments = async (customerId: number) => {
+    if (expandedCustomerId === customerId) {
+      setExpandedCustomerId(null);
+      setCustomerShipments([]);
+      return;
+    }
+    setExpandedCustomerId(customerId);
+    setShipmentsLoading(true);
+    try {
+      const res = await resellerService.customerShipments(customerId);
+      setCustomerShipments(res.shipments || []);
+    } catch {
+      setCustomerShipments([]);
+    } finally {
+      setShipmentsLoading(false);
     }
   };
 
@@ -268,18 +296,23 @@ export default function ResellerCustomersPage() {
               </thead>
               <tbody>
                 {filtered.map((c) => (
+                  <React.Fragment key={c.id}>
                   <tr
-                    key={c.id}
-                    className="border-b border-slate-50 transition hover:bg-blue-50/30"
+                    onClick={() => toggleCustomerShipments(c.id)}
+                    className={`border-b border-slate-50 transition cursor-pointer ${
+                      expandedCustomerId === c.id
+                        ? "bg-blue-50/60 hover:bg-blue-50/80"
+                        : "hover:bg-blue-50/30"
+                    }`}
                   >
                     {/* Müşteri */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white">
                           {c.firstName.charAt(0)}
                           {c.lastName.charAt(0)}
                         </div>
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <div className="font-semibold text-slate-900">
                             {c.firstName} {c.lastName}
                           </div>
@@ -287,6 +320,7 @@ export default function ResellerCustomersPage() {
                             {c.kind === "corporate" ? "Kurumsal" : "Bireysel"}
                           </div>
                         </div>
+                        <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${expandedCustomerId === c.id ? "rotate-180" : ""}`} />
                       </div>
                     </td>
 
@@ -315,9 +349,13 @@ export default function ResellerCustomersPage() {
 
                     {/* Gönderiler */}
                     <td className="px-5 py-4">
-                      <div className="flex items-center gap-1.5">
-                        <Package className="h-4 w-4 text-slate-400" />
-                        <span className="text-sm font-semibold text-slate-700">
+                      <div className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ${
+                        expandedCustomerId === c.id
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-slate-50 text-slate-600"
+                      }`}>
+                        <Package className="h-4 w-4" />
+                        <span className="text-sm font-semibold">
                           {c.shipmentCount}
                         </span>
                       </div>
@@ -352,7 +390,7 @@ export default function ResellerCustomersPage() {
                     {/* İşlem */}
                     <td className="px-5 py-4">
                       <button
-                        onClick={() => setUnlinkTarget(c)}
+                        onClick={(e) => { e.stopPropagation(); setUnlinkTarget(c); }}
                         className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-500 transition hover:bg-red-50"
                       >
                         <UserMinus className="h-3.5 w-3.5" />
@@ -360,6 +398,93 @@ export default function ResellerCustomersPage() {
                       </button>
                     </td>
                   </tr>
+
+                  {/* Expand: Müşteri kargoları */}
+                  {expandedCustomerId === c.id && (
+                    <tr>
+                      <td colSpan={7} className="bg-blue-50/40 px-5 py-4">
+                        {shipmentsLoading ? (
+                          <div className="flex items-center justify-center gap-2 py-6">
+                            <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                            <span className="text-sm text-slate-500">Gönderiler yükleniyor...</span>
+                          </div>
+                        ) : customerShipments.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center py-6 text-center">
+                            <Package className="mb-2 h-8 w-8 text-slate-300" />
+                            <p className="text-sm text-slate-400">Bu müşterinin henüz gönderisi yok</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                              {c.firstName} {c.lastName} — {customerShipments.length} Gönderi
+                            </div>
+                            <div className="overflow-x-auto rounded-xl ring-1 ring-slate-200 bg-white">
+                              <table className="w-full text-left text-sm">
+                                <thead>
+                                  <tr className="border-b border-slate-100 bg-slate-50/60">
+                                    <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Takip Kodu</th>
+                                    <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Durum</th>
+                                    <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Güzergah</th>
+                                    <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Kargo</th>
+                                    <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Ücret</th>
+                                    <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Tarih</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {customerShipments.map((s) => {
+                                    const statusColors: Record<string, string> = {
+                                      pending: "bg-amber-50 text-amber-700",
+                                      processing: "bg-blue-50 text-blue-700",
+                                      shipped: "bg-indigo-50 text-indigo-700",
+                                      delivered: "bg-emerald-50 text-emerald-700",
+                                      cancelled: "bg-red-50 text-red-700",
+                                    };
+                                    const statusLabels: Record<string, string> = {
+                                      pending: "Bekliyor",
+                                      processing: "İşleniyor",
+                                      shipped: "Yolda",
+                                      delivered: "Teslim",
+                                      cancelled: "İptal",
+                                      paid: "Ödendi",
+                                      label_created: "Etiket",
+                                    };
+                                    return (
+                                      <tr key={s.id} onClick={() => router.push(`/panel/bayi/musterilerim/gonderi/${s.id}`)} className="border-b border-slate-50 hover:bg-blue-50/60 transition cursor-pointer group">
+                                        <td className="px-3 py-2">
+                                          <span className="inline-flex rounded bg-slate-100 px-2 py-0.5 text-xs font-mono font-semibold text-slate-600">
+                                            {s.trackingCode || "—"}
+                                          </span>
+                                        </td>
+                                        <td className="px-3 py-2">
+                                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusColors[s.status] || "bg-slate-100 text-slate-600"}`}>
+                                            <span className={`h-1.5 w-1.5 rounded-full ${s.status === "delivered" ? "bg-emerald-500" : s.status === "cancelled" ? "bg-red-500" : "bg-current"}`} />
+                                            {statusLabels[s.status] || s.status}
+                                          </span>
+                                        </td>
+                                        <td className="px-3 py-2 text-xs text-slate-600">
+                                          {s.senderCountry} → {s.receiverCountry}
+                                        </td>
+                                        <td className="px-3 py-2 text-xs text-slate-600">
+                                          {s.carrierName}{s.serviceName ? ` / ${s.serviceName}` : ""}
+                                        </td>
+                                        <td className="px-3 py-2 text-xs font-semibold text-slate-700">
+                                          {s.carrierPriceTry?.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
+                                        </td>
+                                        <td className="px-3 py-2 text-xs text-slate-500">
+                                          {new Date(s.createdAt).toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
@@ -455,6 +580,7 @@ export default function ResellerCustomersPage() {
     </div>
   );
 }
+
 
 // ═════════════════════════════════════════════════════════════════════════════
 // Yeni Müşteri Oluştur Modal

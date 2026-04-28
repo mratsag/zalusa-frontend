@@ -177,7 +177,7 @@ export function CitySelect({
         disabled={disabled || !countryCode}
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex h-11 w-full items-center justify-between rounded-2xl bg-surface px-4 text-sm text-foreground ring-1 ring-border transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/35 disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-9 w-full items-center justify-between rounded-lg bg-slate-50 px-3 text-[13px] text-slate-700 border border-slate-200 transition-colors focus:outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
       >
@@ -193,7 +193,7 @@ export function CitySelect({
       </button>
 
       {isOpen && (
-        <div className="absolute z-[99] mt-1 w-full rounded-2xl border border-border bg-surface p-1 shadow-md animate-in fade-in-0 zoom-in-95">
+        <div className="absolute z-[99] mt-1 w-full rounded-2xl border border-border bg-white p-1 shadow-md" style={{ WebkitBackfaceVisibility: 'hidden' }}>
           {/* Search */}
           <div className="flex items-center gap-2 border-b border-border p-2">
             <Search className="h-4 w-4 shrink-0 text-muted" />
@@ -203,7 +203,7 @@ export function CitySelect({
               placeholder="Şehir ara..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted min-w-0"
+              className="flex-1 bg-white text-sm text-slate-800 outline-none placeholder:text-muted min-w-0"
             />
             {itemCount > 0 && (
               <span className="text-[10px] text-muted shrink-0">

@@ -627,15 +627,15 @@ export function AuthPage() {
                 </button>
 
                 {/* Müşteri Hizmetleri Destek Bandı */}
-                <div className="mt-5 flex items-center gap-3 rounded-[12px] bg-[#F0FDF4] p-4 ring-1 ring-[#BBF7D0]">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
+                <div className="mt-5 flex flex-col items-center gap-2 rounded-[12px] bg-[#F0FDF4] p-4 ring-1 ring-[#BBF7D0] text-center">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
                     <div className="text-[13px] font-bold text-[#14532D]">Giriş yapamıyor musun?</div>
-                    <div className="text-[12px] text-[#16A34A]">Müşteri hizmetleri 7/24 hizmetinizde</div>
                   </div>
-                  <a href="tel:08502551840" className="text-[15px] font-extrabold text-[#16A34A] hover:underline underline-offset-2 whitespace-nowrap">0850 255 18 40</a>
+                  <div className="text-[12px] text-[#16A34A]">Müşteri hizmetleri 7/24 hizmetinizde</div>
+                  <a href="tel:08502551840" className="text-[16px] font-extrabold text-[#16A34A] hover:underline underline-offset-2">0850 255 18 40</a>
                 </div>
               </form>
             ) : (
@@ -650,11 +650,11 @@ export function AuthPage() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="relative">
                     <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"><User className="h-4 w-4" /></div>
-                    <input placeholder="Ad" value={firstName} onChange={e => setFirstName(e.target.value)} required className={fieldInputClass} />
+                    <input placeholder="Ad" value={firstName} onChange={e => setFirstName(e.target.value)} maxLength={70} required className={fieldInputClass} />
                   </div>
                   <div className="relative">
                     <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"><User className="h-4 w-4" /></div>
-                    <input placeholder="Soyad" value={lastName} onChange={e => setLastName(e.target.value)} required className={fieldInputClass} />
+                    <input placeholder="Soyad" value={lastName} onChange={e => setLastName(e.target.value)} maxLength={70} required className={fieldInputClass} />
                   </div>
                 </div>
 
@@ -665,7 +665,7 @@ export function AuthPage() {
                   </div>
                   <div className="w-3/5 relative">
                     <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"><PhoneCall className="h-4 w-4" /></div>
-                    <input placeholder="Telefon Numarası" value={phone} onChange={e => setPhone(e.target.value)} required className={fieldInputClass} />
+                    <input placeholder="Telefon Numarası" value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ""))} maxLength={20} inputMode="numeric" required className={fieldInputClass} />
                   </div>
                 </div>
 

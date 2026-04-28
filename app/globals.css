@@ -3,6 +3,7 @@
 :root {
   --background: #f7f9ff;
   --foreground: #0b1220;
+  color-scheme: light;
 }
 
 @theme inline {
@@ -49,12 +50,9 @@
   --color-danger-600: #dc2626;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #050816;
-    --foreground: #eef2ff;
-  }
-}
+/* Dark mode explicitly disabled — this is a light-only theme.
+   Removing dark overrides prevents mobile browsers from applying
+   native dark tinting to form controls when OS dark mode is on. */
 
 body {
   background: var(--background);
@@ -153,4 +151,24 @@ aside::-webkit-scrollbar {
 aside {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ── Force light form controls on mobile WebKit ─────────────────────── */
+/* This prevents foggy/washed-out input rendering on mobile browsers    */
+/* that apply dark mode tinting even though the site is light-only.     */
+input,
+textarea,
+select,
+button {
+  color-scheme: light;
+  -webkit-text-fill-color: currentColor;
+}
+
+/* Prevent mobile WebKit from adding grey overlay to disabled inputs */
+input:disabled,
+textarea:disabled,
+select:disabled {
+  -webkit-text-fill-color: currentColor;
+  opacity: 1;
+  color: inherit;
 }

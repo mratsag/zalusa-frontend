@@ -175,7 +175,7 @@ export function HSCodeCombobox({
 
       {/* Dropdown */}
       {open && (results.length > 0 || aiResult) && (
-        <div className="absolute left-0 top-[calc(100%-4px)] z-50 w-[280px] sm:w-[320px] max-h-64 overflow-auto rounded-[5px] bg-surface shadow-lg ring-1 ring-border">
+        <div className="absolute left-0 top-[calc(100%-4px)] z-50 w-[280px] sm:w-[320px] max-h-64 overflow-auto rounded-[5px] bg-white shadow-lg ring-1 ring-border">
 
           {/* Sistem Önerisi (varsa en üstte) */}
           {aiResult && (
@@ -204,7 +204,7 @@ export function HSCodeCombobox({
           )}
 
           {!search && productHint && !aiResult && (
-            <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted bg-surface-2">
+            <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted bg-slate-50">
               &quot;{productHint}&quot; için önerilen GTIP kodları
             </div>
           )}
@@ -242,7 +242,7 @@ export function HSCodeCombobox({
 
       {/* Sonuç yoksa bilgi */}
       {open && search && search.length >= 2 && results.length === 0 && !aiResult && !aiLoading && (
-        <div className="absolute left-0 top-[calc(100%-4px)] z-50 w-[280px] sm:w-[320px] rounded-[5px] bg-surface shadow-lg ring-1 ring-border">
+        <div className="absolute left-0 top-[calc(100%-4px)] z-50 w-[280px] sm:w-[320px] rounded-[5px] bg-white shadow-lg ring-1 ring-border">
           <div className="px-3 py-3 text-xs text-muted text-center">Sonuç bulunamadı. Kodu manuel girebilirsiniz.</div>
           <div className="border-t border-border px-3 py-2">
             <a href="https://uygulama.gtb.gov.tr/Tara" target="_blank" rel="noopener noreferrer"
@@ -256,7 +256,7 @@ export function HSCodeCombobox({
 
       {/* Sistem önerisi yükleniyor durumu (dropdown açıkken) */}
       {open && aiLoading && results.length === 0 && (
-        <div className="absolute left-0 top-[calc(100%-4px)] z-50 w-[280px] sm:w-[320px] rounded-[5px] bg-surface shadow-lg ring-1 ring-border">
+        <div className="absolute left-0 top-[calc(100%-4px)] z-50 w-[280px] sm:w-[320px] rounded-[5px] bg-white shadow-lg ring-1 ring-border">
           <div className="flex items-center justify-center gap-2 px-3 py-4 text-xs text-blue-600">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Sistem ile otomatik GTİP eşleştiriliyor...</span>

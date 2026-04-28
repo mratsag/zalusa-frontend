@@ -22,11 +22,14 @@ import {
   TicketCheck,
   Package,
   Banknote,
+  Printer,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 const adminNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/gonderiler", label: "Tüm Gönderiler", icon: Package },
+  { href: "/admin/etiket-bas", label: "Etiket Bas", icon: Printer },
   { href: "/admin/kurye-talepleri", label: "Kurye Talepleri", icon: Truck },
   { href: "/admin/canli-destek", label: "Canlı Destek", icon: Headphones },
   { href: "/admin/destek-talepleri", label: "Destek Talepleri", icon: TicketCheck },
@@ -35,6 +38,7 @@ const adminNavItems = [
   { href: "/admin/doviz-kurlari", label: "Döviz Kurları", icon: DollarSign },
   { href: "/admin/margin-rules", label: "Fiyat & Marj Kuralları", icon: Calculator },
   { href: "/admin/yurt-ici-marjlari", label: "Yurt İçi Marjları", icon: Package },
+  { href: "/admin/ekstra-marjlar", label: "Ekstra Marjlar (Desi/Genel)", icon: DollarSign },
   { href: "/admin/gonderi-aciklama-tipleri", label: "Gönderi Açıklama Tipleri", icon: Tag },
   { href: "/admin/yardim-ogeleri", label: "Yardım Öğeleri", icon: HelpCircle },
   { href: "/admin/kullanicilar", label: "Kullanıcılar", icon: UsersRound },
@@ -182,3 +186,5 @@ export function AdminSidebar({
     </>
   );
 }
+
+

@@ -270,6 +270,10 @@ function AdminFinancialsTab() {
         <div className="bg-white p-5 rounded-2xl ring-1 ring-slate-200">
           <div className="text-sm font-medium text-slate-500 mb-1">Toplam Ciro (Müşteri)</div>
           <div className="text-2xl font-extrabold text-slate-900">{(data.total_revenue || 0).toLocaleString("tr-TR", {maximumFractionDigits:2})} ₺</div>
+          <div className="flex gap-3 mt-1.5 text-[11px] font-semibold text-slate-400">
+            <span>${(data.total_revenue_usd || 0).toLocaleString("tr-TR", {maximumFractionDigits:2})}</span>
+            <span>€{(data.total_revenue_eur || 0).toLocaleString("tr-TR", {maximumFractionDigits:2})}</span>
+          </div>
         </div>
         <div className="bg-white p-5 rounded-2xl ring-1 ring-slate-200">
           <div className="text-sm font-medium text-slate-500 mb-1">Yurt Dışı Maliyeti</div>
@@ -279,9 +283,13 @@ function AdminFinancialsTab() {
           <div className="text-sm font-medium text-slate-500 mb-1">Yurt İçi Maliyeti</div>
           <div className="text-2xl font-extrabold text-red-500">- {(data.total_domestic || 0).toLocaleString("tr-TR", {maximumFractionDigits:2})} ₺</div>
         </div>
-        <div className="bg-indigo-600 p-5 rounded-2xl ring-1 ring-indigo-500 shadow-lg shadow-indigo-200">
+        <div className="bg-gradient-to-br from-indigo-600 to-violet-600 p-5 rounded-2xl ring-1 ring-indigo-500 shadow-lg shadow-indigo-200">
           <div className="text-sm font-semibold text-indigo-200 mb-1">Tahmini Net Kâr</div>
           <div className="text-2xl font-extrabold text-white">{(data.net_profit || 0).toLocaleString("tr-TR", {maximumFractionDigits:2})} ₺</div>
+          <div className="flex gap-3 mt-1.5 text-[11px] font-bold text-indigo-200/80">
+            <span>≈ ${(data.net_profit_usd || 0).toLocaleString("tr-TR", {maximumFractionDigits:2})}</span>
+            <span>≈ €{(data.net_profit_eur || 0).toLocaleString("tr-TR", {maximumFractionDigits:2})}</span>
+          </div>
         </div>
       </div>
 

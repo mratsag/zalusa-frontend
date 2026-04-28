@@ -8,8 +8,9 @@ import {
   Clock, Star, Zap, BadgeDollarSign, Search, Plus, BookOpen,
 } from "lucide-react";
 import {
-  shipmentService, addressService,
+  shipmentService, addressService, domesticService,
   type ApiCarrierQuote, type ApiAddress, type ApiPackage,
+  type DomesticCarrierQuote,
 } from "@/lib/services/shipmentService";
 import { CitySelect } from "@/components/ui/city-select";
 import { useToast } from "@/components/ui/toast";
@@ -24,6 +25,8 @@ const WIZARD_STEPS = [
   { label: "Adresler", icon: MapPin },
   { label: "Proforma", icon: Receipt },
   { label: "Onay", icon: CheckCircle2 },
+  { label: "Yurt İçi", icon: Truck },
+  { label: "Ödeme", icon: Receipt },
 ];
 
 const SHIPMENT_TYPES = [
@@ -43,6 +46,7 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [capacityModal, setCapacityModal] = useState<string | null>(null);
+  const [showAddressBook, setShowAddressBook] = useState(false);
 
   // Step 0: Temel bilgiler
   const [shipmentType, setShipmentType] = useState("Paket");
@@ -69,6 +73,14 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
   const [selectedSenderAddressId, setSelectedSenderAddressId] = useState<number | null>(null);
   const [selectedReceiverAddressId, setSelectedReceiverAddressId] = useState<number | null>(null);
   const [showNewReceiver, setShowNewReceiver] = useState(false);
+  const [showNewSender, setShowNewSender] = useState(false);
+  const [newSenderName, setNewSenderName] = useState("");
+  const [newSenderPhone, setNewSenderPhone] = useState("");
+  const [newSenderAddress, setNewSenderAddress] = useState("");
+  const [newSenderCity, setNewSenderCity] = useState("");
+  const [newSenderTown, setNewSenderTown] = useState("");
+  const [newSenderCompany, setNewSenderCompany] = useState("");
+  const [savingSender, setSavingSender] = useState(false);
   const [receiverName, setReceiverName] = useState("");
   const [receiverCompany, setReceiverCompany] = useState("");
   const [receiverPhone, setReceiverPhone] = useState("");
@@ -84,6 +96,14 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
   const [productQuantity, setProductQuantity] = useState("1");
   const [productUnitPrice, setProductUnitPrice] = useState("");
   const [productHsCode, setProductHsCode] = useState("");
+
+  // Step 6: Basit Kargo (Yurt İçi Transfer)
+  const [domesticCarriers, setDomesticCarriers] = useState<DomesticCarrierQuote[]>([]);
+  const [selectedDomesticHandler, setSelectedDomesticHandler] = useState("");
+  const [domesticLoading, setDomesticLoading] = useState(false);
+  const [createdShipmentId, setCreatedShipmentId] = useState<string | null>(null);
+  const [createdTrackingCode, setCreatedTrackingCode] = useState("");
+  const [createdTotalCost, setCreatedTotalCost] = useState(0);
 
   const [descriptionTypes, setDescriptionTypes] = useState<{ id: number; label: string }[]>([]);
 
@@ -184,10 +204,13 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
       }
 
       if (step === 3) {
-        if (!selectedSenderAddressId) { setError("Gönderici adresi seçiniz."); setLoading(false); return; }
-        if (!selectedReceiverAddressId && !showNewReceiver) { setError("Alıcı adresi seçiniz veya yeni adres giriniz."); setLoading(false); return; }
-        if (showNewReceiver && (!receiverName || !receiverAddress || !receiverCity)) {
-          setError("Alıcı bilgilerini eksiksiz giriniz."); setLoading(false); return;
+        if (!selectedSenderAddressId) { setError("Gönderici adresi seçmeden devam edemezsiniz. Lütfen bir gönderici adresi seçin veya yeni adres ekleyin."); setLoading(false); return; }
+        if (!selectedReceiverAddressId && !showNewReceiver) { setError("Alıcı adresi seçmeden devam edemezsiniz. Lütfen bir alıcı adresi seçin veya yeni adres ekleyin."); setLoading(false); return; }
+        if (showNewReceiver) {
+          if (!receiverName.trim()) { setError("Alıcı ad soyad alanını doldurmadan devam edemezsiniz."); setLoading(false); return; }
+          if (!receiverPhone.trim()) { setError("Alıcı telefon numarasını girmeden devam edemezsiniz."); setLoading(false); return; }
+          if (!receiverCity) { setError("Alıcı şehir bilgisini seçmeden devam edemezsiniz."); setLoading(false); return; }
+          if (!receiverAddress.trim()) { setError("Alıcı açık adres bilgisini girmeden devam edemezsiniz."); setLoading(false); return; }
         }
       }
 
@@ -243,7 +266,27 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
         autoFinalize: true,
       });
 
-      onComplete(result.trackingCode, result.totalCost);
+      setCreatedShipmentId(String(result.shipmentId || ""));
+      setCreatedTrackingCode(result.trackingCode);
+      setCreatedTotalCost(result.totalCost);
+
+      // Basit kargo adımına geç (Step 6)
+      setStep(6);
+
+      // Basit kargo fiyatlarını çek
+      setDomesticLoading(true);
+      try {
+        const pkgs = shipmentType === "Belge"
+          ? [{ width: 1, height: 1, depth: 1, weight: 0.5 }]
+          : [{ width: w, height: h, depth: l, weight: kg }];
+        const res = await domesticService.getPrices(pkgs, result.shipmentId || result.trackingCode);
+        setDomesticCarriers(res.carriers || []);
+      } catch {
+        // Basit kargo yoksa direkt ödemeye yönlendir
+        setDomesticCarriers([]);
+      } finally {
+        setDomesticLoading(false);
+      }
     } catch (err: any) {
       const msg = err?.message || "Kargo oluşturulamadı.";
       setError(msg);
@@ -263,8 +306,8 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
   // ── CSS classes ──
   const inputCls = "w-full h-9 px-3 rounded-lg bg-slate-50 text-[13px] text-slate-700 border border-slate-200 outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-100 transition-all";
   const labelCls = "block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1";
-  const cardCls = "rounded-xl p-3 ring-1 ring-slate-200 bg-white transition-all cursor-pointer hover:ring-blue-200";
-  const cardSelectedCls = "rounded-xl p-3 ring-2 ring-blue-500 bg-blue-50/60 transition-all cursor-pointer";
+  const cardCls = "rounded-xl p-3 ring-1 ring-slate-200 bg-white text-slate-800 transition-all cursor-pointer hover:ring-blue-200";
+  const cardSelectedCls = "rounded-xl p-3 ring-2 ring-blue-500 bg-blue-50 text-slate-800 transition-all cursor-pointer";
 
   return (
     <div className="flex flex-col h-full">
@@ -419,7 +462,7 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                     <button key={q.carrierId} onClick={() => setSelectedCarrierId(q.carrierId)}
                       className={`w-full text-left ${isSelected ? cardSelectedCls : cardCls}`}>
                       <div className="flex items-center gap-3">
-                        <div className={`h-9 w-9 rounded-full flex items-center justify-center text-white text-[11px] font-bold shadow-sm ${q.logoColor || "bg-slate-600"}`}>
+                        <div className="h-9 w-9 rounded-full flex items-center justify-center text-white text-[11px] font-bold shadow-sm" style={{ backgroundColor: q.logoColor || "#475569" }}>
                           {q.logoLetter}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -533,14 +576,108 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                     </div>
                   )}
 
-                  {/* Başlık + Ekle */}
                   <div className="flex items-center justify-between">
                     <p className="text-[14px] font-bold text-slate-800">Kayıtlı Gönderici Adresleriniz</p>
-                    <button className="text-[12px] font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
+                    <button onClick={() => { setShowNewSender(!showNewSender); if (!showNewSender) setSelectedSenderAddressId(null); }} className="text-[12px] font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
                       <Plus className="h-4 w-4" />
-                      Yeni Gönderici Adresi Ekle
+                      {showNewSender ? "Vazgeç" : "Yeni Gönderici Adresi Ekle"}
                     </button>
                   </div>
+
+                  {/* Yeni Gönderici Formu */}
+                  {showNewSender && (
+                    <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 space-y-3">
+                      <p className="text-[13px] font-bold text-slate-800 mb-2">Yeni Gönderici Adresi</p>
+                      <input type="text" value={newSenderName} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); if (v.length <= 60) setNewSenderName(v); }}
+                        placeholder="Ad Soyad *" maxLength={60} className={inputCls} />
+                      <input type="text" value={newSenderCompany} onChange={e => setNewSenderCompany(e.target.value)}
+                        placeholder="Firma adı *" className={inputCls} />
+                      <input type="tel" inputMode="numeric" value={newSenderPhone}
+                        onChange={e => { const v = e.target.value.replace(/[^0-9]/g, ""); if (v.length <= 20) setNewSenderPhone(v); }}
+                        placeholder="Telefon * (sadece rakam)" maxLength={20} className={inputCls} />
+                      <div>
+                        <label className={labelCls}>Şehir</label>
+                        <CitySelect
+                          countryCode="TR"
+                          value={newSenderCity}
+                          onChange={(v) => setNewSenderCity(v)}
+                          placeholder="Şehir seçiniz"
+                          className="h-9 text-[13px]"
+                        />
+                      </div>
+                      <input type="text" value={newSenderTown} onChange={e => { if (e.target.value.length <= 25) setNewSenderTown(e.target.value); }}
+                        placeholder="İlçe *" maxLength={25} className={inputCls} />
+                      <input type="text" value={newSenderAddress} onChange={e => setNewSenderAddress(e.target.value)}
+                        placeholder="Açık adres *" className={inputCls} />
+                      <button
+                        onClick={async () => {
+                          if (!newSenderName.trim()) {
+                            setError("Lütfen ad soyad alanını doldurun. Bu alan boş bırakılamaz.");
+                            return;
+                          }
+                          if (!newSenderCompany.trim()) {
+                            setError("Lütfen firma adı alanını doldurun. Bu alan boş bırakılamaz.");
+                            return;
+                          }
+                          if (!newSenderPhone.trim()) {
+                            setError("Lütfen telefon numaranızı girin. Bu alan boş bırakılamaz.");
+                            return;
+                          }
+                          if (!newSenderCity) {
+                            setError("Lütfen şehir seçin. Şehir seçmeden devam edemezsiniz.");
+                            return;
+                          }
+                          if (!newSenderTown.trim()) {
+                            setError("Lütfen ilçe bilgisini girin. İlçe alanını doldurmadan devam edemezsiniz.");
+                            return;
+                          }
+                          if (!newSenderAddress.trim()) {
+                            setError("Lütfen açık adres bilgisini girin. Bu alan boş bırakılamaz.");
+                            return;
+                          }
+                          // İlçe validasyonu: en az 2 karakter ve sadece harf içermeli
+                          const townTrimmed = newSenderTown.trim();
+                          if (townTrimmed.length < 2 || /\d/.test(townTrimmed)) {
+                            setError("Geçerli bir ilçe adı giriniz. İlçe adı en az 2 karakter olmalı ve rakam içermemelidir.");
+                            return;
+                          }
+                          setSavingSender(true);
+                          try {
+                            await addressService.create({
+                              type: "sender",
+                              label: `${newSenderName} - ${newSenderCity}`,
+                              name: newSenderName,
+                              company: newSenderCompany,
+                              phone: newSenderPhone,
+                              address: newSenderAddress,
+                              city: newSenderCity,
+                              town: townTrimmed,
+                              countryCode: "TR",
+                            });
+                            // Adresleri yeniden yükle
+                            const r = await addressService.list();
+                            const senders = r.addresses.filter(a => a.type === "sender");
+                            setSenderAddresses(senders);
+                            // Yeni eklenen adresi seç
+                            if (senders.length > 0) setSelectedSenderAddressId(senders[0].id);
+                            setShowNewSender(false);
+                            setNewSenderName(""); setNewSenderCompany(""); setNewSenderPhone(""); setNewSenderAddress(""); setNewSenderCity(""); setNewSenderTown("");
+                            toast.success("Gönderici adresi eklendi!");
+                          } catch (err: any) {
+                            setError(err.message || "Adres kaydedilemedi.");
+                          } finally {
+                            setSavingSender(false);
+                          }
+                        }}
+                        disabled={savingSender}
+                        className="w-full h-10 rounded-xl text-[13px] font-semibold text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        style={{ background: "linear-gradient(135deg, #3d6bff 0%, #2247e6 100%)" }}
+                      >
+                        {savingSender ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                        Adresi Kaydet
+                      </button>
+                    </div>
+                  )}
 
                   {/* Arama */}
                   <div className="relative">
@@ -551,7 +688,7 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                   </div>
 
                   {/* Adres Kartları */}
-                  {senderAddresses.length === 0 ? (
+                  {!showNewSender && (senderAddresses.length === 0 ? (
                     <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                       <User className="h-10 w-10 text-slate-300 mx-auto mb-3" />
                       <p className="text-[13px] text-slate-500 font-medium">Kayıtlı gönderici adresi yok.</p>
@@ -600,7 +737,7 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                         );
                       })}
                     </div>
-                  )}
+                  ))}
                 </div>
               )}
 
@@ -727,12 +864,13 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                           </button>
                         )}
                       </div>
-                      <input type="text" value={receiverName} onChange={e => setReceiverName(e.target.value)}
-                        placeholder="Alıcı adı soyadı" className={inputCls} />
+                      <input type="text" value={receiverName} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); if (v.length <= 60) setReceiverName(v); }}
+                        placeholder="Alıcı adı soyadı *" maxLength={60} className={inputCls} />
                       <input type="text" value={receiverCompany} onChange={e => setReceiverCompany(e.target.value)}
                         placeholder="Firma adı (opsiyonel)" className={inputCls} />
-                      <input type="text" value={receiverPhone} onChange={e => setReceiverPhone(e.target.value)}
-                        placeholder="Telefon" className={inputCls} />
+                      <input type="tel" inputMode="numeric" value={receiverPhone}
+                        onChange={e => { const v = e.target.value.replace(/[^0-9]/g, ""); if (v.length <= 20) setReceiverPhone(v); }}
+                        placeholder="Telefon * (sadece rakam)" maxLength={20} className={inputCls} />
                       <div>
                         <label className={labelCls}>Şehir</label>
                         <CitySelect
@@ -744,7 +882,7 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                         />
                       </div>
                       <input type="text" value={receiverAddress} onChange={e => setReceiverAddress(e.target.value)}
-                        placeholder="Açık adres" className={inputCls} />
+                        placeholder="Açık adres *" className={inputCls} />
                     </div>
                   )}
 
@@ -755,7 +893,7 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                     </div>
                     <p className="text-[12px] text-indigo-700 leading-relaxed">
                       <span className="font-semibold">İpucu:</span> Adres defterinde kayıtlı adreslere hızlı erişebilirsin.{" "}
-                      <span className="font-bold text-indigo-800 underline cursor-pointer hover:text-indigo-900 transition-colors">Adres Defterim →</span>
+                      <span onClick={() => setShowAddressBook(true)} className="font-bold text-indigo-800 underline cursor-pointer hover:text-indigo-900 transition-colors">Adres Defterim →</span>
                     </p>
                   </div>
                 </div>
@@ -881,11 +1019,126 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
             </div>
           </div>
         )}
+
+        {/* ══════════ STEP 6: Basit Kargo (Yurt İçi Transfer) ══════════ */}
+        {step === 6 && (
+          <div className="space-y-3">
+            <div className="bg-white rounded-xl p-4 ring-1 ring-slate-200 space-y-3">
+              <h4 className="text-[13px] font-bold text-slate-800 flex items-center gap-2">
+                <Truck className="h-4 w-4 text-indigo-500" />
+                Yurt İçi Kargo Seçimi
+              </h4>
+              <p className="text-[11px] text-slate-500">
+                Paketinizi en yakın kargo şubesine teslim edebilirsiniz. Bir yurt içi kargo firması seçin.
+              </p>
+
+              {domesticLoading ? (
+                <div className="flex items-center justify-center py-6 gap-2 text-slate-500 text-[12px]">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Yurt içi kargo seçenekleri yükleniyor...
+                </div>
+              ) : domesticCarriers.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-[12px] text-slate-400">Yurt içi kargo seçeneği bulunamadı.</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Ödeme adımına devam edebilirsiniz.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {domesticCarriers.map((carrier) => (
+                    <button key={carrier.handlerCode} onClick={() => setSelectedDomesticHandler(carrier.handlerCode)}
+                      className={`w-full text-left p-3 rounded-xl border-2 transition-all ${
+                        selectedDomesticHandler === carrier.handlerCode
+                          ? "border-indigo-500 bg-indigo-50"
+                          : "border-slate-200 bg-white hover:border-indigo-200"
+                      }`}>
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-[11px] font-bold shrink-0">
+                          {carrier.name?.substring(0, 2).toUpperCase() || "KR"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[13px] font-semibold text-slate-800">{carrier.name}</div>
+                          {carrier.estimatedDays && (
+                            <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                              <Clock className="h-3 w-3" /> {carrier.estimatedDays}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <div className="text-[14px] font-bold text-slate-800">
+                            {carrier.price?.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
+                          </div>
+                        </div>
+                        <div className={`h-5 w-5 rounded-full flex items-center justify-center ring-1 ${
+                          selectedDomesticHandler === carrier.handlerCode ? "bg-indigo-600 ring-indigo-600 text-white" : "ring-slate-300"
+                        }`}>
+                          {selectedDomesticHandler === carrier.handlerCode && <Check className="h-3 w-3" />}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ══════════ STEP 7: Ödeme ══════════ */}
+        {step === 7 && (
+          <div className="space-y-3">
+            <div className="bg-white rounded-xl p-4 ring-1 ring-slate-200 space-y-4">
+              <h4 className="text-[13px] font-bold text-slate-800 flex items-center gap-2">
+                <Receipt className="h-4 w-4 text-green-500" />
+                Ödeme
+              </h4>
+
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                <CheckCircle2 className="h-10 w-10 text-green-500 mx-auto mb-2" />
+                <p className="text-[14px] font-bold text-green-800">Kargonuz başarıyla oluşturuldu!</p>
+                <p className="text-[12px] text-green-700 mt-1">Takip Kodu: <strong>{createdTrackingCode}</strong></p>
+                <p className="text-[14px] font-bold text-green-800 mt-2">
+                  Toplam: {createdTotalCost.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
+                </p>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl p-4 space-y-2">
+                <p className="text-[12px] font-semibold text-slate-700">💳 Ödeme Yöntemi: Havale / EFT</p>
+                <div className="space-y-1 text-[11px]">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Banka</span>
+                    <span className="font-semibold text-slate-800">Garanti BBVA</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">IBAN</span>
+                    <span className="font-mono font-bold text-blue-600 text-[10px]">TR39 0006 2000 0910 0006 2868 13</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  if (createdShipmentId) {
+                    window.location.href = `/panel/odeme/${createdShipmentId}`;
+                  }
+                }}
+                className="w-full h-10 rounded-xl text-[13px] font-bold text-white flex items-center justify-center gap-2 transition-all"
+                style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)" }}>
+                <Receipt className="h-4 w-4" />
+                Ödeme Sayfasına Git
+              </button>
+
+              <button
+                onClick={() => onComplete(createdTrackingCode, createdTotalCost)}
+                className="w-full h-9 rounded-xl text-[12px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 flex items-center justify-center gap-2 transition-colors">
+                <Package className="h-3.5 w-3.5" />
+                Gönderilerime Dön
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Footer ── */}
       <div className="px-4 py-3 bg-white border-t border-slate-100 shrink-0 flex items-center gap-2">
-        {step > 0 && (
+        {step > 0 && step < 6 && (
           <button onClick={() => { setStep(s => s - 1); setError(null); }}
             className="h-9 px-3 rounded-lg text-[12px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 flex items-center gap-1 transition-colors">
             <ArrowLeft className="h-3.5 w-3.5" />
@@ -899,13 +1152,19 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
             style={{ background: "linear-gradient(135deg, #3d6bff 0%, #2247e6 100%)" }}>
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>İleri <ArrowRight className="h-3.5 w-3.5" /></>}
           </button>
-        ) : (
+        ) : step === 5 ? (
           <button onClick={handleCreate} disabled={loading}
             className="h-9 px-4 rounded-lg text-[12px] font-bold text-white flex items-center gap-1.5 transition-all disabled:opacity-50"
             style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)" }}>
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><CheckCircle2 className="h-3.5 w-3.5" /> Onayla ve Oluştur</>}
           </button>
-        )}
+        ) : step === 6 ? (
+          <button onClick={() => setStep(7)} disabled={domesticLoading}
+            className="h-9 px-4 rounded-lg text-[12px] font-bold text-white flex items-center gap-1.5 transition-all disabled:opacity-50"
+            style={{ background: "linear-gradient(135deg, #3d6bff 0%, #2247e6 100%)" }}>
+            {domesticCarriers.length === 0 ? "Ödemeye Geç" : selectedDomesticHandler ? "Devam Et" : "Atla"} <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        ) : null}
       </div>
 
       {/* ── Capacity Exceeded Modal ── */}
@@ -932,6 +1191,110 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
               <button type="button" onClick={() => setCapacityModal(null)} className="rounded-xl bg-white hover:bg-slate-50 border border-slate-200 px-5 py-2.5 text-[13px] font-bold text-slate-900 transition-colors">
                 Kapat
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ── Adres Defteri Modalı ── */}
+      {showAddressBook && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowAddressBook(false)}>
+          <div className="mx-4 w-full max-w-lg rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-purple-50 shrink-0">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                    <BookOpen className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-[15px] font-bold text-slate-900">Adres Defterim</h3>
+                    <p className="text-[11px] text-slate-500">Kayıtlı adreslerinizden seçin</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowAddressBook(false)} className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-colors">
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="overflow-y-auto flex-1 p-5 space-y-4">
+              {/* Gönderici Adresleri */}
+              {senderAddresses.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">📤 Gönderici Adresleri</p>
+                  <div className="space-y-2">
+                    {senderAddresses.map(a => (
+                      <button key={a.id} onClick={() => {
+                        setSelectedSenderAddressId(a.id);
+                        setShowNewSender(false);
+                        setAddressTab("sender");
+                        setShowAddressBook(false);
+                        toast.success(`✅ Gönderici "${a.name}" seçildi`);
+                      }}
+                        className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                          selectedSenderAddressId === a.id
+                            ? "border-indigo-500 bg-indigo-50/50"
+                            : "border-slate-200 bg-white hover:border-indigo-200 hover:shadow-sm"
+                        }`}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[13px] font-bold text-slate-800">{a.name}</span>
+                          {selectedSenderAddressId === a.id && (
+                            <div className="h-5 w-5 rounded-full bg-indigo-600 text-white flex items-center justify-center">
+                              <Check className="h-3 w-3" />
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1">{a.address}{a.postalCode ? `, ${a.postalCode}` : ""} {a.city}</p>
+                        {a.phone && <p className="text-[11px] text-slate-400 mt-0.5">{a.phone}</p>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Alıcı Adresleri */}
+              {receiverAddresses.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">📥 Alıcı Adresleri</p>
+                  <div className="space-y-2">
+                    {receiverAddresses.map(a => (
+                      <button key={a.id} onClick={() => {
+                        setSelectedReceiverAddressId(a.id);
+                        setShowNewReceiver(false);
+                        setAddressTab("receiver");
+                        setShowAddressBook(false);
+                        toast.success(`✅ Alıcı "${a.name}" seçildi`);
+                      }}
+                        className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                          selectedReceiverAddressId === a.id
+                            ? "border-green-500 bg-green-50/50"
+                            : "border-slate-200 bg-white hover:border-green-200 hover:shadow-sm"
+                        }`}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[13px] font-bold text-slate-800">{a.name}</span>
+                          {selectedReceiverAddressId === a.id && (
+                            <div className="h-5 w-5 rounded-full bg-green-600 text-white flex items-center justify-center">
+                              <Check className="h-3 w-3" />
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1">{a.address}{a.postalCode ? `, ${a.postalCode}` : ""} {a.city}{a.countryCode ? `, ${a.countryCode}` : ""}</p>
+                        {a.phone && <p className="text-[11px] text-slate-400 mt-0.5">{a.phone}</p>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Boş durum */}
+              {senderAddresses.length === 0 && receiverAddresses.length === 0 && (
+                <div className="text-center py-10">
+                  <MapPin className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+                  <p className="text-[13px] text-slate-500 font-medium">Henüz kayıtlı adresiniz yok.</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Kargo oluşturdukça adresleriniz otomatik kaydedilecektir.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -169,6 +169,59 @@ export interface ResellerCustomer {
   createdAt: string;
 }
 
+export interface CustomerShipment {
+  id: number;
+  trackingCode: string;
+  status: string;
+  shipmentType: string;
+  senderCountry: string;
+  receiverCountry: string;
+  carrierPriceTry: number;
+  hasInsurance: boolean;
+  carrierName: string;
+  serviceName: string;
+  createdAt: string;
+}
+
+export interface ShipmentDetail {
+  id: number;
+  trackingCode: string;
+  status: string;
+  shipmentType: string;
+  senderCountry: string;
+  receiverCountry: string;
+  receiverPostalCode: string;
+  contentDescription: string;
+  note: string;
+  carrierName: string;
+  serviceName: string;
+  carrierPrice: number;
+  carrierCurrency: string;
+  carrierPriceTry: number;
+  originalPriceTry: number;
+  discountAmountTry: number;
+  hasInsurance: boolean;
+  insuranceCost: number;
+  receiverName: string;
+  receiverCompany: string;
+  receiverPhone: string;
+  receiverAddress: string;
+  receiverCity: string;
+  proformaDescription: string;
+  proformaCurrency: string;
+  proformaTotal: number;
+  totalActualWeightKg: number;
+  totalVolumetricWeightKg: number;
+  totalChargeableWeightKg: number;
+  totalPackageCount: number;
+  assetReference: string;
+  packages: { widthCm: number; lengthCm: number; heightCm: number; weightKg: number; packageCount: number }[] | null;
+  proformaItems: { productDescription: string; hsCode: string; quantity: number; unitPrice: number; originCountry: string; lineTotal: number }[] | null;
+  trackingEvents: { type: string; description: string; location: string; eventDate: string; createdAt: string }[] | null;
+  customer: { firstName: string; lastName: string; email: string };
+  createdAt: string;
+}
+
 // ─── Coupon Types ─────────────────────────────────────────────────────────────
 
 export interface ResellerCoupon {
@@ -265,6 +318,16 @@ export const resellerService = {
   /** Müşteri bağını çöz (çıkar) */
   unlinkCustomer: (customerId: number) =>
     apiDelete<{ message: string }>(`/api/reseller/customers/${customerId}`),
+
+  /** Müşterinin gönderilerini listele */
+  customerShipments: (customerId: number) =>
+    apiGet<{ shipments: CustomerShipment[]; total: number }>(
+      `/api/reseller/customers/${customerId}/shipments`
+    ),
+
+  /** Gönderi detayı */
+  shipmentDetail: (shipmentId: number) =>
+    apiGet<ShipmentDetail>(`/api/reseller/shipments/${shipmentId}`),
 
   linkVerify: (email: string, code: string) =>
     apiPost<{ message: string }>("/api/reseller/link-verify", { email, code }),

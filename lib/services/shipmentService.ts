@@ -142,7 +142,8 @@ export type ApiAddress = {
   address: string;
   postalCode: string;
   city: string;
-  stateProvince: string;  // ← YENİ
+  town?: string;
+  stateProvince: string;
   countryCode: string;
   isDefault: boolean;
 };
@@ -374,6 +375,7 @@ export const addressService = {
     address: string;
     postalCode?: string;
     city: string;
+    town?: string;
     stateProvince?: string;
     countryCode: string;
     isDefault?: boolean;
@@ -383,6 +385,22 @@ export const addressService = {
 
   delete(id: number) {
     return apiDelete<{ message: string }>(`/api/addresses/${id}`);
+  },
+
+  update(id: number, payload: {
+    label?: string;
+    name: string;
+    company?: string;
+    phone?: string;
+    address: string;
+    postalCode?: string;
+    city: string;
+    town?: string;
+    stateProvince?: string;
+    countryCode?: string;
+    isDefault?: boolean;
+  }) {
+    return apiPut<{ message: string }>(`/api/addresses/${id}`, payload);
   },
 };
 

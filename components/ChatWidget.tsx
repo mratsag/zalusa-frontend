@@ -23,6 +23,9 @@ import {
   Minimize2,
   ArrowLeft,
   User,
+  History,
+  FileText,
+  ChevronRight,
 } from "lucide-react";
 import ShipmentWizard from "@/components/ShipmentWizard";
 
@@ -39,7 +42,7 @@ const quickActions = [
 ];
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
-type ChatMode = "ai" | "waiting" | "live" | "shipment" | "tracking";
+type ChatMode = "ai" | "live" | "shipment" | "tracking" | "history";
 
 interface ChatWidgetProps {
   open?: boolean;
@@ -89,6 +92,10 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
   const [recentShipments, setRecentShipments] = useState<any[]>([]);
   const [recentLoading, setRecentLoading] = useState(false);
 
+  // History state
+  const [historyItems, setHistoryItems] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -98,10 +105,13 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Focus input when opened
+  // Focus input when opened (only on desktop to prevent mobile keyboard auto-open)
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 300);
+      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+      if (!isMobile) {
+        setTimeout(() => inputRef.current?.focus(), 300);
+      }
       setPulseButton(false);
     }
   }, [isOpen]);
@@ -138,7 +148,7 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
       return;
     }
 
-    setChatMode("waiting");
+    setChatMode("live");
     setMessages((prev) => [
       ...prev,
       {
@@ -146,7 +156,7 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
         role: "assistant",
         type: "text",
         content:
-          "🔄 Müşteri temsilcisine bağlanılıyor... Lütfen bekleyin.",
+          "✅ Canlı destek hattına bağlandınız. Mesajınızı yazabilirsiniz.",
         timestamp: new Date(),
       },
     ]);
@@ -166,7 +176,6 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
 
         switch (data.type) {
           case "agent_joined":
-            setChatMode("live");
             setMessages((prev) => [
               ...prev,
               {
@@ -246,7 +255,7 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
 
     ws.onclose = () => {
       console.log("[LiveSupport] WebSocket bağlantısı kapandı");
-      if (chatMode === "live" || chatMode === "waiting") {
+      if (chatMode === "live") {
         setChatMode("ai");
       }
       wsRef.current = null;
@@ -322,8 +331,6 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
         return;
       }
 
-      // Waiting modda gönderme
-      if (chatMode === "waiting") return;
 
       const userMsg = {
         id: `user-${Date.now()}`,
@@ -426,7 +433,20 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
       if (!res.ok || data.found === false) {
         setTrackingError(data.error || "Kargo bulunamadı.");
       } else {
-        setTrackingResult(data);
+        // Backend snake_case → Frontend camelCase mapping
+        setTrackingResult({
+          trackingCode: data.tracking_code || data.trackingCode || code,
+          status: data.raw_status || data.status || "unknown",
+          statusLabel: data.main_status || data.statusLabel || "Bilinmiyor",
+          carrierName: data.carrier || data.carrierName || "",
+          serviceName: data.service_name || data.serviceName || "",
+          receiverCountry: data.target_country || data.receiverCountry || "",
+          senderCountry: data.sender_country || data.senderCountry || "TR",
+          shipmentType: data.shipment_type || data.shipmentType || "Paket",
+          createdAt: data.created_at || data.createdAt || "",
+          priceTRY: data.price_try || data.priceTRY || null,
+          events: data.events || [],
+        });
       }
     } catch {
       setTrackingError("Bağlantı hatası. Lütfen tekrar deneyin.");
@@ -531,37 +551,37 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
   const headerGradient =
     chatMode === "live"
       ? "linear-gradient(135deg, #10b981 0%, #059669 60%, #047857 100%)"
-      : chatMode === "waiting"
-        ? "linear-gradient(135deg, #f59e0b 0%, #d97706 60%, #b45309 100%)"
-        : chatMode === "tracking"
-          ? "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 60%, #4c1d95 100%)"
-          : chatMode === "shipment"
-            ? "linear-gradient(135deg, #3d6bff 0%, #2247e6 60%, #152b8a 100%)"
+      : chatMode === "tracking"
+        ? "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 60%, #4c1d95 100%)"
+        : chatMode === "shipment"
+          ? "linear-gradient(135deg, #3d6bff 0%, #2247e6 60%, #152b8a 100%)"
+          : chatMode === "history"
+            ? "linear-gradient(135deg, #f59e0b 0%, #d97706 60%, #92400e 100%)"
             : "linear-gradient(135deg, #3d6bff 0%, #2247e6 60%, #152b8a 100%)";
 
   const headerTitle =
     chatMode === "live"
       ? "Canlı Destek"
-      : chatMode === "waiting"
-        ? "Bağlanılıyor..."
-        : chatMode === "tracking"
-          ? "Kargo Takip"
-          : chatMode === "shipment"
-            ? "Kargo Oluştur"
+      : chatMode === "tracking"
+        ? "Kargo Takip"
+        : chatMode === "shipment"
+          ? "Kargo Oluştur"
+          : chatMode === "history"
+            ? "Geçmiş İşlemlerim"
             : ASSISTANT_NAME;
 
   const headerStatusText =
     chatMode === "live"
       ? "Temsilci bağlı"
-      : chatMode === "waiting"
-        ? "Temsilci bekleniyor"
-        : chatMode === "tracking"
-          ? "Takip kodunuzla kargonuzu sorgulayın"
-          : chatMode === "shipment"
-            ? "Form doldurarak kargo oluşturun"
+      : chatMode === "tracking"
+        ? "Takip kodunuzla kargonuzu sorgulayın"
+        : chatMode === "shipment"
+          ? "Form doldurarak kargo oluşturun"
+          : chatMode === "history"
+            ? "Tüm kargo ve destek geçmişiniz"
             : "Çevrimiçi";
 
-  const HeaderIcon = chatMode === "tracking" ? Search : chatMode === "shipment" ? Package : chatMode === "ai" ? Bot : Headphones;
+  const HeaderIcon = chatMode === "tracking" ? Search : chatMode === "shipment" ? Package : chatMode === "history" ? History : chatMode === "ai" ? Bot : Headphones;
 
   // ─── Render ────────────────────────────────────────────────────────────
   if (typeof document === "undefined") return null;
@@ -628,11 +648,7 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
                 </h3>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span
-                    className={`h-2 w-2 rounded-full ${
-                      chatMode === "waiting"
-                        ? "bg-yellow-300 animate-pulse"
-                        : "bg-emerald-400 animate-pulse"
-                    }`}
+                    className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"
                   />
                   <span className="text-[11px] text-white/80 font-medium">
                     {headerStatusText}
@@ -648,6 +664,28 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
                 title="Sohbeti sıfırla"
               >
                 <RotateCcw className="h-3.5 w-3.5 text-white" />
+              </button>
+              <button
+                onClick={() => {
+                  setChatMode("history");
+                  setIsExpanded(true);
+                  // Fetch history
+                  const token = typeof window !== "undefined" ? localStorage.getItem("zalusa.token") : null;
+                  if (token) {
+                    setHistoryLoading(true);
+                    fetch(`${API_BASE}/api/shipments/recent`, {
+                      headers: { Authorization: `Bearer ${token}` },
+                    })
+                      .then((r) => r.json())
+                      .then((data) => setHistoryItems(data.shipments ?? []))
+                      .catch(() => setHistoryItems([]))
+                      .finally(() => setHistoryLoading(false));
+                  }
+                }}
+                className="h-8 w-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                title="Geçmiş İşlemler"
+              >
+                <History className="h-3.5 w-3.5 text-white" />
               </button>
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
@@ -808,73 +846,106 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
                 {/* Result card */}
                 {trackingResult && (
                   <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                    {/* Status header */}
-                    <div
-                      className="px-5 py-4 flex items-center gap-3"
-                      style={{
-                        background:
-                          trackingResult.status === "delivered" ? "linear-gradient(135deg, #10b981 0%, #059669 100%)"
-                          : trackingResult.status === "in_transit" || trackingResult.status === "shipped" ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
-                          : trackingResult.status === "cancelled" ? "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
-                          : trackingResult.status === "paid" || trackingResult.status === "label_created" ? "linear-gradient(135deg, #10b981 0%, #059669 100%)"
-                          : "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-                      }}
-                    >
-                      <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                        {trackingResult.status === "delivered" ? <CheckCircle2 className="h-5 w-5 text-white" />
-                          : trackingResult.status === "in_transit" || trackingResult.status === "shipped" ? <Truck className="h-5 w-5 text-white" />
-                          : trackingResult.status === "pending_payment" ? <CreditCard className="h-5 w-5 text-white" />
-                          : trackingResult.status === "draft" ? <Clock className="h-5 w-5 text-white" />
-                          : <Package className="h-5 w-5 text-white" />}
-                      </div>
-                      <div>
-                        <p className="text-[14px] font-bold text-white">{trackingResult.statusLabel}</p>
-                        <p className="text-[11px] text-white/80 font-medium mt-0.5">{trackingResult.trackingCode}</p>
-                      </div>
+                    {/* Takip kodu header (kompakt) */}
+                    <div className="px-5 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-100 flex items-center gap-2">
+                      <Package className="h-4 w-4 text-indigo-500" />
+                      <p className="text-[13px] font-bold text-indigo-700">{trackingResult.trackingCode}</p>
                     </div>
 
-                    {/* Details grid */}
-                    <div className="px-5 py-4 space-y-3">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-xl bg-slate-50 px-3 py-2.5">
-                          <p className="text-[10px] text-slate-400 font-medium">Gönderi Tipi</p>
-                          <p className="text-[13px] text-slate-800 font-semibold mt-0.5">
-                            <Tag className="h-3 w-3 inline-block mr-1 text-slate-400" />
-                            {trackingResult.shipmentType}
-                          </p>
+                    {/* ── Events Timeline (ana bilgilendirme) ── */}
+                    {trackingResult.events?.length > 0 ? (
+                      <div className="px-5 pt-4 pb-2">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="h-6 w-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                            <Clock className="h-3 w-3 text-white" />
+                          </div>
+                          <p className="text-[12px] font-bold text-slate-700">Kargo Hareketleri</p>
                         </div>
-                        <div className="rounded-xl bg-slate-50 px-3 py-2.5">
-                          <p className="text-[10px] text-slate-400 font-medium">Oluşturulma</p>
-                          <p className="text-[13px] text-slate-800 font-semibold mt-0.5">
-                            <Clock className="h-3 w-3 inline-block mr-1 text-slate-400" />
-                            {trackingResult.createdAt}
-                          </p>
+                        <div className="relative">
+                          {trackingResult.events.map((event: any, idx: number) => {
+                            const isFirst = idx === 0;
+                            const isLast = idx === trackingResult.events.length - 1;
+                            return (
+                              <div key={idx} className="flex gap-3 relative">
+                                {!isLast && (
+                                  <div
+                                    className="absolute left-[11px] top-[22px] w-[2px] bg-gradient-to-b from-indigo-200 to-slate-100"
+                                    style={{ height: "calc(100% - 6px)" }}
+                                  />
+                                )}
+                                <div className="relative z-10 shrink-0 mt-1">
+                                  <div
+                                    className={`h-[22px] w-[22px] rounded-full flex items-center justify-center border-2 ${
+                                      isFirst
+                                        ? "bg-indigo-500 border-indigo-300"
+                                        : "bg-white border-slate-200"
+                                    }`}
+                                  >
+                                    <div
+                                      className={`h-2 w-2 rounded-full ${
+                                        isFirst ? "bg-white" : "bg-slate-300"
+                                      }`}
+                                    />
+                                  </div>
+                                </div>
+                                <div className={`flex-1 ${isLast ? "pb-1" : "pb-4"}`}>
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span
+                                      className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                                        isFirst
+                                          ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                                          : "bg-slate-50 text-slate-600 border border-slate-200"
+                                      }`}
+                                    >
+                                      {event.status}
+                                    </span>
+                                    {event.date && (
+                                      <span className="text-[10px] text-slate-400 font-medium">
+                                        {event.date}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {event.description && (
+                                    <p className="text-[12px] text-slate-600 mt-1 leading-relaxed">
+                                      {event.description}
+                                    </p>
+                                  )}
+                                  {event.location && (
+                                    <p className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
+                                      <MapPin className="h-2.5 w-2.5" />
+                                      {event.location}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-                      <div className="rounded-xl bg-slate-50 px-3 py-2.5">
-                        <p className="text-[10px] text-slate-400 font-medium">Güzergah</p>
-                        <p className="text-[13px] text-slate-800 font-semibold mt-0.5">
+                    ) : (
+                      <div className="px-5 py-4 text-center text-[12px] text-slate-400">
+                        Henüz kargo hareketi bulunmamaktadır.
+                      </div>
+                    )}
+
+                    {/* ── Compact details ── */}
+                    <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/50">
+                      <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[11px]">
+                        <span className="text-slate-500">
+                          <Tag className="h-3 w-3 inline-block mr-1 text-slate-400" />
+                          {trackingResult.shipmentType}
+                        </span>
+                        <span className="text-slate-500">
                           <MapPin className="h-3 w-3 inline-block mr-1 text-slate-400" />
                           {trackingResult.senderCountry} → {trackingResult.receiverCountry}
-                        </p>
-                      </div>
-                      {trackingResult.carrierName && (
-                        <div className="rounded-xl bg-slate-50 px-3 py-2.5">
-                          <p className="text-[10px] text-slate-400 font-medium">Kargo Firması</p>
-                          <p className="text-[13px] text-slate-800 font-semibold mt-0.5">
+                        </span>
+                        {trackingResult.carrierName && (
+                          <span className="text-slate-500">
                             <Truck className="h-3 w-3 inline-block mr-1 text-slate-400" />
-                            {trackingResult.carrierName} {trackingResult.serviceName}
-                          </p>
-                        </div>
-                      )}
-                      {trackingResult.priceTRY && (
-                        <div className="rounded-xl bg-emerald-50 px-3 py-2.5 border border-emerald-100">
-                          <p className="text-[10px] text-emerald-500 font-medium">Fiyat</p>
-                          <p className="text-[14px] text-emerald-700 font-bold mt-0.5">
-                            {trackingResult.priceTRY.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
-                          </p>
-                        </div>
-                      )}
+                            {trackingResult.carrierName}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -884,6 +955,94 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
                   <button
                     onClick={backToAI}
                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-semibold bg-white border border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600 hover:shadow-sm transition-all active:scale-95"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" /> Sohbete Dön
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : chatMode === "history" ? (
+            /* ── History Panel ── */
+            <div className="flex-1 overflow-y-auto px-4 py-6" style={{ background: "#fffbeb" }}>
+              <div className="space-y-3">
+                {historyLoading ? (
+                  <div className="flex justify-center py-12">
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 border border-amber-200">
+                      <Loader2 className="h-4 w-4 text-amber-600 animate-spin" />
+                      <span className="text-[12px] font-medium text-amber-700">Geçmiş yükleniyor...</span>
+                    </div>
+                  </div>
+                ) : historyItems.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+                      <History className="h-7 w-7 text-amber-500" />
+                    </div>
+                    <p className="text-[14px] font-semibold text-slate-700">Henüz işlem geçmişiniz yok</p>
+                    <p className="text-[12px] text-slate-400 mt-1">Kargo oluşturduğunuzda burada görünecektir.</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider px-1">Son Gönderileriniz ({historyItems.length})</p>
+                    {historyItems.map((item: any) => {
+                      const statusColors: Record<string, string> = {
+                        pending_payment: "bg-amber-100 text-amber-700 border-amber-200",
+                        paid: "bg-emerald-100 text-emerald-700 border-emerald-200",
+                        label_created: "bg-blue-100 text-blue-700 border-blue-200",
+                        shipped: "bg-blue-100 text-blue-700 border-blue-200",
+                        in_transit: "bg-indigo-100 text-indigo-700 border-indigo-200",
+                        delivered: "bg-emerald-100 text-emerald-700 border-emerald-200",
+                        cancelled: "bg-red-100 text-red-700 border-red-200",
+                        draft: "bg-slate-100 text-slate-600 border-slate-200",
+                      };
+                      const badgeCls = statusColors[item.status] || "bg-slate-100 text-slate-600 border-slate-200";
+                      return (
+                        <button
+                          key={item.trackingCode || item.id}
+                          onClick={() => {
+                            setChatMode("tracking");
+                            setTrackingInput(item.trackingCode);
+                            handleTrackShipment(item.trackingCode);
+                          }}
+                          className="w-full bg-white rounded-xl p-4 border border-slate-100 shadow-sm hover:shadow-md hover:border-amber-200 transition-all text-left group"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0 group-hover:bg-amber-100 transition-colors">
+                                <Package className="h-4.5 w-4.5 text-amber-600" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-[13px] font-bold text-slate-800 font-mono truncate">{item.trackingCode}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${badgeCls}`}>
+                                    {item.statusLabel || item.status}
+                                  </span>
+                                  {item.receiverCountry && (
+                                    <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                                      <MapPin className="h-2.5 w-2.5" />
+                                      {item.receiverCountry}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {item.createdAt && (
+                                <span className="text-[10px] text-slate-400">{item.createdAt}</span>
+                              )}
+                              <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-amber-500 transition-colors" />
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </>
+                )}
+
+                {/* Back to chat */}
+                <div className="flex justify-center pt-3">
+                  <button
+                    onClick={backToAI}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-semibold bg-white border border-slate-200 text-slate-600 hover:border-amber-300 hover:text-amber-600 hover:shadow-sm transition-all active:scale-95"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" /> Sohbete Dön
                   </button>
@@ -1012,17 +1171,7 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
               </div>
             )}
 
-            {/* ── Waiting spinner ── */}
-            {chatMode === "waiting" && (
-              <div className="flex justify-center py-4">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 border border-amber-200">
-                  <Loader2 className="h-4 w-4 text-amber-600 animate-spin" />
-                  <span className="text-[12px] font-medium text-amber-700">
-                    Temsilci bekleniyor...
-                  </span>
-                </div>
-              </div>
-            )}
+
 
             <div ref={messagesEndRef} />
           </div>
@@ -1057,18 +1206,15 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
                   }
                 }}
                 placeholder={
-                  chatMode === "waiting"
-                    ? "Temsilci bağlanana kadar bekleyin..."
-                    : chatMode === "live"
-                      ? "Temsilciye mesajınızı yazın..."
-                      : "Mesajınızı yazın..."
+                  chatMode === "live"
+                    ? "Mesajınızı yazın..."
+                    : "Mesajınızı yazın..."
                 }
-                disabled={chatMode === "waiting"}
-                className="flex-1 h-10 px-4 rounded-xl bg-slate-50 text-[13px] text-slate-700 placeholder:text-slate-400 outline-none border border-slate-200 focus:border-blue-300 focus:ring-2 focus:ring-blue-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 h-10 px-4 rounded-xl bg-slate-50 text-[13px] text-slate-700 placeholder:text-slate-400 outline-none border border-slate-200 focus:border-blue-300 focus:ring-2 focus:ring-blue-100 transition-all"
               />
               <button
                 onClick={() => sendMessage(input)}
-                disabled={!input.trim() || isTyping || chatMode === "waiting"}
+                disabled={!input.trim() || isTyping}
                 className="h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-200 disabled:opacity-40 disabled:scale-95 hover:shadow-md active:scale-95"
                 style={{
                   background: input.trim()
@@ -1089,13 +1235,11 @@ export function ChatWidget({ open, onOpenChange }: ChatWidgetProps = {}) {
                 )}
               </button>
             </div>
-            <p className="text-[10px] text-slate-400 text-center mt-2 font-medium">
-              {chatMode === "live"
-                ? "🟢 Canlı destek temsilcisine bağlısınız"
-                : chatMode === "waiting"
-                  ? "⏳ Temsilci bağlanıyor..."
-                  : "Powered by AI • Canlı destek her zaman kullanılabilir"}
-            </p>
+            {chatMode === "live" && (
+              <p className="text-[10px] text-slate-400 text-center mt-2 font-medium">
+                🟢 Canlı destek hattındasınız
+              </p>
+            )}
           </div>
           </> /* end of non-shipment content */
           )}

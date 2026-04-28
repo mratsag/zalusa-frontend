@@ -147,9 +147,10 @@ export function HelpSidebar() {
 
           <button
             onClick={() => setOpen(false)}
-            className="absolute top-5 right-5 h-8 w-8 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center transition-colors backdrop-blur-sm"
+            className="absolute top-4 right-4 z-10 h-9 w-9 bg-white/20 hover:bg-white/30 active:bg-white/40 rounded-xl flex items-center justify-center transition-colors"
+            aria-label="Kapat"
           >
-            <X className="h-4 w-4 text-white" />
+            <X className="h-5 w-5 text-white" />
           </button>
 
           <div className="relative">
@@ -270,7 +271,7 @@ export function HelpSidebar() {
         </div>
 
         {/* Bottom Nav */}
-        <div className="absolute bottom-0 left-0 right-0 h-14 bg-white/80 backdrop-blur-xl border-t border-slate-100 flex items-center shadow-[0_-4px_24px_rgba(0,0,0,0.04)]">
+        {/* <div className="absolute bottom-0 left-0 right-0 h-14 bg-white/80 backdrop-blur-xl border-t border-slate-100 flex items-center shadow-[0_-4px_24px_rgba(0,0,0,0.04)]">
           <button className="flex-1 flex flex-col items-center justify-center gap-0.5 text-blue-600">
             <Home className="h-5 w-5" />
             <span className="text-[10px] font-semibold">Ana Sayfa</span>
@@ -280,7 +281,7 @@ export function HelpSidebar() {
             <span className="text-[10px] font-medium">Duyurular</span>
             <span className="absolute top-2 right-[3.5rem] h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
           </button>
-        </div>
+        </div> */}
       </div>
     </>
   );

@@ -54,7 +54,7 @@ export function PanelHeaderActions() {
       {/* Chat Widget */}
       <ChatWidget open={chatOpen} onOpenChange={setChatOpen} />
 
-      {/* Wallet/Balance Button */}
+      {/* Wallet/Balance Button - şimdilik devre dışı
       <button className="h-10 px-3 flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-[#F8FAFC] hover:bg-slate-100 transition-colors text-slate-700">
         <div className="flex items-center gap-1.5">
           <div className="flex h-5 w-5 items-center justify-center rounded-[4px] bg-[#2563EB] text-white">
@@ -64,6 +64,7 @@ export function PanelHeaderActions() {
         </div>
         <ChevronDown className="h-4 w-4 text-slate-400 ml-1" />
       </button>
+      */}
 
       {/* Profile Button with Dropdown */}
       <div className="relative ml-1" ref={dropdownRef}>

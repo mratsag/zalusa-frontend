@@ -91,6 +91,8 @@ export function NotificationBell() {
 
   async function fetchUnreadCount() {
     try {
+      const token = getToken();
+      if (!token) return; // Token yoksa gereksiz istek atma
       const data = await apiFetch<{ count: number }>("/api/notifications/unread-count");
       setUnreadCount(data.count);
     } catch {
@@ -156,7 +158,13 @@ export function NotificationBell() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-12 z-50 w-[380px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+        <>
+          {/* Mobile backdrop */}
+          <div
+            className="fixed inset-0 z-40 bg-black/20 sm:hidden"
+            onClick={() => setOpen(false)}
+          />
+          <div className="fixed inset-x-3 top-16 z-50 sm:absolute sm:inset-auto sm:right-0 sm:top-12 w-auto sm:w-[380px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <div className="flex items-center gap-2">
@@ -187,7 +195,7 @@ export function NotificationBell() {
           </div>
 
           {/* Content */}
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="max-h-[60vh] sm:max-h-[400px] overflow-y-auto">
             {loading ? (
               <div className="p-6 text-center">
                 <div className="h-5 w-5 mx-auto animate-spin rounded-full border-2 border-slate-200 border-t-blue-500" />
@@ -246,6 +254,7 @@ export function NotificationBell() {
             )}
           </div>
         </div>
+        </>
       )}
     </div>
   );

@@ -24,7 +24,7 @@ export function Checkbox({
           "mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md ring-1 transition-colors",
           checked
             ? "bg-brand-600 text-white ring-brand-600"
-            : "bg-surface text-transparent ring-border hover:bg-surface-2",
+            : "bg-white text-transparent ring-border hover:bg-slate-50",
         )}
       >
         <Check className="h-4 w-4" />

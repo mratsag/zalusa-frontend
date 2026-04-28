@@ -21,6 +21,8 @@ import {
   Trash2,
   XCircle,
   AlertTriangle,
+  Download,
+  FileText,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -38,13 +40,13 @@ function getLogoSrc(url: string): string {
 // â”€â”€â”€ Ãœlke Kodu â†’ TÃ¼rkÃ§e Ad â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const COUNTRY_NAMES: Record<string, string> = {
-  DE: "Almanya", NL: "Hollanda", FR: "Fransa", GB: "Ä°ngiltere", US: "ABD",
-  IT: "Ä°talya", ES: "Ä°spanya", AT: "Avusturya", BE: "BelÃ§ika", CH: "Ä°sviÃ§re",
-  SE: "Ä°sveÃ§", DK: "Danimarka", NO: "NorveÃ§", PL: "Polonya", CZ: "Ã‡ekya",
-  PT: "Portekiz", IE: "Ä°rlanda", FI: "Finlandiya", GR: "Yunanistan",
-  RO: "Romanya", BG: "Bulgaristan", HR: "HÄ±rvatistan", HU: "Macaristan",
-  JP: "Japonya", CN: "Ã‡in", KR: "GÃ¼ney Kore", AU: "Avustralya", CA: "Kanada",
-  BR: "Brezilya", SA: "Suudi Arabistan", AE: "BAE", TR: "TÃ¼rkiye",
+  DE: "Almanya", NL: "Hollanda", FR: "Fransa", GB: "İngiltere", US: "ABD",
+  IT: "İtalya", ES: "İspanya", AT: "Avusturya", BE: "Belçika", CH: "İsviçre",
+  SE: "İsveç", DK: "Danimarka", NO: "Norveç", PL: "Polonya", CZ: "Çekya",
+  PT: "Portekiz", IE: "İrlanda", FI: "Finlandiya", GR: "Yunanistan",
+  RO: "Romanya", BG: "Bulgaristan", HR: "Hırvatistan", HU: "Macaristan",
+  JP: "Japonya", CN: "Çin", KR: "Güney Kore", AU: "Avustralya", CA: "Kanada",
+  BR: "Brezilya", SA: "Suudi Arabistan", AE: "BAE", TR: "Türkiye",
 };
 
 function getCountryName(code: string): string {
@@ -65,12 +67,17 @@ const STATUS_MAP: Record<string, { label: string; className: string; dotClass: s
     dotClass: "bg-orange-500",
   },
   paid: {
-    label: "Ã–DENDÄ°",
+    label: "ÖDENDİ",
     className: "bg-blue-50 text-blue-600",
     dotClass: "bg-blue-500",
   },
+  label_created: {
+    label: "ETİKET HAZIR",
+    className: "bg-teal-50 text-teal-600",
+    dotClass: "bg-teal-500",
+  },
   processing: {
-    label: "Ä°ÅLENÄ°YOR",
+    label: "İŞLENİYOR",
     className: "bg-amber-50 text-amber-600",
     dotClass: "bg-amber-500",
   },
@@ -80,19 +87,19 @@ const STATUS_MAP: Record<string, { label: string; className: string; dotClass: s
     dotClass: "bg-sky-500",
   },
   delivered: {
-    label: "TESLÄ°M EDÄ°LDÄ°",
+    label: "TESLİM EDİLDİ",
     className: "bg-[#ECFDF5] text-[#10B981]",
     dotClass: "bg-[#10B981]",
   },
   cancelled: {
-    label: "Ä°PTAL EDÄ°LDÄ°",
+    label: "İPTAL EDİLDİ",
     className: "bg-red-50 text-red-600",
     dotClass: "bg-red-500",
   },
 };
 
 function getCountryEmoji(countryCode: string) {
-  if (!countryCode) return "ğŸ³ï¸";
+  if (!countryCode) return "🏳️";
   const code = countryCode.toUpperCase();
   // If it's longer than 2 characters, maybe it's not a standard ISO code. 
   // We'll just try to convert the first 2 letters.
@@ -166,7 +173,7 @@ function formatDate(iso: string): string {
   });
 }
 
-// â”€â”€â”€ Dropdown MenÃ¼ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€â”€ Dropdown Menü â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function ShipmentDropdown({ shipmentId, onCancel }: { shipmentId: number; onCancel: () => void }) {
   const [open, setOpen] = useState(false);
@@ -206,7 +213,7 @@ function ShipmentDropdown({ shipmentId, onCancel }: { shipmentId: number; onCanc
   );
 }
 
-// â”€â”€â”€ Ä°ptal Onay ModalÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€â”€ İptal Onay Modalı â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function CancelConfirmModal({
   shipmentId,
@@ -236,7 +243,7 @@ function CancelConfirmModal({
         </div>
 
         <h3 className="text-[17px] font-bold text-slate-900 text-center">
-          GÃ¶nderiyi Ä°ptal Et
+          Gönderiyi İptal Et
         </h3>
         <p className="text-[13px] text-slate-500 text-center mt-2 leading-relaxed">
           <span className="font-bold text-slate-700">{trackingCode || `ZLS-SHP-${shipmentId}`}</span> kodlu gönderiyi iptal etmek istediğinize emin misiniz? Bu işlem geri alınamaz.
@@ -248,7 +255,7 @@ function CancelConfirmModal({
             disabled={loading}
             className="flex-1 h-[44px] rounded-[12px] bg-slate-100 hover:bg-slate-200 text-slate-700 text-[13px] font-bold transition-all disabled:opacity-50"
           >
-            VazgeÃ§
+            Vazgeç
           </button>
           <button
             onClick={onConfirm}
@@ -260,7 +267,7 @@ function CancelConfirmModal({
             ) : (
               <Trash2 className="h-4 w-4" />
             )}
-            {loading ? "Ä°ptal Ediliyor..." : "Ä°ptal Et"}
+            {loading ? "İptal Ediliyor..." : "İptal Et"}
           </button>
         </div>
       </div>
@@ -290,7 +297,7 @@ function Toast({ message, type, onClose }: { message: string; type: "success" | 
   );
 }
 
-// â”€â”€â”€ Sayfa BileÅŸeni â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€â”€ Sayfa Bileşeni â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function GonderilerimPage() {
   const [shipments, setShipments] = useState<ShipmentListItem[]>([]);
@@ -308,7 +315,26 @@ export default function GonderilerimPage() {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-  // â”€â”€ Veri Ã‡ek â”€â”€
+  // Sort & Filter state
+  const [sortOpen, setSortOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "price_high" | "price_low">("newest");
+  const [filterCarrier, setFilterCarrier] = useState<string>("");
+  const [filterType, setFilterType] = useState<string>("");
+  const sortRef = useRef<HTMLDivElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) setSortOpen(false);
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) setFilterOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // â”€â”€ Veri Çek â”€â”€
   const fetchShipments = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -332,13 +358,13 @@ export default function GonderilerimPage() {
     fetchShipments();
   }, [fetchShipments]);
 
-  // Tab deÄŸiÅŸince sayfa 1'e dÃ¶n
+  // Tab değişince sayfa 1'e dön
   function handleTabChange(tab: (typeof TABS)[number]) {
     setActiveTab(tab);
     setPage(1);
   }
 
-  // â”€â”€ Ä°ptal Ä°ÅŸlemi â”€â”€
+  // â”€â”€ İptal İşlemi â”€â”€
   async function handleCancelConfirm() {
     if (!cancelTarget) return;
     setCancelLoading(true);
@@ -354,21 +380,84 @@ export default function GonderilerimPage() {
     }
   }
 
+  // ── Etiket İndirme ──
+  const [labelLoading, setLabelLoading] = useState<Record<number, boolean>>({});
+  const [labelModal, setLabelModal] = useState<{
+    pdfUrl: string;
+    trackingCode: string;
+    carrierName: string;
+    receiverCountry: string;
+  } | null>(null);
+
+  async function handleDownloadLabel(shipment: ShipmentListItem) {
+    setLabelLoading(prev => ({ ...prev, [shipment.id]: true }));
+    try {
+      const token = localStorage.getItem("zalusa.token");
+      const res = await fetch(`${API_BASE}/api/shipments/${shipment.id}/label`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setToast({ message: data.error || "Etiket alınamadı", type: "error" });
+        return;
+      }
+
+      if (data.integrationType === "pts" && data.pdfUrl) {
+        setLabelModal({
+          pdfUrl: data.pdfUrl,
+          trackingCode: shipment.trackingCode || `ZLS-SHP-${shipment.id}`,
+          carrierName: shipment.carrierName || "Kargo",
+          receiverCountry: shipment.receiverCountry || "",
+        });
+      } else if (data.integrationType === "asset" && data.reference) {
+        setToast({ message: "Asset etiketi hazırlanıyor, lütfen destek ile iletişime geçin.", type: "error" });
+      } else if (!data.hasLabel) {
+        setToast({ message: data.message || "Etiket henüz hazır değil. Birkaç dakika bekleyip tekrar deneyin.", type: "error" });
+      }
+    } catch {
+      setToast({ message: "Etiket indirme hatası", type: "error" });
+    } finally {
+      setLabelLoading(prev => ({ ...prev, [shipment.id]: false }));
+    }
+  }
+
+  const hasLabel = (status: string) => ["paid", "label_created", "shipped", "in_transit", "delivered"].includes(status);
+
   // â”€â”€ Client-side arama filtresi â”€â”€
-  const filtered = shipments.filter((s) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    const country = getCountryName(s.receiverCountry).toLowerCase();
-    const code = s.receiverCountry.toLowerCase();
-    const tracking = (s.trackingCode ?? "").toLowerCase();
-    const carrier = (s.carrierName ?? "").toLowerCase();
-    return (
-      country.includes(q) ||
-      code.includes(q) ||
-      tracking.includes(q) ||
-      carrier.includes(q)
-    );
-  });
+  const filtered = shipments
+    .filter((s) => {
+      if (search) {
+        const q = search.toLowerCase();
+        const country = getCountryName(s.receiverCountry).toLowerCase();
+        const code = s.receiverCountry.toLowerCase();
+        const tracking = (s.trackingCode ?? "").toLowerCase();
+        const carrier = (s.carrierName ?? "").toLowerCase();
+        if (!country.includes(q) && !code.includes(q) && !tracking.includes(q) && !carrier.includes(q)) return false;
+      }
+      if (filterCarrier && (s.carrierName ?? "") !== filterCarrier) return false;
+      if (filterType && (s.shipmentType ?? "") !== filterType) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (sortBy === "oldest") return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      if (sortBy === "price_high") return (b.carrierPriceTry ?? 0) - (a.carrierPriceTry ?? 0);
+      if (sortBy === "price_low") return (a.carrierPriceTry ?? 0) - (b.carrierPriceTry ?? 0);
+      return 0;
+    });
+
+  const uniqueCarriers = Array.from(new Set(shipments.map(s => s.carrierName).filter(Boolean)));
+  const uniqueTypes = Array.from(new Set(shipments.map(s => s.shipmentType).filter(Boolean)));
+  const activeFilterCount = (filterCarrier ? 1 : 0) + (filterType ? 1 : 0);
+
+  const tabCounts: Record<string, number> = {
+    "Tümü": total,
+    "Taslak": shipments.filter(s => s.status === "draft").length,
+    "Ödeme Bekliyor": shipments.filter(s => s.status === "pending_payment").length,
+    "Yolda": shipments.filter(s => s.status === "shipped").length,
+    "Teslim Edildi": shipments.filter(s => s.status === "delivered").length,
+  };
 
   // â”€â”€ Loading State â”€â”€
   if (loading && shipments.length === 0) {
@@ -401,7 +490,7 @@ export default function GonderilerimPage() {
 
   const totalPages = Math.ceil(total / limit);
 
-  // Ä°ptal edilebilir statusler
+  // İptal edilebilir statusler
   const canCancel = (status: string) => status === "draft" || status === "pending_payment";
 
   return (
@@ -428,42 +517,107 @@ export default function GonderilerimPage() {
           />
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button className="flex items-center gap-2 px-4 h-[44px] text-[13px] font-semibold rounded-[12px] bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all shadow-sm">
-            <ArrowUpDown className="h-4 w-4 text-slate-400" />
-            Sırala
-          </button>
-          <button className="flex items-center gap-2 px-4 h-[44px] text-[13px] font-semibold rounded-[12px] bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all shadow-sm">
-            <Filter className="h-4 w-4 text-slate-400" />
-            Filtrele
-          </button>
+          {/* Sırala Dropdown */}
+          <div className="relative" ref={sortRef}>
+            <button
+              onClick={() => { setSortOpen(!sortOpen); setFilterOpen(false); }}
+              className={`flex items-center gap-2 px-4 h-[44px] text-[13px] font-semibold rounded-[12px] border transition-all shadow-sm ${sortBy !== "newest" ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"}`}
+            >
+              <ArrowUpDown className="h-4 w-4" />
+              Sırala
+            </button>
+            {sortOpen && (
+              <div className="absolute left-0 sm:left-auto sm:right-0 top-[48px] z-50 w-[220px] bg-white rounded-[14px] shadow-[0_8px_30px_-4px_rgba(0,0,0,0.15)] border border-slate-100 py-1.5 animate-in fade-in slide-in-from-top-2 duration-150">
+                {[
+                  { key: "newest" as const, label: "En Yeni" },
+                  { key: "oldest" as const, label: "En Eski" },
+                  { key: "price_high" as const, label: "Fiyat: Yüksekten Düşüğe" },
+                  { key: "price_low" as const, label: "Fiyat: Düşükten Yükseğe" },
+                ].map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => { setSortBy(opt.key); setSortOpen(false); }}
+                    className={`flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] font-semibold transition-colors ${sortBy === opt.key ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"}`}
+                  >
+                    {sortBy === opt.key && <CheckCircle2 className="h-3.5 w-3.5 text-blue-600" />}
+                    <span className={sortBy === opt.key ? "" : "ml-[22px]"}>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Filtrele Dropdown */}
+          <div className="relative" ref={filterRef}>
+            <button
+              onClick={() => { setFilterOpen(!filterOpen); setSortOpen(false); }}
+              className={`flex items-center gap-2 px-4 h-[44px] text-[13px] font-semibold rounded-[12px] border transition-all shadow-sm ${activeFilterCount > 0 ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"}`}
+            >
+              <Filter className="h-4 w-4" />
+              Filtrele
+              {activeFilterCount > 0 && (
+                <span className="flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-blue-600 text-white text-[10px] font-bold">{activeFilterCount}</span>
+              )}
+            </button>
+            {filterOpen && (
+              <div className="absolute left-0 sm:left-auto sm:right-0 top-[48px] z-50 w-[240px] bg-white rounded-[14px] shadow-[0_8px_30px_-4px_rgba(0,0,0,0.15)] border border-slate-100 py-2 px-3 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Kargo Firması</div>
+                <select
+                  value={filterCarrier}
+                  onChange={e => setFilterCarrier(e.target.value)}
+                  className="w-full h-[36px] rounded-[8px] border border-slate-200 bg-white text-[13px] font-medium text-slate-700 px-2.5 mb-3 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                >
+                  <option value="">Tümü</option>
+                  {uniqueCarriers.map(c => <option key={c} value={c!}>{c}</option>)}
+                </select>
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Gönderi Tipi</div>
+                <select
+                  value={filterType}
+                  onChange={e => setFilterType(e.target.value)}
+                  className="w-full h-[36px] rounded-[8px] border border-slate-200 bg-white text-[13px] font-medium text-slate-700 px-2.5 mb-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                >
+                  <option value="">Tümü</option>
+                  {uniqueTypes.map(t => <option key={t} value={t!}>{t}</option>)}
+                </select>
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={() => { setFilterCarrier(""); setFilterType(""); }}
+                    className="w-full mt-1 py-2 text-[12px] font-bold text-red-500 hover:bg-red-50 rounded-[8px] transition-colors"
+                  >
+                    Filtreleri Temizle
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* â”€â”€ Tabs â”€â”€ */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-2">
+      <div className="border-b border-slate-100 pb-2">
+        <div className="flex items-center gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
         {TABS.map((tab) => {
           const isActive = activeTab === tab;
-          const counts: Record<string, number> = { "Tümü": 6, "Taslak": 3, "Ödeme Bekliyor": 1, "Yolda": 1, "Teslim Edildi": 1 };
           
           return (
             <button
               key={tab}
               onClick={() => handleTabChange(tab)}
-              className={`flex items-center gap-2 px-3 py-1.5 text-[13px] font-semibold rounded-[10px] border transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-semibold rounded-[10px] border transition-all whitespace-nowrap shrink-0 ${
                 isActive
                   ? "bg-white border-slate-200 text-slate-900 shadow-sm"
                   : "bg-transparent border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
               }`}
             >
-              <span className={`flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-[11px] font-bold rounded-[6px] ${
-                isActive ? "bg-slate-900 text-white shadow-sm" : "bg-white border border-slate-200 text-slate-400 shadow-sm"
+              <span className={`flex items-center justify-center min-w-[20px] h-[20px] px-1 text-[11px] font-bold rounded-[5px] ${
+                isActive ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-400"
               }`}>
-                {counts[tab] || 0}
+                {tabCounts[tab] ?? 0}
               </span>
               {tab}
             </button>
           );
         })}
+        </div>
       </div>
 
       {/* â”€â”€ Loading overlay for tab/page changes â”€â”€ */}
@@ -552,12 +706,27 @@ export default function GonderilerimPage() {
                     </div>
                     
                     <div className="flex items-center gap-2">
+                      {/* Etiket İndir — ödeme sonrası statülerde */}
+                      {hasLabel(s.status) && (
+                        <button
+                          className="px-4 py-[10px] rounded-full bg-teal-500 hover:bg-teal-600 text-white text-[13px] font-bold transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                          onClick={() => handleDownloadLabel(s)}
+                          disabled={labelLoading[s.id]}
+                        >
+                          {labelLoading[s.id] ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <FileText className="h-3.5 w-3.5" />
+                          )}
+                          Etiket İndir
+                        </button>
+                      )}
+
                       {s.status === "draft" ? (
                         <button
                           className="px-6 py-[10px] rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[13px] font-bold transition-all shadow-sm"
                           onClick={() => window.location.href = `/panel/gonderi-olustur?draft=${s.id}`}
                         >
-                          {/* bg-[#10B981] */}
                           Devam Et
                         </button>
                       ) : s.status === "pending_payment" ? (
@@ -583,7 +752,7 @@ export default function GonderilerimPage() {
                         </button>
                       )}
 
-                      {/* 3 Nokta MenÃ¼ â€” Sadece draft ve pending_payment iÃ§in */}
+                      {/* 3 Nokta Menü â€” Sadece draft ve pending_payment için */}
                       {showMenu && (
                         <ShipmentDropdown
                           shipmentId={s.id}
@@ -673,7 +842,7 @@ export default function GonderilerimPage() {
             disabled={page <= 1}
             onClick={() => setPage((p) => p - 1)}
           >
-            Ã–nceki
+            Önceki
           </Button>
           <span className="text-sm text-slate-500 px-3">
             {page} / {totalPages}
@@ -690,7 +859,7 @@ export default function GonderilerimPage() {
         </div>
       )}
 
-      {/* â”€â”€ Ä°ptal Onay ModalÄ± â”€â”€ */}
+      {/* â”€â”€ İptal Onay Modalı â”€â”€ */}
       {cancelTarget && (
         <CancelConfirmModal
           shipmentId={cancelTarget.id}
@@ -709,6 +878,156 @@ export default function GonderilerimPage() {
           onClose={() => setToast(null)}
         />
       )}
+
+      {/* ── Etiket Modal ── */}
+      {labelModal && (
+        <LabelModal
+          pdfUrl={labelModal.pdfUrl}
+          trackingCode={labelModal.trackingCode}
+          carrierName={labelModal.carrierName}
+          receiverCountry={labelModal.receiverCountry}
+          onClose={() => setLabelModal(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ─── Kargo Etiketi Modalı ─────────────────────────────────────────────────────
+
+function LabelModal({
+  pdfUrl,
+  trackingCode,
+  carrierName,
+  receiverCountry,
+  onClose,
+}: {
+  pdfUrl: string;
+  trackingCode: string;
+  carrierName: string;
+  receiverCountry: string;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Modal */}
+      <div className="relative bg-white rounded-[24px] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.3)] w-full max-w-[720px] max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-300">
+        
+        {/* Header */}
+        <div className="px-6 pt-6 pb-4 border-b border-slate-100">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center shadow-lg shadow-teal-200">
+                <FileText className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-[18px] font-bold text-slate-900">Kargo Etiketiniz Hazır!</h2>
+                <p className="text-[13px] text-slate-500 mt-0.5">
+                  <span className="font-bold text-slate-700">{trackingCode}</span>
+                  <span className="mx-1.5">&middot;</span>
+                  {carrierName}
+                  {receiverCountry && (
+                    <>
+                      <span className="mx-1.5">&rarr;</span>
+                      <span>{receiverCountry}</span>
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-700 transition-all"
+            >
+              <XCircle className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Steps / Instructions */}
+        <div className="px-6 py-4 bg-gradient-to-r from-teal-50/80 to-emerald-50/60 border-b border-teal-100/50">
+          <div className="flex items-center gap-4 sm:gap-6 flex-wrap sm:flex-nowrap">
+            <div className="flex items-center gap-2.5 text-[12px] font-bold text-teal-700">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-[11px] font-black shadow-sm shrink-0">1</span>
+              Etiketi indirin
+            </div>
+            <div className="w-4 h-px bg-teal-300/50 hidden sm:block" />
+            <div className="flex items-center gap-2.5 text-[12px] font-bold text-teal-700">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-[11px] font-black shadow-sm shrink-0">2</span>
+              {"\u00c7\u0131kt\u0131 al\u0131n"}
+            </div>
+            <div className="w-4 h-px bg-teal-300/50 hidden sm:block" />
+            <div className="flex items-center gap-2.5 text-[12px] font-bold text-teal-700">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-[11px] font-black shadow-sm shrink-0">3</span>
+              {"Kolinin \u00fczerine yap\u0131\u015ft\u0131r\u0131n"}
+            </div>
+          </div>
+        </div>
+
+        {/* PDF Viewer */}
+        <div className="flex-1 overflow-hidden px-4 py-3" style={{ minHeight: "400px" }}>
+          <iframe
+            src={pdfUrl}
+            className="w-full h-full rounded-xl border border-slate-200"
+            style={{ minHeight: "380px" }}
+            title="Kargo Etiketi"
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="px-6 py-4 border-t border-slate-100 flex items-center gap-3">
+          <a
+            href={pdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center gap-2 h-[48px] rounded-2xl bg-teal-500 hover:bg-teal-600 text-white text-[14px] font-bold transition-all shadow-lg shadow-teal-200/50"
+          >
+            <Download className="h-4 w-4" />
+            {"Etiketi \u0130ndir / Yazd\u0131r"}
+          </a>
+          <button
+            onClick={onClose}
+            className="h-[48px] px-6 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[14px] font-bold transition-all"
+          >
+            Kapat
+          </button>
+        </div>
+
+        {/* Scrolling Marquee Ticker */}
+        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 overflow-hidden py-2.5">
+          <div className="flex whitespace-nowrap" style={{
+            animation: "labelMarquee 30s linear infinite",
+          }}>
+            {[0, 1].map((i) => (
+              <div key={i} className="flex items-center shrink-0">
+                {Array.from({ length: 4 }).map((_, j) => (
+                  <React.Fragment key={j}>
+                    <span className="mx-6 text-[12px] font-bold text-teal-400 tracking-wider">
+                      {"✦ Zalusa'y\u0131 tercih etti\u011finiz i\u00e7in te\u015fekk\u00fcr ederiz"}
+                    </span>
+                    <span className="mx-6 text-[12px] font-bold text-slate-400 tracking-wider">
+                      {"📦 L\u00fctfen etiketi \u00e7\u0131kt\u0131 alarak g\u00f6nderinizin \u00fczerine yap\u0131\u015ft\u0131r\u0131n\u0131z"}
+                    </span>
+                    <span className="mx-6 text-[12px] font-bold text-emerald-400 tracking-wider">
+                      {"🚀 G\u00f6nderiniz en k\u0131sa s\u00fcrede yola \u00e7\u0131kacakt\u0131r"}
+                    </span>
+                  </React.Fragment>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes labelMarquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
     </div>
   );
 }

@@ -34,14 +34,20 @@ export default function KargomNeredePage() {
 
     try {
       // API call to the unified tracking endpoint
-      const res = await fetch(`http://localhost:8080/api/shipments/track/${trackingCode.trim()}`);
+      const API = process.env.NEXT_PUBLIC_API_URL ?? "";
+      const res = await fetch(`${API}/api/shipments/track/${trackingCode.trim()}`);
       if (!res.ok) {
-        throw new Error("Kargo bulunamadı veya geçersiz takip numarası.");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || "Girdiğiniz takip numarasına ait kargo bulunamadı. Lütfen takip numaranızı kontrol edin.");
       }
       const json = await res.json();
       setData(json);
     } catch (err: any) {
-      setError(err.message || "Bir hata oluştu.");
+      if (err.message?.includes("Failed to fetch") || err.message?.includes("fetch")) {
+        setError("Kargo sorgulama servisi şu anda yanıt vermiyor. Lütfen daha sonra tekrar deneyin.");
+      } else {
+        setError(err.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
+      }
     } finally {
       setLoading(false);
     }
@@ -75,15 +81,15 @@ export default function KargomNeredePage() {
       <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl shadow-slate-200/50 overflow-hidden border border-slate-100">
         
         {/* Header / Arama Bölümü */}
-        <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-8 sm:p-12 text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+        <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-5 sm:p-12 text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none hidden sm:block">
             <PackageSearch className="w-48 h-48 text-white -rotate-12 transform scale-150" />
           </div>
           
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3 relative z-10">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-white mb-2 sm:mb-3 relative z-10">
             Kargom Nerede?
           </h1>
-          <p className="text-indigo-100 text-sm sm:text-base font-medium max-w-md mx-auto mb-8 relative z-10">
+          <p className="text-indigo-100 text-xs sm:text-base font-medium max-w-md mx-auto mb-6 sm:mb-8 relative z-10">
             Zalusa takip numaranızı girerek kargonuzun tüm güncel hareketlerini anlık ve kesintisiz izleyin.
           </p>
 
@@ -96,8 +102,8 @@ export default function KargomNeredePage() {
                 type="text"
                 value={trackingCode}
                 onChange={(e) => setTrackingCode(e.target.value.toUpperCase())}
-                placeholder="Örn: ZLS-SHP-12345"
-                className="w-full h-14 pl-12 pr-32 rounded-2xl border-0 shadow-lg ring-1 ring-white/20 bg-white/95 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:ring-4 focus:ring-white/40 focus:outline-none transition-all font-bold text-lg uppercase tracking-wide"
+                placeholder="ZLS-SHP-12345"
+                className="w-full h-12 sm:h-14 pl-10 sm:pl-12 pr-24 sm:pr-32 rounded-2xl border-0 shadow-lg ring-1 ring-white/20 bg-white/95 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:ring-4 focus:ring-white/40 focus:outline-none transition-all font-bold text-sm sm:text-lg uppercase tracking-wide"
               />
               <button
                 type="submit"

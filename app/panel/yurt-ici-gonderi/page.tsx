@@ -809,7 +809,7 @@ export default function YurtIciGonderiPage() {
                   <button key={c.handlerCode} type="button" onClick={() => { setSelectedCarrier(c.handlerCode); setApiError(null); }}
                     className={cn(
                       "group flex w-full items-center justify-between rounded-2xl p-4 text-left ring-1 transition-all",
-                      isSelected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : "bg-surface ring-border hover:ring-brand-200 hover:shadow-sm"
+                      isSelected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : "bg-white ring-border hover:ring-brand-200 hover:shadow-sm"
                     )}>
                     <div className="flex items-center gap-4">
                       {/* Logo */}
@@ -839,7 +839,7 @@ export default function YurtIciGonderiPage() {
                         <div className="text-lg font-bold tracking-tight">{c.price.toFixed(2)} ₺</div>
                         <div className="text-[10px] text-muted">Desi: {c.desiKg} kg</div>
                       </div>
-                      <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1", isSelected ? "bg-brand-600 ring-brand-600 text-white" : "bg-surface ring-border group-hover:ring-brand-300")}>
+                      <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1", isSelected ? "bg-brand-600 ring-brand-600 text-white" : "bg-white ring-border group-hover:ring-brand-300")}>
                         {isSelected && <Check className="h-3.5 w-3.5" />}
                       </div>
                     </div>

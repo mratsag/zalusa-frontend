@@ -82,7 +82,7 @@ export function SearchableSelect({
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex h-11 w-full items-center justify-between rounded-2xl bg-surface px-4 text-sm text-foreground ring-1 ring-border transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/35 disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-11 w-full items-center justify-between rounded-2xl bg-white px-4 text-sm text-foreground ring-1 ring-border transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/35 disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
       >
@@ -93,7 +93,7 @@ export function SearchableSelect({
       </button>
 
       {isOpen && (
-        <div className="absolute z-[99] mt-1 w-full rounded-2xl border border-border bg-surface p-1 shadow-md animate-in fade-in-0 zoom-in-95">
+        <div className="absolute z-[99] mt-1 w-full rounded-2xl border border-border bg-white p-1 shadow-md animate-in fade-in-0 zoom-in-95">
           {!hideSearchAndSort && (
             <div className="flex items-center gap-2 border-b border-border p-2">
               <Search className="h-4 w-4 shrink-0 text-muted" />
@@ -102,7 +102,7 @@ export function SearchableSelect({
                 placeholder={searchPlaceholder}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted min-w-0"
+                className="flex-1 bg-white text-sm text-slate-800 outline-none placeholder:text-muted min-w-0"
                 autoFocus
               />
               <div className="flex gap-1 ml-1 text-muted shrink-0">

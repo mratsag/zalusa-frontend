@@ -201,15 +201,15 @@ export default function PanelHomePage() {
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h1 className="text-[24px] font-extrabold tracking-tight text-[#1E293B]">
+          <h1 className="text-[20px] sm:text-[24px] font-extrabold tracking-tight text-[#1E293B]">
             Dashboard
           </h1>
-          <p className="text-[14px] text-[#64748B] font-medium">
+          <p className="text-[12px] sm:text-[14px] text-[#64748B] font-medium leading-relaxed">
             Panelinize hoş geldiniz. Hesap özetinizi ve istatistiklerinizi
             buradan inceleyebilirsiniz.
           </p>
         </div>
-        <div className="flex items-center gap-1 bg-[#F8FAFC] rounded-xl p-1 ring-1 ring-[#E2E8F0] shrink-0">
+        <div className="flex items-center gap-1 bg-[#F8FAFC] rounded-xl p-1 ring-1 ring-[#E2E8F0] shrink-0 overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {[
             { key: "week", label: "Bu Hafta" },
             { key: "month", label: "Bu Ay" },
@@ -219,7 +219,7 @@ export default function PanelHomePage() {
             <button
               key={item.key}
               onClick={() => setPeriod(item.key)}
-              className={`px-3.5 py-2 text-[13px] font-bold rounded-lg transition-all duration-200 ${
+              className={`px-2.5 sm:px-3.5 py-2 text-[12px] sm:text-[13px] font-bold rounded-lg transition-all duration-200 whitespace-nowrap shrink-0 ${
                 period === item.key
                   ? "bg-[#1E293B] text-white shadow-sm"
                   : "text-[#94A3B8] hover:text-[#64748B]"
@@ -469,7 +469,7 @@ export default function PanelHomePage() {
                         <PackageCheck className="h-[18px] w-[18px] text-[#64748B]" />
                       </div>
                       <div className="min-w-0">
-                        <div className="truncate text-[13px] font-bold text-[#1E293B]">
+                        <div className="text-[13px] font-bold text-[#1E293B] leading-snug">
                           {getCountryName(order.countryCode)} Gönderi Ücreti
                         </div>
                         <div className="mt-0.5 flex items-center gap-1.5 text-[11px] font-medium text-[#94A3B8]">
@@ -507,14 +507,14 @@ export default function PanelHomePage() {
             <button
               key={item.href}
               onClick={() => router.push(item.href)}
-              className="group flex items-center gap-3 rounded-2xl bg-white border border-[#E8EDF2] p-4 text-left shadow-sm hover:shadow-md hover:border-[#CBD5E1] transition-all"
+              className="group flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-3 rounded-2xl bg-white border border-[#E8EDF2] p-3 sm:p-4 text-left shadow-sm hover:shadow-md hover:border-[#CBD5E1] transition-all"
             >
               <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${item.bg} ${item.iconColor} group-hover:scale-105 transition-transform`}>
                 <Icon className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <div className="text-[13px] font-bold text-[#1E293B] truncate">{item.label}</div>
-                <div className="text-[11px] text-[#94A3B8] truncate">{item.desc}</div>
+                <div className="text-[12px] sm:text-[13px] font-bold text-[#1E293B] leading-snug">{item.label}</div>
+                <div className="text-[10px] sm:text-[11px] text-[#94A3B8] leading-snug">{item.desc}</div>
               </div>
             </button>
           );

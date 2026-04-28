@@ -35,7 +35,7 @@ export function PanelDataSection() {
             <div className="text-sm text-muted text-center py-4">Kayıtlı adres bulunamadı.</div>
           ) : (
             addresses.map(addr => (
-              <div key={addr.id} className="group flex flex-col rounded-[var(--radius-md)] p-4 ring-1 ring-border bg-surface hover:ring-brand-200 transition-colors">
+              <div key={addr.id} className="group flex flex-col rounded-[var(--radius-md)] p-4 ring-1 ring-border bg-white hover:ring-brand-200 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-brand-500" />
@@ -75,7 +75,7 @@ export function PanelDataSection() {
             <div className="text-sm text-muted text-center py-4">Kayıtlı banka hesabı bulunamadı.</div>
           ) : (
             bankAccounts.map(bank => (
-              <div key={bank.id} className="group flex flex-col rounded-[var(--radius-md)] p-4 ring-1 ring-border bg-surface hover:ring-brand-200 transition-colors">
+              <div key={bank.id} className="group flex flex-col rounded-[var(--radius-md)] p-4 ring-1 ring-border bg-white hover:ring-brand-200 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     <CreditCard className="h-4 w-4 text-emerald-500" />

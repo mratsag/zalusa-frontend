@@ -22,7 +22,7 @@ export function Button({
         size === "md" && "px-6 py-2.5 text-sm font-extrabold",
         size === "lg" && "h-12 px-8 text-base font-extrabold",
         variant === "primary" &&
-          "bg-lime-400 text-slate-900 shadow-sm shadow-lime-400/30 hover:bg-lime-300",
+          "bg-emerald-500 text-white shadow-sm shadow-emerald-500/30 hover:bg-emerald-400",
         variant === "secondary" &&
           "bg-white text-slate-900 ring-1 ring-slate-200 hover:bg-slate-50 shadow-sm",
         variant === "ghost" &&
