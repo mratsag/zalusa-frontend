@@ -505,6 +505,18 @@ export default function GonderilerimPage() {
         </p>
       </div>
 
+      {/* ── MSDS + PTS Uyarı Banner'ı ── */}
+      {shipments.some(s => hasLabel(s.status)) && (
+        <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border border-amber-200 px-5 py-3.5 shadow-sm">
+          <div className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center shrink-0 shadow-md shadow-amber-200">
+            <FileText className="w-4.5 h-4.5 text-white" />
+          </div>
+          <p className="text-[13px] text-amber-800 leading-relaxed font-medium">
+            <strong className="text-amber-900">⚠️ Önemli:</strong> Lütfen <strong>MSDS belgesini</strong> ve <strong>PTS etiketinizi</strong> çıktı olarak çıkarıp kolinin üzerine yapıştırınız.
+          </p>
+        </div>
+      )}
+
       {/* â”€â”€ Search & Filter Row â”€â”€ */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="relative flex-1">
@@ -952,17 +964,17 @@ function LabelModal({
           <div className="flex items-center gap-4 sm:gap-6 flex-wrap sm:flex-nowrap">
             <div className="flex items-center gap-2.5 text-[12px] font-bold text-teal-700">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-[11px] font-black shadow-sm shrink-0">1</span>
-              Etiketi indirin
+              PTS etiketi ve MSDS belgesini indirin
             </div>
             <div className="w-4 h-px bg-teal-300/50 hidden sm:block" />
             <div className="flex items-center gap-2.5 text-[12px] font-bold text-teal-700">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-[11px] font-black shadow-sm shrink-0">2</span>
-              {"\u00c7\u0131kt\u0131 al\u0131n"}
+              Çıktı alın
             </div>
             <div className="w-4 h-px bg-teal-300/50 hidden sm:block" />
             <div className="flex items-center gap-2.5 text-[12px] font-bold text-teal-700">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-[11px] font-black shadow-sm shrink-0">3</span>
-              {"Kolinin \u00fczerine yap\u0131\u015ft\u0131r\u0131n"}
+              Kolinin üzerine yapıştırın
             </div>
           </div>
         </div>
@@ -1006,13 +1018,16 @@ function LabelModal({
                 {Array.from({ length: 4 }).map((_, j) => (
                   <React.Fragment key={j}>
                     <span className="mx-6 text-[12px] font-bold text-teal-400 tracking-wider">
-                      {"✦ Zalusa'y\u0131 tercih etti\u011finiz i\u00e7in te\u015fekk\u00fcr ederiz"}
+                      ✦ Zalusa&apos;yı tercih ettiğiniz için teşekkür ederiz
+                    </span>
+                    <span className="mx-6 text-[12px] font-bold text-amber-400 tracking-wider">
+                      ⚠️ Lütfen MSDS belgesini ve PTS etiketinizi çıktı olarak çıkarınız
                     </span>
                     <span className="mx-6 text-[12px] font-bold text-slate-400 tracking-wider">
-                      {"📦 L\u00fctfen etiketi \u00e7\u0131kt\u0131 alarak g\u00f6nderinizin \u00fczerine yap\u0131\u015ft\u0131r\u0131n\u0131z"}
+                      📦 Çıktıları kolinin üzerine yapıştırınız
                     </span>
                     <span className="mx-6 text-[12px] font-bold text-emerald-400 tracking-wider">
-                      {"🚀 G\u00f6nderiniz en k\u0131sa s\u00fcrede yola \u00e7\u0131kacakt\u0131r"}
+                      🚀 Gönderiniz en kısa sürede yola çıkacaktır
                     </span>
                   </React.Fragment>
                 ))}

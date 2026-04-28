@@ -336,8 +336,8 @@ export default function OdemePage() {
                 <h4 className="text-[14px] font-bold text-teal-800 mb-1">Kargo Etiketiniz Haz{"\u0131"}rlan{"\u0131"}yor</h4>
                 <p className="text-[12px] text-teal-700 leading-relaxed">
                   {"\u00d6"}demeniz onaylan{"\u0131"}p kargonuz olu{"\u015f"}turuldu{"\u011f"}unda, <strong>{"\u201c"}G{"\u00f6"}nderilerim{"\u201d"}</strong> sayfas{"\u0131"}ndan{" "}
-                  <strong className="text-teal-900">kargo etiketinizi</strong> indirebilirsiniz. 
-                  Etiketi yazd{"\u0131"}r{"\u0131"}p kolinin {"\u00fc"}zerine yap{"\u0131\u015f"}t{"\u0131"}rman{"\u0131"}z gerekmektedir.
+                  <strong className="text-teal-900">MSDS belgenizi ve PTS etiketinizi</strong> indirebilirsiniz. 
+                  L{"\\u00fc"}tfen belgelerinizi {"\\u00e7\\u0131"}kt{"\\u0131"} al{"\\u0131"}p kolinin {"\\u00fc"}zerine yap{"\\u0131\\u015f"}t{"\\u0131"}r{"\\u0131"}n{"\\u0131"}z.
                 </p>
               </div>
             </div>
@@ -353,13 +353,16 @@ export default function OdemePage() {
                   {Array.from({ length: 4 }).map((_, j) => (
                     <span key={j} className="inline-flex items-center">
                       <span className="mx-5 text-[12px] font-bold text-teal-400 tracking-wider">
-                        {"\u2726"} Zalusa{"\u2019"}y{"\u0131"} tercih etti{"\u011f"}iniz i{"\u00e7"}in te{"\u015f"}ekk{"\u00fc"}r ederiz
+                        ✦ Zalusa&apos;yı tercih ettiğiniz için teşekkür ederiz
+                      </span>
+                      <span className="mx-5 text-[12px] font-bold text-amber-400 tracking-wider">
+                        ⚠️ Lütfen MSDS belgesini ve PTS etiketinizi çıktı olarak çıkarınız
                       </span>
                       <span className="mx-5 text-[12px] font-bold text-slate-400 tracking-wider">
-                        {"\ud83d\udce6"} L{"\u00fc"}tfen etiketi {"\u00e7\u0131"}kt{"\u0131"} alarak g{"\u00f6"}nderinizin {"\u00fc"}zerine yap{"\u0131\u015f"}t{"\u0131"}r{"\u0131"}n{"\u0131"}z
+                        📦 Çıktıları kolinin üzerine yapıştırınız
                       </span>
                       <span className="mx-5 text-[12px] font-bold text-emerald-400 tracking-wider">
-                        {"\ud83d\ude80"} G{"\u00f6"}nderiniz en k{"\u0131"}sa s{"\u00fc"}rede yola {"\u00e7\u0131"}kacakt{"\u0131"}r
+                        🚀 Gönderiniz en kısa sürede yola çıkacaktır
                       </span>
                     </span>
                   ))}
