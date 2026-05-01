@@ -6,6 +6,7 @@ import { X, Globe, Sparkles, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/cn";
 import { gtipService, type GtipResponse } from "@/lib/services/shipmentService";
+import { adminService } from "@/lib/services/adminService";
 
 type HSCodeEntry = { code: string; tr: string; en: string; keywords: string[] };
 
@@ -107,7 +108,10 @@ export function HSCodeCombobox({
       setAiLoading(true);
       setAiResult(null);
       try {
-        const res = await gtipService.predict(hint);
+        const isAdmin = typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
+        const res = isAdmin ? await adminService.getGtip(hint) : await gtipService.predict(hint);
+        
+        // @ts-ignore - response type mismatch handled
         setAiResult(res);
         // Otomatik olarak HS kodunu doldur
         if (res.hs_code) {

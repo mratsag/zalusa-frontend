@@ -689,6 +689,74 @@ export const adminService = {
       `/api/admin/bank-transfers/${id}/reject`,
       { adminNote },
     ),
+
+  // ── Gönderi Zorla Oluşturma (Draft/Pending → Paid + Kargo) ──────────
+  forceCreateShipment: (id: number, payload: any) =>
+    put<{ message: string; status: string }>(
+      `/api/admin/shipments/${id}/force-create`,
+      payload,
+    ),
+
+  updateDraft: (id: number | string, payload: any) =>
+    put<{ message: string }>(`/api/admin/shipments/${id}/draft`, payload),
+
+  // ── Kargo Seçenekleri (Admin) ────────────────────────────────────────
+  getCarrierOptions: (id: number, payload?: any) =>
+    post<{
+      domestic: any[];
+      international: any[];
+    }>(`/api/admin/shipments/${id}/carrier-options`, payload || {}),
+
+  // ── Belge Yükleme ──────────────────────────────────────────────
+  uploadDocument: async (file: File, shipmentId: number | string, fileType: string) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("shipment_id", String(shipmentId));
+    formData.append("file_type", fileType);
+
+    const res = await fetch(`${API}/api/admin/upload-document`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${getToken()}` },
+      body: formData,
+    });
+    if (!res.ok) throw new Error("Dosya yüklenemedi");
+    return res.json();
+  },
+
+  // ── GTIP (Admin) ──────────────────────────────────────────────
+  getGtip: (productName: string) =>
+    get<{ status: string; hs_code: string; resolved_name: string; confidence_score: number }>(`/api/admin/get-gtip?q=${encodeURIComponent(productName)}`),
+
+  // ── Paket Güncelleme (Admin) ────────────────────────────────────────
+  updatePackages: (id: number, packages: { widthCm: number; lengthCm: number; heightCm: number; weightKg: number; packageCount: number }[]) =>
+    put<{
+      message: string;
+      totalPackageCount: number;
+      actualWeight: number;
+      volumetricWeight: number;
+      chargeableWeight: number;
+    }>(`/api/admin/shipments/${id}/packages`, { packages }),
+
+  // ── Yurt İçi Fiyat & Doğrulama (Admin) ────────────────────────────────
+  getDomesticPrices: (payload: { packages: { width: number; height: number; depth: number; weight: number }[]; shipmentId: number }) =>
+    post<{ carriers: any[] }>("/api/admin/domestic-prices", payload),
+
+  validateDomesticCarrier: (payload: { 
+    handlerCode: string; 
+    shipmentId: string;
+    senderName?: string;
+    senderPhone?: string;
+    senderCity?: string;
+    senderTown?: string;
+    senderAddress?: string;
+    receiverName?: string;
+    receiverPhone?: string;
+    receiverCity?: string;
+    receiverTown?: string;
+    receiverAddress?: string;
+    isTransfer?: boolean;
+  }) =>
+    post<{ valid: boolean; error?: string; handlerCode: string }>("/api/admin/domestic-validate-carrier", payload),
 };
 
 export interface BankTransfer {

@@ -28,6 +28,7 @@ import { cn } from "@/lib/cn";
 
 const adminNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/fiyat-hesaplama", label: "Fiyat Hesaplama", icon: Calculator },
   { href: "/admin/gonderiler", label: "Tüm Gönderiler", icon: Package },
   { href: "/admin/etiket-bas", label: "Etiket Bas", icon: Printer },
   { href: "/admin/kurye-talepleri", label: "Kurye Talepleri", icon: Truck },

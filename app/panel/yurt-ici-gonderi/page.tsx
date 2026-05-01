@@ -38,7 +38,7 @@ async function apiFetch<T = any>(path: string, options: RequestInit = {}): Promi
 }
 
 // ── Stepper ──────────────────────────────────────────────────────────────────
-const STEPS = ["Rota Bilgisi", "Paket Bilgileri", "Kargo Firması", "Adres Bilgileri", "Özet & Ödeme"] as const;
+const STEPS = ["Rota Bilgisi", "Paket Bilgileri", "Adres Bilgileri", "Kargo Firması", "Özet & Ödeme"] as const;
 
 // ── Types ────────────────────────────────────────────────────────────────────
 type PackageItem = {
@@ -147,12 +147,14 @@ export default function YurtIciGonderiPage() {
   const [senderCity, setSenderCity] = React.useState("");
   const [senderTown, setSenderTown] = React.useState("");
   const [senderAddress, setSenderAddress] = React.useState("");
+  const [senderPostalCode, setSenderPostalCode] = React.useState("");
 
   const [receiverName, setReceiverName] = React.useState("");
   const [receiverPhone, setReceiverPhone] = React.useState("+90");
   const [receiverCity, setReceiverCity] = React.useState("");
   const [receiverTown, setReceiverTown] = React.useState("");
   const [receiverAddress, setReceiverAddress] = React.useState("");
+  const [receiverPostalCode, setReceiverPostalCode] = React.useState("");
 
   // ── Şehir/İlçe ──
   const [cities, setCities] = React.useState<City[]>([]);
@@ -238,8 +240,8 @@ export default function YurtIciGonderiPage() {
     setStep(1);
   }
 
-  // ADIM 1: Paket bilgileri + fiyat sorgula
-  async function handlePackageNext() {
+  // ADIM 1: Paket bilgileri validasyonu
+  function handlePackageNext() {
     const errors: Record<string, string> = {};
     for (const pkg of packages) {
       if (!toNumber(pkg.width)) errors[`pkg_${pkg.id}_width`] = "Zorunlu";
@@ -249,7 +251,25 @@ export default function YurtIciGonderiPage() {
     }
     setFieldErrors(errors);
     if (Object.keys(errors).length) return;
+    setApiError(null);
+    setStep(2); // Adres adımına git
+  }
 
+  // ADIM 2: Adres bilgileri + fiyat sorgula
+  async function handleAddressNext() {
+    const errors: Record<string, string> = {};
+    if (!senderName.trim()) errors.senderName = "Zorunlu";
+    if (!senderPhone.trim() || senderPhone.length < 5) errors.senderPhone = "Zorunlu";
+    if (!senderAddress.trim()) errors.senderAddress = "Zorunlu";
+    if (!senderPostalCode.trim()) errors.senderPostalCode = "Zorunlu";
+    if (!receiverName.trim()) errors.receiverName = "Zorunlu";
+    if (!receiverPhone.trim() || receiverPhone.length < 5) errors.receiverPhone = "Zorunlu";
+    if (!receiverAddress.trim()) errors.receiverAddress = "Zorunlu";
+    if (!receiverPostalCode.trim()) errors.receiverPostalCode = "Zorunlu";
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) return;
+
+    // Adres bilgileri tamam → fiyat sorgula ve kargo firması adımına geç
     setCarrierLoading(true);
     setApiError(null);
     try {
@@ -269,7 +289,7 @@ export default function YurtIciGonderiPage() {
       if (!res.carriers?.length) {
         setApiError("Bu paket boyutları için uygun kargo firması bulunamadı.");
       } else {
-        setStep(2);
+        setStep(3); // Kargo firması adımına git
       }
     } catch (err: any) {
       setApiError(err.message || "Fiyat bilgileri alınamadı");
@@ -278,26 +298,44 @@ export default function YurtIciGonderiPage() {
     }
   }
 
-  function handleCarrierNext() {
+  // ADIM 3: Kargo firması seçimi → Basit Kargo'da doğrula → Özet'e geç
+  const [validating, setValidating] = React.useState(false);
+
+  async function handleCarrierNext() {
     if (!selectedCarrier) {
       setApiError("Lütfen bir kargo firması seçin.");
       return;
     }
     setApiError(null);
-    setStep(3);
-  }
-
-  function handleAddressNext() {
-    const errors: Record<string, string> = {};
-    if (!senderName.trim()) errors.senderName = "Zorunlu";
-    if (!senderPhone.trim() || senderPhone.length < 5) errors.senderPhone = "Zorunlu";
-    if (!senderAddress.trim()) errors.senderAddress = "Zorunlu";
-    if (!receiverName.trim()) errors.receiverName = "Zorunlu";
-    if (!receiverPhone.trim() || receiverPhone.length < 5) errors.receiverPhone = "Zorunlu";
-    if (!receiverAddress.trim()) errors.receiverAddress = "Zorunlu";
-    setFieldErrors(errors);
-    if (Object.keys(errors).length) return;
-    setStep(4);
+    setValidating(true);
+    try {
+      const res = await apiFetch<{ valid: boolean; error?: string }>("/api/domestic/validate-carrier", {
+        method: "POST",
+        body: JSON.stringify({
+          handlerCode: selectedCarrier,
+          receiverName,
+          receiverPhone,
+          receiverCity,
+          receiverTown: receiverTown || receiverCity,
+          receiverAddress,
+          packages: packages.map(p => ({
+            width: toNumber(p.width),
+            height: toNumber(p.height),
+            depth: toNumber(p.depth),
+            weight: toNumber(p.weight),
+          })),
+        }),
+      });
+      if (!res.valid) {
+        setApiError(res.error || "Bu kargo firması seçilen güzergahı desteklemiyor. Lütfen başka bir firma seçin.");
+        return;
+      }
+      setStep(4);
+    } catch (err: any) {
+      setApiError(err.message || "Kargo doğrulama başarısız");
+    } finally {
+      setValidating(false);
+    }
   }
 
   async function handleFinalize() {
@@ -318,11 +356,13 @@ export default function YurtIciGonderiPage() {
         senderCity,
         senderTown: senderTown || senderCity,
         senderAddress,
+        senderPostalCode,
         receiverName,
         receiverPhone,
         receiverCity,
         receiverTown: receiverTown || receiverCity,
         receiverAddress,
+        receiverPostalCode,
       };
       const res = await apiFetch<any>("/api/domestic/shipments", {
         method: "POST",
@@ -355,7 +395,7 @@ export default function YurtIciGonderiPage() {
   );
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-32">
       {/* Başlık */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
@@ -520,9 +560,8 @@ export default function YurtIciGonderiPage() {
               <button type="button" onClick={() => setStep(0)} className="flex items-center gap-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 px-4 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-[14px] font-bold text-[#0F172A] transition-colors shadow-sm">
                 <span>←</span> Geri
               </button>
-              <button type="button" onClick={handlePackageNext} disabled={carrierLoading} className="flex items-center gap-2 rounded-xl bg-[#3959F2] hover:bg-[#4338CA] px-4 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-[14px] font-bold text-white transition-colors disabled:opacity-50">
-                {carrierLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {carrierLoading ? "Sorgulanıyor..." : "Devam"} <span>→</span>
+              <button type="button" onClick={handlePackageNext} className="flex items-center gap-2 rounded-xl bg-[#3959F2] hover:bg-[#4338CA] px-4 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-[14px] font-bold text-white transition-colors disabled:opacity-50">
+                Devam <span>→</span>
               </button>
             </div>
           </CardHeader>
@@ -749,9 +788,8 @@ export default function YurtIciGonderiPage() {
                         <div className="text-[10px] sm:text-[11px] text-[#94A3B8]">Ücretlendirme</div>
                         <div className="text-[18px] sm:text-[24px] font-bold leading-tight">{chargeableWeight.toFixed(1)}kg</div>
                       </div>
-                      <button type="button" onClick={handlePackageNext} disabled={carrierLoading} className="flex items-center gap-2 rounded-xl bg-[#3959F2] hover:bg-[#4338CA] px-4 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-[14px] font-bold text-white transition-colors disabled:opacity-50">
-                        {carrierLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                        {carrierLoading ? "Sorgulanıyor..." : "Sonraki Adım"} <span>→</span>
+                      <button type="button" onClick={handlePackageNext} className="flex items-center gap-2 rounded-xl bg-[#3959F2] hover:bg-[#4338CA] px-4 sm:px-6 py-2.5 sm:py-3 text-[13px] sm:text-[14px] font-bold text-white transition-colors disabled:opacity-50">
+                        Sonraki Adım <span>→</span>
                       </button>
                     </div>
                   </div>
@@ -762,8 +800,8 @@ export default function YurtIciGonderiPage() {
         </Card>
       )}
 
-      {/* ═══════════════════════ ADIM 2: Kargo Firması ═══════════════════════ */}
-      {step === 2 && (
+      {/* ═══════════════════════ ADIM 3: Kargo Firması ═══════════════════════ */}
+      {step === 3 && (
         <Card className="border-0 shadow-lg rounded-3xl">
           <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
@@ -800,16 +838,21 @@ export default function YurtIciGonderiPage() {
 
             {/* Firma kartları */}
             <div className="space-y-3">
-              {carriers.map((c, idx) => {
+              {[...carriers].sort((a, b) => a.price - b.price).map((c, idx) => {
                 const isSelected = selectedCarrier === c.handlerCode;
                 const logo = CARRIER_LOGOS[c.handlerCode];
-                const isCheapest = idx === 0 || c.price === Math.min(...carriers.map(x => x.price));
+                const minPrice = carriers.length > 0 ? Math.min(...carriers.map(x => x.price)) : 0;
+                const isCheapest = c.price === minPrice;
 
                 return (
                   <button key={c.handlerCode} type="button" onClick={() => { setSelectedCarrier(c.handlerCode); setApiError(null); }}
                     className={cn(
                       "group flex w-full items-center justify-between rounded-2xl p-4 text-left ring-1 transition-all",
-                      isSelected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : "bg-white ring-border hover:ring-brand-200 hover:shadow-sm"
+                      isSelected 
+                        ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" 
+                        : isCheapest 
+                          ? "bg-emerald-50/20 ring-2 ring-emerald-500 hover:ring-emerald-600 shadow-sm" 
+                          : "bg-white ring-border hover:ring-brand-200 hover:shadow-sm"
                     )}>
                     <div className="flex items-center gap-4">
                       {/* Logo */}
@@ -857,19 +900,20 @@ export default function YurtIciGonderiPage() {
 
             {/* Butonlar */}
             <div className="flex justify-between pt-2">
-              <Button variant="outline" onClick={() => setStep(1)} className="h-12 px-6 rounded-2xl gap-2">
+              <Button variant="outline" onClick={() => setStep(2)} className="h-12 px-6 rounded-2xl gap-2">
                 <ArrowLeft className="h-4 w-4" /> Geri
               </Button>
-              <Button onClick={handleCarrierNext} disabled={!selectedCarrier} className="h-12 px-8 rounded-2xl text-sm font-semibold gap-2">
-                <ArrowRight className="h-4 w-4" /> Devam Et
+              <Button onClick={handleCarrierNext} disabled={!selectedCarrier || validating} className="h-12 px-8 rounded-2xl text-sm font-semibold gap-2">
+                {validating && <Loader2 className="h-4 w-4 animate-spin" />}
+                {validating ? "Doğrulanıyor..." : <><ArrowRight className="h-4 w-4" /> Devam Et</>}
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* ═══════════════════════ ADIM 3: Adres Bilgileri ═══════════════════════ */}
-      {step === 3 && (
+      {/* ═══════════════════════ ADIM 2: Adres Bilgileri ═══════════════════════ */}
+      {step === 2 && (
         <Card className="border-0 shadow-lg rounded-3xl">
           <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
@@ -910,6 +954,9 @@ export default function YurtIciGonderiPage() {
                   ) : (
                     <Input placeholder="İlçe" value={senderTown} onChange={e => setSenderTown(e.target.value)} />
                   )}
+                </Field>
+                <Field label="Posta Kodu" icon={MapPin} error={fieldErrors.senderPostalCode}>
+                  <Input placeholder="Posta Kodu" value={senderPostalCode} onChange={e => setSenderPostalCode(e.target.value)} />
                 </Field>
                 <div className="sm:col-span-2">
                   <Field label="Adres" icon={MapPin} error={fieldErrors.senderAddress}>
@@ -953,6 +1000,9 @@ export default function YurtIciGonderiPage() {
                     <Input placeholder="İlçe" value={receiverTown} onChange={e => setReceiverTown(e.target.value)} />
                   )}
                 </Field>
+                <Field label="Posta Kodu" icon={MapPin} error={fieldErrors.receiverPostalCode}>
+                  <Input placeholder="Posta Kodu" value={receiverPostalCode} onChange={e => setReceiverPostalCode(e.target.value)} />
+                </Field>
                 <div className="sm:col-span-2">
                   <Field label="Adres" icon={MapPin} error={fieldErrors.receiverAddress}>
                     <Input placeholder="Açık adres" value={receiverAddress} onChange={e => setReceiverAddress(e.target.value)} />
@@ -963,11 +1013,12 @@ export default function YurtIciGonderiPage() {
 
             {/* Butonlar */}
             <div className="flex justify-between pt-2">
-              <Button variant="outline" onClick={() => setStep(2)} className="h-12 px-6 rounded-2xl gap-2">
+              <Button variant="outline" onClick={() => setStep(1)} className="h-12 px-6 rounded-2xl gap-2">
                 <ArrowLeft className="h-4 w-4" /> Geri
               </Button>
-              <Button onClick={handleAddressNext} className="h-12 px-8 rounded-2xl text-sm font-semibold gap-2">
-                <ArrowRight className="h-4 w-4" /> Devam Et
+              <Button onClick={handleAddressNext} disabled={carrierLoading} className="h-12 px-8 rounded-2xl text-sm font-semibold gap-2">
+                {carrierLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {carrierLoading ? "Fiyatlar Sorgulanıyor..." : <><ArrowRight className="h-4 w-4" /> Devam Et</>}
               </Button>
             </div>
           </CardContent>

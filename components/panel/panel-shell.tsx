@@ -63,7 +63,7 @@ export function PanelShell({
           </div>
 
           {/* Content */}
-          <main className="mx-auto w-full max-w-[1400px] flex-1 px-3 py-6 sm:px-4 md:px-10 md:py-10 overflow-x-hidden">
+          <main className="mx-auto w-full max-w-[1400px] flex-1 px-3 py-6 sm:px-4 md:px-10 md:py-10">
             {/* Minimal mobile controls (no full header) */}
             <div className="mb-4 sm:mb-6 flex items-center justify-between gap-2 md:hidden">
               <button
