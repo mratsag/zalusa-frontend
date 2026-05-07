@@ -184,8 +184,8 @@ export default function UsersPage() {
       ) : (
         <>
           {/* Desktop Table */}
-          <div className="hidden overflow-hidden rounded-2xl bg-white ring-1 ring-slate-100 shadow-sm md:block">
-            <table className="w-full text-sm">
+          <div className="hidden rounded-2xl bg-white ring-1 ring-slate-100 shadow-sm md:block overflow-x-auto">
+            <table className="w-full min-w-[900px] text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/60">
                   <th className="px-5 py-3.5 text-left font-semibold text-slate-600">

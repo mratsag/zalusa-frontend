@@ -19,7 +19,7 @@ import {
 export const panelNavItems = [
   { href: "/panel", label: "Panel", icon: LayoutDashboard },
   { href: "/panel/gonderi-olustur", label: "Gönderi Oluştur", icon: PackagePlus },
-  { href: "/panel/yurt-ici-gonderi", label: "Yurt İçi Gönderi", icon: Truck },
+  // { href: "/panel/yurt-ici-gonderi", label: "Yurt İçi Gönderi", icon: Truck },
   { href: "/panel/gonderilerim", label: "Gönderilerim", icon: PackageSearch },
   { href: "/panel/sepetim", label: "Sepetim", icon: ShoppingCart },
   { href: "/panel/entegrasyon", label: "Entegrasyon", icon: Plug },

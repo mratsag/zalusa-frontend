@@ -26,6 +26,7 @@ import {
   Weight,
   DollarSign,
   RotateCcw,
+  PlusCircle,
 } from "lucide-react";
 import { adminService } from "@/lib/services/adminService";
 
@@ -203,6 +204,13 @@ export default function UserDetailPage() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => router.push(`/admin/kullanicilar/${userId}/gonderi-olustur`)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition-all hover:shadow-md"
+            >
+              <PlusCircle className="h-3.5 w-3.5" />
+              Kargo Oluştur
+            </button>
             {user.isActive ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 ring-1 ring-emerald-200"><CheckCircle2 className="h-3 w-3" /> Aktif</span>
             ) : (

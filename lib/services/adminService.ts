@@ -698,7 +698,7 @@ export const adminService = {
     ),
 
   updateDraft: (id: number | string, payload: any) =>
-    put<{ message: string }>(`/api/admin/shipments/${id}/draft`, payload),
+    put<{ message: string; requiresDomesticTransfer?: boolean }>(`/api/admin/shipments/${id}/draft`, payload),
 
   // ── Kargo Seçenekleri (Admin) ────────────────────────────────────────
   getCarrierOptions: (id: number, payload?: any) =>
@@ -757,6 +757,78 @@ export const adminService = {
     isTransfer?: boolean;
   }) =>
     post<{ valid: boolean; error?: string; handlerCode: string }>("/api/admin/domestic-validate-carrier", payload),
+
+  // ── Admin Shipment Wizard (Kullanıcı adına kargo oluşturma) ──────────
+  createDraftForUser: (userId: number, payload: {
+    shipmentType: "Belge" | "Paket" | "Koli";
+    receiverCountry: string;
+    receiverPostalCode: string;
+  }) =>
+    post<{ shipmentId: number; trackingCode?: string; message: string; isExisting?: boolean }>(
+      `/api/admin/users/${userId}/shipments/draft`, payload
+    ),
+
+  getDraftForUser: (userId: number) =>
+    get<{ draft: any | null; message?: string }>(`/api/admin/users/${userId}/shipments/draft`),
+
+  getQuotesAdmin: (payload: {
+    senderCountry: string;
+    receiverCountry: string;
+    receiverPostalCode?: string;
+    packages: { widthCm: number; lengthCm: number; heightCm: number; weightKg: number; packageCount: number }[];
+    shipmentType?: string;
+  }) =>
+    post<{ quotes: any[]; chargeableWeight?: number; message?: string; capacity_exceeded?: boolean }>(
+      "/api/admin/shipments/quotes", payload
+    ),
+
+  getUserAddresses: (userId: number) =>
+    get<{ addresses: any[] }>(`/api/admin/users/${userId}/addresses`),
+
+  createUserAddress: (userId: number, payload: any) =>
+    post<{ message: string; id: number }>(`/api/admin/users/${userId}/addresses`, payload),
+
+  updateUserAddress: (userId: number, addrId: number, payload: any) =>
+    put<{ message: string }>(`/api/admin/users/${userId}/addresses/${addrId}`, payload),
+
+  deleteUserAddress: (userId: number, addrId: number) =>
+    del<{ message: string }>(`/api/admin/users/${userId}/addresses/${addrId}`),
+
+  getUserMeasurements: (userId: number) =>
+    get<{ measurements: any[] }>(`/api/admin/users/${userId}/measurements`),
+
+  createUserMeasurement: (userId: number, payload: any) =>
+    post<{ message: string; id: number }>(`/api/admin/users/${userId}/measurements`, payload),
+
+  uploadDocumentForUser: async (userId: number, file: File, shipmentId: number | string, fileType: string) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("shipment_id", String(shipmentId));
+    formData.append("file_type", fileType);
+
+    const res = await fetch(`${API}/api/admin/users/${userId}/upload-document`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${getToken()}` },
+      body: formData,
+    });
+    if (!res.ok) throw new Error("Dosya yüklenemedi");
+    return res.json();
+  },
+
+  listShipmentAttachmentsForUser: (userId: number, shipmentId: number | string) =>
+    get<{ attachments: any[] }>(`/api/admin/users/${userId}/shipment-attachments?shipment_id=${shipmentId}`),
+
+  // ── Gönderi Etiket Bilgisi (PTS PDF URL) ────────────────────────────
+  getShipmentLabel: (shipmentId: number | string) =>
+    get<{
+      integrationType: "pts" | "asset" | "none";
+      awb?: string;
+      pdfUrl?: string;
+      reference?: string;
+      supplierRef?: string;
+      hasLabel: boolean;
+      message?: string;
+    }>(`/api/admin/shipments/${shipmentId}/label`),
 };
 
 export interface BankTransfer {

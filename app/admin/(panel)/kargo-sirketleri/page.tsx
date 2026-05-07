@@ -383,7 +383,16 @@ function CarrierDetail({ carrier: initialCarrier, onCarrierUpdated }: { carrier:
               : <span className="text-sm font-bold text-white">{carrier.logoLetter}</span>}
           </div>
           <div>
-            <div className="text-sm font-semibold text-slate-800">{carrier.carrierName}</div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-slate-800">{carrier.carrierName}</span>
+              <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none ${
+                ((carrier as any).integrationType === "PTS" || carrier.id.startsWith("pts-"))
+                  ? "bg-amber-100 text-amber-700"
+                  : "bg-blue-100 text-blue-700"
+              }`}>
+                {(carrier as any).integrationType || (carrier.id.startsWith("pts-") ? "PTS" : "Asset")}
+              </span>
+            </div>
             <div className="text-xs text-slate-500">{carrier.serviceName}</div>
           </div>
         </div>

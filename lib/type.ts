@@ -41,7 +41,7 @@ export type ShipmentDraft = {
   senderName: string; senderCompany: string; senderPhone: string;
   senderAddress: string; senderCity: string; senderTown: string; senderStateId: number | null; saveSenderAddress: boolean;
   receiverName: string; receiverCompany: string; receiverPhone: string;
-  receiverAddress: string; receiverCity: string; receiverStateProvince: string;
+  receiverAddress: string; receiverCity: string; receiverTown: string; receiverStateProvince: string;
   receiverAddressCountry: string; receiverAddressPostalCode: string;
   saveReceiverAddress: boolean;
 
@@ -50,6 +50,11 @@ export type ShipmentDraft = {
   proformaCurrency: "EUR" | "USD" | "GBP";
   proformaIOSS: string;
   proformaItems: ProformaItem[];
+
+  // Fatura bilgileri (PTS API - Mikro İhracat beyanında zorunlu, FedEx sıkı uygular)
+  invoiceNo: string;
+  invoiceDate: string;
+  earchivePdfUrl: string;
 
   proformaFileName: string;
 };

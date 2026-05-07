@@ -31,6 +31,7 @@ import { CitySelect } from "@/components/ui/city-select";
 import { StateSelect } from "@/components/ui/state-select";
 import ProformaExcelUploader, { ParsedProformaRow } from "@/components/Proformaexceluploader";
 import PackageExcelUploader, { ParsedPackageRow } from "@/components/Packageexceluploader";
+import { adminService } from "@/lib/services/adminService";
 
 // NOT: @/lib/type içindeki ShipmentDraft tipinde "quantity" alanını
 // "packageCount" olarak güncellemeyi unutma!
@@ -47,11 +48,12 @@ const DEFAULT_DRAFT: ShipmentDraft = {
   selectedCarrierId: "", carrierQuotes: [],
   selectedSenderAddressId: "sender-1", selectedReceiverAddressId: "",
   senderName: "", senderCompany: "", senderPhone: "+90", senderAddress: "", senderCity: "", senderTown: "", senderStateId: null, saveSenderAddress: false,
-  receiverName: "", receiverCompany: "", receiverPhone: "", receiverAddress: "", receiverCity: "",
+  receiverName: "", receiverCompany: "", receiverPhone: "", receiverAddress: "", receiverCity: "", receiverTown: "",
   receiverStateProvince: "", receiverAddressCountry: "", receiverAddressPostalCode: "",
   saveReceiverAddress: false,
   proformaDescription: "", proformaCurrency: "EUR", proformaIOSS: "",
   proformaItems: [{ ...EMPTY_PROFORMA_ITEM, id: crypto.randomUUID() }],
+  invoiceNo: "", invoiceDate: "", earchivePdfUrl: "",
   proformaFileName: "",
 };
 
@@ -132,14 +134,12 @@ function getLogoSrc(url: string): string {
 }
 function CarrierLogo({ q, size = "h-11 w-11", textSize = "text-sm" }: { q: ApiCarrierQuote; size?: string; textSize?: string }) {
   if (q.logoUrl) {
-    // Görsel varsa: Carrier'ın marka rengini arka plan olarak kullan
-    // (logolar beyaz/şeffaf olduğu için renkli arka plan gerekli)
-    const color = getLogoColor(q);
-    const hex = isHexColor(color);
+    // Görsel varsa: Admin paneldeki gibi açık arka plan kullan
+    // (Kırmızı arka plan + kırmızı logo = görünmez oluyordu)
     return (
       <div
-        className={cn("flex shrink-0 items-center justify-center rounded-full shadow-sm overflow-hidden", size, !hex && color)}
-        style={hex ? { backgroundColor: color } : undefined}
+        className={cn("flex shrink-0 items-center justify-center rounded-full shadow-sm overflow-hidden", size)}
+        style={{ backgroundColor: "#f8fafc" }}
       >
         <img src={getLogoSrc(q.logoUrl)} alt={q.carrierName} className="h-[70%] w-[70%] object-contain" />
       </div>
@@ -395,10 +395,81 @@ function getFlagImageUrl(code: string, size: number = 40): string {
   if (upper === "IK") return "/ik-flag.png";
   return `https://flagcdn.com/w${size}/${code.toLowerCase()}.png`;
 }
-export default function GonderiOlusturPage() {
+
+// Admin mode ile paylaşılabilir props
+export interface ShipmentWizardProps {
+  adminMode?: boolean;
+  adminUserId?: number;
+  adminUserName?: string;
+}
+
+export function ShipmentWizardCore({ adminMode, adminUserId, adminUserName }: ShipmentWizardProps) {
   const { hydrated } = useAppState();
   const searchParams = useSearchParams();
-  const urlDraftId = searchParams.get("draft");
+  const urlDraftId = adminMode ? null : searchParams.get("draft");
+
+  // ── API Adapters: adminMode ise admin service, değilse user service kullanır ──
+  const api = React.useMemo(() => ({
+    createDraft: (payload: { shipmentType: "Belge" | "Paket" | "Koli"; receiverCountry: string; receiverPostalCode: string }) =>
+      adminMode && adminUserId
+        ? adminService.createDraftForUser(adminUserId, payload)
+        : shipmentService.createDraft(payload),
+    getDraft: () =>
+      adminMode && adminUserId
+        ? adminService.getDraftForUser(adminUserId)
+        : shipmentService.getDraft(),
+    updateDraft: (id: number, step: number, payload: Record<string, unknown>) =>
+      adminMode
+        ? adminService.updateDraft(id, { step, ...payload })
+        : shipmentService.updateDraft(id, step, payload),
+    getQuotes: (payload: any) =>
+      adminMode
+        ? adminService.getQuotesAdmin(payload)
+        : shipmentService.getQuotes(payload),
+    listAddresses: () =>
+      adminMode && adminUserId
+        ? adminService.getUserAddresses(adminUserId)
+        : addressService.list(),
+    createAddress: (payload: any) =>
+      adminMode && adminUserId
+        ? adminService.createUserAddress(adminUserId, payload)
+        : addressService.create(payload),
+    updateAddress: (id: number, payload: any) =>
+      adminMode && adminUserId
+        ? adminService.updateUserAddress(adminUserId, id, payload)
+        : addressService.update(id, payload),
+    deleteAddress: (id: number) =>
+      adminMode && adminUserId
+        ? adminService.deleteUserAddress(adminUserId, id)
+        : addressService.delete(id),
+    listMeasurements: () =>
+      adminMode && adminUserId
+        ? adminService.getUserMeasurements(adminUserId)
+        : measurementService.list(),
+    createMeasurement: (payload: any) =>
+      adminMode && adminUserId
+        ? adminService.createUserMeasurement(adminUserId, payload)
+        : measurementService.create(payload),
+    uploadDocument: (file: File, shipmentId: number | string, fileType: string) =>
+      adminMode && adminUserId
+        ? adminService.uploadDocumentForUser(adminUserId, file, shipmentId, fileType)
+        : documentService.upload(file, shipmentId, fileType),
+    listAttachments: (shipmentId: number | string) =>
+      adminMode && adminUserId
+        ? adminService.listShipmentAttachmentsForUser(adminUserId, shipmentId)
+        : documentService.list(shipmentId),
+    getDomesticPrices: (pkgs: any[], shipmentId: number | null) =>
+      adminMode
+        ? adminService.getDomesticPrices({ packages: pkgs, shipmentId: shipmentId || 0 })
+        : domesticService.getPrices(pkgs, shipmentId),
+    validateDomesticCarrier: (shipmentId: string, handlerCode: string) =>
+      adminMode
+        ? adminService.validateDomesticCarrier({ shipmentId, handlerCode })
+        : domesticService.validateCarrier(shipmentId, handlerCode),
+    forceCreate: (shipmentId: number, payload: any) =>
+      adminService.forceCreateShipment(shipmentId, payload),
+  }), [adminMode, adminUserId]);
+
   const [step, setStep] = React.useState(0);
   const [draft, setDraft] = React.useState<ShipmentDraft>(DEFAULT_DRAFT);
   const [shipmentId, setShipmentId] = React.useState<number | null>(null);
@@ -442,6 +513,10 @@ const [descriptionTypes, setDescriptionTypes] = React.useState<{ id: number; lab
   const [draftLoading, setDraftLoading] = React.useState(!!urlDraftId);
 const [showPackageExcel, setShowPackageExcel] = React.useState(false);
   const [showMoreCarriers, setShowMoreCarriers] = React.useState(true);
+  // ── PTS Etiket State ───────────────────────────────────────────────────
+  const [labelLoading, setLabelLoading] = React.useState(false);
+  const [labelData, setLabelData] = React.useState<{ integrationType: string; awb?: string; pdfUrl?: string; reference?: string; supplierRef?: string; hasLabel: boolean; message?: string } | null>(null);
+  const [labelError, setLabelError] = React.useState<string | null>(null);
   const [addressTab, setAddressTab] = React.useState<"sender" | "receiver">("sender");
 
   // ── Adım Geçiş Toast ──
@@ -556,13 +631,13 @@ const [showPackageExcel, setShowPackageExcel] = React.useState(false);
   React.useEffect(() => {
     if (!hydrated) return;
     // Adresler
-    addressService.list().then(r => { setApiAddresses(r.addresses); setAddressesLoaded(true); }).catch(() => { setAddressesLoaded(true); });
+    api.listAddresses().then(r => { setApiAddresses(r.addresses); setAddressesLoaded(true); }).catch(() => { setAddressesLoaded(true); });
     // Ölçüler
-    measurementService.list().then(r => setApiMeasurements(r.measurements)).catch(() => {});
+    api.listMeasurements().then(r => setApiMeasurements(r.measurements)).catch(() => {});
     // URL'de draftId varsa banner için tekrar taslak çekme (Race condition önlemi)
     if (urlDraftId) return;
     // Mevcut taslak var mı kontrol et (ama otomatik yükleme)
-    shipmentService.getDraft().then(r => {
+    api.getDraft().then(r => {
       if (!r.draft) return;
       const d = r.draft;
       // Taslak varsa sadece banner bilgisini sakla
@@ -586,7 +661,7 @@ const [showPackageExcel, setShowPackageExcel] = React.useState(false);
     if (shipmentId === draftId) return;
 
     setDraftLoading(true);
-    shipmentService.getDraftById(draftId)
+    api.getDraft()
       .then(async r => {
         if (!r.draft) {
           setDraftLoading(false);
@@ -647,7 +722,7 @@ const [showPackageExcel, setShowPackageExcel] = React.useState(false);
               packageCount: Math.max(1, Math.round(toNumber(p.packageCount))),
             }));
 
-            const quoteRes = await shipmentService.getQuotes({
+            const quoteRes = await api.getQuotes({
               senderCountry,
               receiverCountry,
               receiverPostalCode,
@@ -909,6 +984,15 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
       if (!item.unitPrice || toNumber(item.unitPrice) <= 0) errors[`item_${idx}_unitPrice`] = "Zorunlu";
     });
 
+    // FedEx seçildiyse fatura bilgileri zorunlu
+    const selectedCarrier = apiQuotes.find(q => q.carrierId === draft.selectedCarrierId);
+    const isFedExSelected = selectedCarrier?.carrierName?.toUpperCase().includes("FEDEX") || selectedCarrier?.serviceName?.toUpperCase().includes("FEDEX");
+    if (isFedExSelected) {
+      if (!draft.invoiceNo.trim()) errors.invoiceNo = "FedEx için fatura numarası zorunludur";
+      if (!draft.invoiceDate.trim()) errors.invoiceDate = "FedEx için fatura tarihi zorunludur";
+      if (!draft.earchivePdfUrl.trim()) errors.earchivePdfUrl = "FedEx için e-arşiv fatura PDF linki zorunludur";
+    }
+
     // Belge yükleme zorunluluğu
     if (docUploadedFiles.length === 0) {
       errors.documentUpload = "Zorunlu";
@@ -958,7 +1042,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
         // Taslak oluştur veya güncelle (step 0)
         let sid = shipmentId;
         if (!sid) {
-          const res = await shipmentService.createDraft({
+          const res = await api.createDraft({
             shipmentType: draft.shipmentType,
             receiverCountry: draft.receiverCountry,
             receiverPostalCode: draft.receiverPostalCode,
@@ -966,7 +1050,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           sid = res.shipmentId;
           setShipmentId(sid);
         } else {
-          await shipmentService.updateDraft(sid, 0, {
+          await api.updateDraft(sid, 0, {
             shipmentType: draft.shipmentType,
             receiverCountry: draft.receiverCountry,
             receiverPostalCode: draft.receiverPostalCode,
@@ -977,7 +1061,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
         if (draft.shipmentType === "Belge") {
           const belgePackages = [{ widthCm: 1, lengthCm: 1, heightCm: 1, weightKg: 0.5, packageCount: 1 }];
           // Paket bilgisini backend'e kaydet
-          await shipmentService.updateDraft(sid!, 1, { packages: belgePackages, saveMeasurements: [] });
+          await api.updateDraft(sid!, 1, { packages: belgePackages, saveMeasurements: [] });
           // Sabit paketi draft state'ine yaz
           setDraft(d => ({
             ...d,
@@ -988,7 +1072,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
             }],
           }));
           // Fiyat tekliflerini çek
-          const quoteRes = await shipmentService.getQuotes({
+          const quoteRes = await api.getQuotes({
             senderCountry: draft.senderCountry,
             receiverCountry: draft.receiverCountry,
             receiverPostalCode: draft.receiverPostalCode,
@@ -1036,9 +1120,9 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
         const saveMeasurements = draft.packages
           .filter(p => p.saveMeasurement && p.measurementLabel)
           .map(p => ({ label: p.measurementLabel!, widthCm: toNumber(p.widthCm), lengthCm: toNumber(p.lengthCm), heightCm: toNumber(p.heightCm), weightKg: toNumber(p.weightKg) }));
-        await shipmentService.updateDraft(shipmentId, 1, { packages, saveMeasurements });
+        await api.updateDraft(shipmentId, 1, { packages, saveMeasurements });
         // Kargo fiyatlarını çek
-        const quoteRes = await shipmentService.getQuotes({
+        const quoteRes = await api.getQuotes({
           senderCountry: draft.senderCountry,
           receiverCountry: draft.receiverCountry,
           receiverPostalCode: draft.receiverPostalCode,
@@ -1055,7 +1139,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
         }
         // Ölçüleri yenile (saveMeasurement varsa yeni kayıtlar gelmiş olabilir)
         if (saveMeasurements.length > 0) {
-          measurementService.list().then(r => setApiMeasurements(r.measurements)).catch(() => {});
+          api.listMeasurements().then(r => setApiMeasurements(r.measurements)).catch(() => {});
         }
         // Tavsiye edilen kargo
         const rec = quotes.find(q => q.tags.includes("recommended"));
@@ -1066,7 +1150,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
         if (!draft.selectedCarrierId) { setApiError("Lütfen bir kargo firması seçin."); setLoading(false); return; }
         
         // Modal geçici olarak kapatıldı, direkt backend'e yaz ve devam et.
-        await shipmentService.updateDraft(shipmentId, 2, {
+        await api.updateDraft(shipmentId, 2, {
           selectedCarrierId: draft.selectedCarrierId,
           hasInsurance: draft.hasInsurance,
         });
@@ -1090,10 +1174,27 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           if (!draft.receiverAddress) step3Errors.receiverAddress = "Adres zorunludur";
           if (!draft.receiverCity) step3Errors.receiverCity = "Şehir zorunludur";
           if (!draft.receiverPhone) step3Errors.receiverPhone = "Telefon zorunludur";
-          if (!draft.receiverAddressCountry) step3Errors.receiverAddressCountry = "Ülke zorunludur";
+          if (!draft.receiverAddressCountry) {
+            step3Errors.receiverAddressCountry = "Ülke zorunludur";
+          } else if (draft.receiverAddressCountry.toUpperCase() !== draft.receiverCountry.toUpperCase()) {
+            const formCountryName = apiCountries.find(c => c.value.toUpperCase() === draft.receiverAddressCountry.toUpperCase())?.name || draft.receiverAddressCountry;
+            const targetCountryName = apiCountries.find(c => c.value.toUpperCase() === draft.receiverCountry.toUpperCase())?.name || draft.receiverCountry;
+            setErrorModal({ title: "Ülke Uyuşmazlığı", message: `Yeni girdiğiniz alıcı adresi "${formCountryName}" ülkesine ait. Ancak hedef ülke olarak "${targetCountryName}" seçtiniz. Lütfen hedef ülkeyle eşleşen bir ülke seçin.` });
+            setLoading(false);
+            return;
+          }
         } else {
           if (!draft.selectedReceiverAddressId) {
             step3Errors.selectedReceiverAddressId = "Lütfen bir alıcı seçin veya yeni adres girin";
+          } else {
+            const selectedAddr = SAVED_RECEIVER_ADDRESSES.find(a => String(a.id) === draft.selectedReceiverAddressId);
+            if (selectedAddr && selectedAddr.countryCode && selectedAddr.countryCode.toUpperCase() !== draft.receiverCountry.toUpperCase()) {
+              const addrCountryName = apiCountries.find(c => c.value.toUpperCase() === selectedAddr.countryCode.toUpperCase())?.name || selectedAddr.countryCode;
+              const targetCountryName = apiCountries.find(c => c.value.toUpperCase() === draft.receiverCountry.toUpperCase())?.name || draft.receiverCountry;
+              setErrorModal({ title: "Ülke Uyuşmazlığı", message: `Seçtiğiniz alıcı adresi "${addrCountryName}" ülkesine ait. Ancak hedef ülke olarak "${targetCountryName}" seçtiniz. Lütfen hedef ülkeyle eşleşen bir alıcı adresi seçin veya yeni adres ekleyin.` });
+              setLoading(false);
+              return;
+            }
           }
         }
 
@@ -1119,7 +1220,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
         // senderAddressId: numeric ID gönder
         const numericSenderAddrId = fallbackSender ? fallbackSender.id : (finalSenderAddressId ? parseInt(finalSenderAddressId) || null : null);
 
-        const step3Result = await shipmentService.updateDraft(shipmentId, 3, {
+        const step3Result = await api.updateDraft(shipmentId, 3, {
           senderAddressId: numericSenderAddrId,
           senderName: finalSenderName,
           senderCompany: finalSenderCompany,
@@ -1130,14 +1231,15 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           senderStateId: draft.senderStateId,
           saveSenderAddress: draft.saveSenderAddress,
           receiverAddressId: receiverAddr ? receiverAddr.id : null,
-          receiverName: draft.receiverName,
-          receiverCompany: draft.receiverCompany,
-          receiverPhone: draft.receiverPhone,
-          receiverAddress: draft.receiverAddress,
-          receiverCity: draft.receiverCity,
-          receiverStateProvince: draft.receiverStateProvince,
-          receiverAddressCountry: draft.receiverAddressCountry,
-          receiverAddressPostalCode: draft.receiverAddressPostalCode,
+          // Kayıtlı adres seçildiyse → o adresin bilgilerini gönder (draft'taki stale veri değil)
+          receiverName: receiverAddr ? receiverAddr.name : draft.receiverName,
+          receiverCompany: receiverAddr ? receiverAddr.company : draft.receiverCompany,
+          receiverPhone: receiverAddr ? receiverAddr.phone : draft.receiverPhone,
+          receiverAddress: receiverAddr ? receiverAddr.address : draft.receiverAddress,
+          receiverCity: receiverAddr ? receiverAddr.city : draft.receiverCity,
+          receiverStateProvince: receiverAddr ? (receiverAddr.stateProvince || receiverAddr.city) : draft.receiverStateProvince,
+          receiverAddressCountry: receiverAddr ? receiverAddr.countryCode : draft.receiverAddressCountry,
+          receiverAddressPostalCode: receiverAddr ? receiverAddr.postalCode : draft.receiverAddressPostalCode,
           saveReceiverAddress: draft.saveReceiverAddress,
           domesticHandlerCode: selectedDomesticHandler || undefined,
         });
@@ -1154,7 +1256,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
               depth: parseFloat(p.lengthCm) || 10,
               weight: parseFloat(p.weightKg) || 1,
             }));
-            const res = await domesticService.getPrices(pkgs, shipmentId);
+            const res = await api.getDomesticPrices(pkgs, shipmentId);
             setDomesticCarriers(res.carriers || []);
           } catch (err: any) {
             setApiError("Yurt içi kargo fiyatları alınamadı: " + (err?.message || ""));
@@ -1167,7 +1269,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
 
         // Adres listesini yenile (yeni adres kaydedildiyse)
         if (draft.saveReceiverAddress || (showNewSenderForm && draft.saveSenderAddress)) {
-          addressService.list().then(r => setApiAddresses(r.addresses)).catch(() => {});
+          api.listAddresses().then(r => setApiAddresses(r.addresses)).catch(() => {});
         }
       } else if (step === 4) {
         if (!shipmentId) { setApiError("Taslak bulunamadı."); setLoading(false); return; }
@@ -1189,11 +1291,14 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           quantity: Math.max(1, Math.round(toNumber(item.quantity))),
           unitPrice: toNumber(item.unitPrice), originCountry: item.origin || "TR",
         }));
-        await shipmentService.updateDraft(shipmentId, 4, {
+        await api.updateDraft(shipmentId, 4, {
           proformaDescription: draft.proformaDescription,
           proformaCurrency: draft.proformaCurrency,
           proformaIOSS: draft.proformaIOSS,
           proformaItems,
+          invoiceNo: draft.invoiceNo,
+          invoiceDate: draft.invoiceDate,
+          earchivePdfUrl: draft.earchivePdfUrl,
         });
       }
       setStep(s => {
@@ -1219,7 +1324,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
     if (!shipmentId || !draft.selectedCarrierId) return;
     setLoading(true);
     try {
-      await shipmentService.updateDraft(shipmentId, 2, {
+      await api.updateDraft(shipmentId, 2, {
         selectedCarrierId: draft.selectedCarrierId,
         hasInsurance: draft.hasInsurance,
       });
@@ -1257,16 +1362,45 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
     try {
       if (docUploadedFiles.length > 0) {
         await Promise.all(
-          docUploadedFiles.map(f => documentService.upload(f.file, shipmentId, f.type))
+          docUploadedFiles.map(f => api.uploadDocument(f.file, shipmentId, f.type))
         ).catch((err: any) => {
           throw new Error("Belgeler yüklenirken hata oluştu: " + (err?.message || "Bilinmeyen Hata"));
         });
       }
-      // Adım 5 → pending_payment'a al
-      await shipmentService.updateDraft(shipmentId, 5, {});
 
-      // Ödeme seçenekleri sayfasına yönlendir (Havale/EFT + iyzico)
-      window.location.href = `/panel/odeme/${shipmentId}`;
+      if (adminMode) {
+        // Admin modunda: forceCreate ile direkt oluştur
+        await api.forceCreate(shipmentId, {
+          // Gönderici
+          senderName: draft.senderName,
+          senderPhone: draft.senderPhone,
+          senderAddress: draft.senderAddress,
+          senderCity: draft.senderCity,
+          senderTown: draft.senderTown || "",
+          senderCountry: draft.senderCountry || "TR",
+          // Alıcı
+          receiverName: draft.receiverName,
+          receiverPhone: draft.receiverPhone,
+          receiverAddress: draft.receiverAddress,
+          receiverCity: draft.receiverCity,
+          receiverTown: draft.receiverTown || "",
+          receiverPostalCode: draft.receiverPostalCode || draft.receiverAddressPostalCode || "",
+          receiverCountry: draft.receiverCountry,
+          // Kargo
+          carrierId: draft.selectedCarrierId,
+          carrierType: "international",
+          priceTry: apiQuotes.find(q => q.carrierId === draft.selectedCarrierId)?.priceTry || 0,
+          carrierName: apiQuotes.find(q => q.carrierId === draft.selectedCarrierId)?.carrierName || "",
+          serviceName: apiQuotes.find(q => q.carrierId === draft.selectedCarrierId)?.serviceName || "",
+        });
+        setDone(true);
+        setStep(STEPS.length - 1);
+      } else {
+        // Adım 5 → pending_payment'a al
+        await api.updateDraft(shipmentId, 5, {});
+        // Ödeme seçenekleri sayfasına yönlendir (Havale/EFT + iyzico)
+        window.location.href = `/panel/odeme/${shipmentId}`;
+      }
     } catch (err: any) {
       const msg = err?.message || "Gönderi tamamlanamadı.";
       if (msg.includes("taslak değil") || msg.includes("düzenlenemez")) {
@@ -2256,7 +2390,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                     <Button type="button" disabled={editSenderBusy} onClick={async () => {
                                       setEditSenderBusy(true);
                                       try {
-                                        await addressService.update(editingSenderAddr.id, {
+                                        await api.updateAddress(editingSenderAddr.id, {
                                           label: editingSenderAddr.label || editingSenderAddr.name,
                                           name: editingSenderAddr.name,
                                           company: editingSenderAddr.company,
@@ -2268,7 +2402,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                           stateProvince: editingSenderAddr.stateProvince,
                                           countryCode: editingSenderAddr.countryCode,
                                         });
-                                        const res = await addressService.list();
+                                        const res = await api.listAddresses();
                                         setApiAddresses(res.addresses);
                                         if (isSelected) {
                                           setDraft(d => ({ ...d, senderName: editingSenderAddr.name, senderPhone: editingSenderAddr.phone || "+90", senderAddress: editingSenderAddr.address, senderCity: editingSenderAddr.city, senderTown: (editingSenderAddr as any).town || "", senderCompany: editingSenderAddr.company || "" }));
@@ -2300,7 +2434,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                   <button type="button" onClick={(e) => { e.stopPropagation(); setEditingSenderAddr({ ...a }); }} className="grid h-7 w-7 place-items-center rounded-lg text-[#94A3B8] hover:bg-[#EEF2FF] hover:text-[#4F46E5] transition-colors opacity-0 group-hover:opacity-100" title="Düzenle">
                                     <Pencil className="h-3.5 w-3.5" />
                                   </button>
-                                  <button type="button" onClick={async (e) => { e.stopPropagation(); if (!confirm("Bu adresi silmek istediğinize emin misiniz?")) return; try { await addressService.delete(a.id); const res = await addressService.list(); setApiAddresses(res.addresses); if (isSelected) update("selectedSenderAddressId", ""); } catch {} }} className="grid h-7 w-7 place-items-center rounded-lg text-[#94A3B8] hover:bg-red-50 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100" title="Sil">
+                                  <button type="button" onClick={async (e) => { e.stopPropagation(); if (!confirm("Bu adresi silmek istediğinize emin misiniz?")) return; try { await api.deleteAddress(a.id); const res = await api.listAddresses(); setApiAddresses(res.addresses); if (isSelected) update("selectedSenderAddressId", ""); } catch {} }} className="grid h-7 w-7 place-items-center rounded-lg text-[#94A3B8] hover:bg-red-50 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100" title="Sil">
                                     <Trash2 className="h-3.5 w-3.5" />
                                   </button>
                                   <div className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-2 transition-colors ml-1", isSelected ? "bg-[#3959F2] ring-[#4F46E5]" : "bg-white ring-[#CBD5E1] group-hover:ring-[#94A3B8]")}>
@@ -2365,21 +2499,29 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                             const isSelected = draft.selectedReceiverAddressId === String(a.id);
                             const colors = ["bg-gradient-to-br from-violet-500 to-indigo-600", "bg-gradient-to-br from-emerald-500 to-teal-600", "bg-gradient-to-br from-amber-500 to-orange-600", "bg-gradient-to-br from-rose-500 to-pink-600", "bg-gradient-to-br from-sky-500 to-blue-600"];
                             const colorIdx = a.id % colors.length;
+                            const isCountryMismatch = a.countryCode && a.countryCode.toUpperCase() !== draft.receiverCountry.toUpperCase();
+                            const targetCountryName = apiCountries.find(c => c.value.toUpperCase() === draft.receiverCountry.toUpperCase())?.name || draft.receiverCountry;
+
                             return (
                               <button
                                 key={String(a.id)}
                                 type="button"
-                                onClick={() => { update("selectedReceiverAddressId", String(a.id)); setShowNewReceiverForm(false); }}
+                                onClick={() => { setDraft(d => ({ ...d, selectedReceiverAddressId: String(a.id), receiverName: a.name || "", receiverCompany: a.company || "", receiverPhone: a.phone || "", receiverAddress: a.address || "", receiverCity: a.city || "", receiverStateProvince: a.stateProvince || a.city || "", receiverAddressCountry: a.countryCode || "", receiverAddressPostalCode: a.postalCode || "" })); setShowNewReceiverForm(false); }}
                                 className={cn(
                                   "flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3 text-left ring-1 transition-all hover:shadow-md",
-                                  isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-sm" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1]"
+                                  isCountryMismatch
+                                    ? (isSelected ? "bg-amber-50 ring-2 ring-amber-400 shadow-sm" : "bg-amber-50/50 ring-amber-200 hover:ring-amber-300")
+                                    : (isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-sm" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1]")
                                 )}
                               >
-                                <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm", colors[colorIdx])}>
-                                  {initials}
+                                <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm", isCountryMismatch ? "bg-amber-500" : colors[colorIdx])}>
+                                  {isCountryMismatch ? <AlertTriangle className="h-3.5 w-3.5" /> : initials}
                                 </div>
                                 <div className="min-w-0">
-                                  <div className="text-[12px] font-bold text-[#0F172A] truncate leading-tight">{a.name}</div>
+                                  <div className="text-[12px] font-bold text-[#0F172A] truncate leading-tight flex items-center gap-1">
+                                    {a.name}
+                                    {isCountryMismatch && <span className="text-[9px] font-semibold text-amber-600">Uyuşmazlık</span>}
+                                  </div>
                                   <div className="text-[10px] text-[#94A3B8] truncate leading-tight">{a.city} · {a.countryCode}</div>
                                 </div>
                               </button>
@@ -2434,7 +2576,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                     <Button type="button" disabled={editReceiverBusy} onClick={async () => {
                                       setEditReceiverBusy(true);
                                       try {
-                                        await addressService.update(editingReceiverAddr.id, {
+                                        await api.updateAddress(editingReceiverAddr.id, {
                                           label: editingReceiverAddr.label || editingReceiverAddr.name,
                                           name: editingReceiverAddr.name,
                                           company: editingReceiverAddr.company,
@@ -2446,7 +2588,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                           stateProvince: editingReceiverAddr.stateProvince,
                                           countryCode: editingReceiverAddr.countryCode,
                                         });
-                                        const res = await addressService.list();
+                                        const res = await api.listAddresses();
                                         setApiAddresses(res.addresses);
                                         if (isSelected) {
                                           setDraft(d => ({ ...d, receiverName: editingReceiverAddr.name, receiverPhone: editingReceiverAddr.phone || "", receiverAddress: editingReceiverAddr.address, receiverCity: editingReceiverAddr.city, receiverCompany: editingReceiverAddr.company || "" }));
@@ -2463,32 +2605,43 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                               );
                             }
 
+                            const isCountryMismatch = a.countryCode && a.countryCode.toUpperCase() !== draft.receiverCountry.toUpperCase();
+                            const targetCountryName = apiCountries.find(c => c.value.toUpperCase() === draft.receiverCountry.toUpperCase())?.name || draft.receiverCountry;
+
                             return (
-                              <div key={String(a.id)} className={cn("group flex w-full items-center justify-between rounded-2xl p-3.5 ring-1 transition-all", isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-md shadow-indigo-100/50" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1] hover:shadow-md")}>
-                                <button type="button" onClick={() => { update("selectedReceiverAddressId", String(a.id)); setShowNewReceiverForm(false); }} className="flex items-center gap-3 text-left flex-1 min-w-0">
-                                  <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold text-white shadow-sm", colors[colorIdx])}>
-                                    {initials}
-                                  </div>
-                                  <div className="min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-[13px] font-bold text-[#0F172A]">{a.name}</span>
-                                      {a.countryCode && <span className="text-[10px] font-semibold text-white bg-slate-400 rounded px-1.5 py-0.5 leading-none">{a.countryCode}</span>}
+                              <div key={String(a.id)} className={cn("group flex w-full flex-col justify-between rounded-2xl p-3.5 ring-1 transition-all", isCountryMismatch ? (isSelected ? "bg-amber-50 ring-2 ring-amber-400 shadow-md" : "bg-amber-50/50 ring-amber-200 hover:ring-amber-300 hover:shadow-md") : (isSelected ? "bg-white ring-2 ring-[#4F46E5] shadow-md shadow-indigo-100/50" : "bg-white ring-[#E2E8F0] hover:ring-[#CBD5E1] hover:shadow-md"))}>
+                                <div className="flex w-full items-center justify-between">
+                                  <button type="button" onClick={() => { setDraft(d => ({ ...d, selectedReceiverAddressId: String(a.id), receiverName: a.name || "", receiverCompany: a.company || "", receiverPhone: a.phone || "", receiverAddress: a.address || "", receiverCity: a.city || "", receiverStateProvince: a.stateProvince || a.city || "", receiverAddressCountry: a.countryCode || "", receiverAddressPostalCode: a.postalCode || "" })); setShowNewReceiverForm(false); }} className="flex items-center gap-3 text-left flex-1 min-w-0">
+                                    <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold text-white shadow-sm", colors[colorIdx])}>
+                                      {initials}
                                     </div>
-                                    <div className="text-[11px] text-[#94A3B8] truncate mt-0.5">{a.company && <>{a.company} · </>}{a.city}{a.postalCode && <> · {a.postalCode}</>}</div>
-                                    <div className="text-[10px] text-[#CBD5E1] truncate">{a.address}</div>
-                                  </div>
-                                </button>
-                                <div className="flex items-center gap-1 shrink-0 ml-2">
-                                  <button type="button" onClick={(e) => { e.stopPropagation(); setEditingReceiverAddr({ ...a }); }} className="grid h-8 w-8 place-items-center rounded-xl text-[#94A3B8] hover:bg-[#EEF2FF] hover:text-[#4F46E5] transition-all opacity-0 group-hover:opacity-100" title="Düzenle">
-                                    <Pencil className="h-3.5 w-3.5" />
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-[13px] font-bold text-[#0F172A]">{a.name}</span>
+                                        {a.countryCode && <span className={cn("text-[10px] font-semibold text-white rounded px-1.5 py-0.5 leading-none", isCountryMismatch ? "bg-amber-500" : "bg-slate-400")}>{a.countryCode}</span>}
+                                      </div>
+                                      <div className="text-[11px] text-[#94A3B8] truncate mt-0.5">{a.company && <>{a.company} · </>}{a.city}{a.postalCode && <> · {a.postalCode}</>}</div>
+                                      <div className="text-[10px] text-[#CBD5E1] truncate">{a.address}</div>
+                                    </div>
                                   </button>
-                                  <button type="button" onClick={async (e) => { e.stopPropagation(); if (!confirm("Bu adresi silmek istediğinize emin misiniz?")) return; try { await addressService.delete(a.id); const res = await addressService.list(); setApiAddresses(res.addresses); if (isSelected) update("selectedReceiverAddressId", ""); } catch {} }} className="grid h-8 w-8 place-items-center rounded-xl text-[#94A3B8] hover:bg-red-50 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100" title="Sil">
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </button>
-                                  <div className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-2 transition-colors ml-1", isSelected ? "bg-[#3959F2] ring-[#4F46E5]" : "bg-white ring-[#CBD5E1] group-hover:ring-[#94A3B8]")}>
-                                    {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
+                                  <div className="flex items-center gap-1 shrink-0 ml-2">
+                                    <button type="button" onClick={(e) => { e.stopPropagation(); setEditingReceiverAddr({ ...a }); }} className="grid h-8 w-8 place-items-center rounded-xl text-[#94A3B8] hover:bg-[#EEF2FF] hover:text-[#4F46E5] transition-all opacity-0 group-hover:opacity-100" title="Düzenle">
+                                      <Pencil className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button type="button" onClick={async (e) => { e.stopPropagation(); if (!confirm("Bu adresi silmek istediğinize emin misiniz?")) return; try { await api.deleteAddress(a.id); const res = await api.listAddresses(); setApiAddresses(res.addresses); if (isSelected) update("selectedReceiverAddressId", ""); } catch {} }} className="grid h-8 w-8 place-items-center rounded-xl text-[#94A3B8] hover:bg-red-50 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100" title="Sil">
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                    <div className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-2 transition-colors ml-1", isCountryMismatch && isSelected ? "bg-amber-500 ring-amber-400" : isSelected ? "bg-[#3959F2] ring-[#4F46E5]" : "bg-white ring-[#CBD5E1] group-hover:ring-[#94A3B8]")}>
+                                      {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
+                                    </div>
                                   </div>
                                 </div>
+                                {isCountryMismatch && (
+                                  <p className="text-[10px] text-amber-600 font-semibold mt-2 flex items-center gap-1">
+                                    <AlertTriangle className="h-3 w-3 shrink-0" />
+                                    Hedef ülke ({targetCountryName}) ile uyuşmuyor
+                                  </p>
+                                )}
                               </div>
                             );
                           })}
@@ -2748,6 +2901,141 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                     </p>
                   </div>
                 </div>
+
+                {/* ── Fatura Bilgileri (Mikro İhracat - FedEx zorunlu tutar) ── */}
+                {(() => {
+                  const sq = apiQuotes.find(q => q.carrierId === draft.selectedCarrierId);
+                  const isFedEx = sq?.carrierName?.toUpperCase().includes("FEDEX") || sq?.serviceName?.toUpperCase().includes("FEDEX");
+                  return (
+                    <div className={cn("mt-6 rounded-2xl border p-5 transition-all", isFedEx ? "border-amber-300 bg-amber-50/40" : "border-slate-200 bg-slate-50/30")}>
+                      <div className="flex items-center gap-2 mb-4">
+                        <Receipt className="h-4 w-4 text-amber-600" />
+                        <span className="text-[14px] font-bold text-slate-800">Fatura Bilgileri</span>
+                        {isFedEx && <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">FedEx - Zorunlu</span>}
+                      </div>
+                      {isFedEx && (
+                        <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2.5 mb-4">
+                          <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-amber-800 leading-relaxed">
+                            <span className="font-bold">FedEx</span> ile yapılan gönderilerde fatura numarası, tarihi ve e-arşiv fatura PDF yüklemesi zorunludur.
+                          </p>
+                        </div>
+                      )}
+                      <div className="grid gap-x-4 gap-y-4 grid-cols-1 sm:grid-cols-2">
+                        {/* Fatura No */}
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[12px] font-bold text-slate-700">Fatura Numarası {isFedEx && <span className="text-red-500 text-sm ml-0.5">*</span>}</label>
+                          <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 focus-within:bg-white focus-within:ring-2 transition-all", fieldErrors.invoiceNo ? "border-red-500 bg-red-50/30 ring-2 ring-red-100" : "border-slate-300 bg-slate-50/50 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
+                            <Receipt className="mr-3 h-4 w-4 text-slate-400 shrink-0" />
+                            <Input value={draft.invoiceNo} onChange={e => update("invoiceNo", e.target.value)} placeholder="Örn: FTR-2026-001" className="flex-1 border-0 ring-0 shadow-none bg-transparent p-0 text-[14px] font-medium text-slate-700 focus:ring-0 placeholder:text-slate-400" />
+                          </div>
+                        </div>
+                        {/* Fatura Tarihi */}
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[12px] font-bold text-slate-700">Fatura Tarihi {isFedEx && <span className="text-red-500 text-sm ml-0.5">*</span>}</label>
+                          <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 focus-within:bg-white focus-within:ring-2 transition-all", fieldErrors.invoiceDate ? "border-red-500 bg-red-50/30 ring-2 ring-red-100" : "border-slate-300 bg-slate-50/50 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
+                            <Calendar className="mr-3 h-4 w-4 text-slate-400 shrink-0" />
+                            <Input type="date" value={draft.invoiceDate} onChange={e => update("invoiceDate", e.target.value)} className="flex-1 border-0 ring-0 shadow-none bg-transparent p-0 text-[14px] font-medium text-slate-700 focus:ring-0" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* E-Arşiv Fatura PDF Yükleme */}
+                      <div className="mt-4">
+                        <label className="text-[12px] font-bold text-slate-700 mb-2 block">E-Arşiv Fatura PDF {isFedEx && <span className="text-red-500 text-sm ml-0.5">*</span>}</label>
+                        {draft.earchivePdfUrl ? (
+                          /* Yüklendi — Dosya gösterimi */
+                          <div className={cn("flex items-center gap-3 rounded-2xl border-[1.5px] px-4 py-3 transition-all", "border-emerald-300 bg-emerald-50/40")}>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">
+                              <CheckCircle className="h-5 w-5 text-emerald-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] font-semibold text-emerald-800 truncate">E-Arşiv fatura yüklendi</p>
+                              <a href={draft.earchivePdfUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] text-emerald-600 hover:underline truncate block">{draft.earchivePdfUrl.split('/').pop()}</a>
+                            </div>
+                            <button type="button" onClick={() => update("earchivePdfUrl", "")} className="flex h-8 w-8 items-center justify-center rounded-full text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors shrink-0">
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          /* Yüklenmedi — Upload alanı */
+                          <div
+                            onDragOver={e => { e.preventDefault(); }}
+                            onDrop={async e => {
+                              e.preventDefault();
+                              const file = e.dataTransfer.files?.[0];
+                              if (!file) return;
+                              if (!file.name.toLowerCase().endsWith('.pdf')) {
+                                setFieldErrors(prev => ({ ...prev, earchivePdfUrl: "Sadece PDF dosyası yükleyebilirsiniz" }));
+                                return;
+                              }
+                              if (file.size > 25 * 1024 * 1024) {
+                                setFieldErrors(prev => ({ ...prev, earchivePdfUrl: "Dosya boyutu 25MB'dan büyük olamaz" }));
+                                return;
+                              }
+                              setFieldErrors(prev => { const next = { ...prev }; delete next.earchivePdfUrl; return next; });
+                              try {
+                                const result = await api.uploadDocument(file, shipmentId || 0, "INVOICE");
+                                if (result.url) {
+                                  update("earchivePdfUrl", result.url);
+                                } else {
+                                  setFieldErrors(prev => ({ ...prev, earchivePdfUrl: "Yükleme başarısız" }));
+                                }
+                              } catch (err: any) {
+                                setFieldErrors(prev => ({ ...prev, earchivePdfUrl: err?.message || "Yükleme sırasında hata oluştu" }));
+                              }
+                            }}
+                            onClick={() => {
+                              const input = document.createElement("input");
+                              input.type = "file";
+                              input.accept = ".pdf";
+                              input.onchange = async () => {
+                                const file = input.files?.[0];
+                                if (!file) return;
+                                if (file.size > 25 * 1024 * 1024) {
+                                  setFieldErrors(prev => ({ ...prev, earchivePdfUrl: "Dosya boyutu 25MB'dan büyük olamaz" }));
+                                  return;
+                                }
+                                setFieldErrors(prev => { const next = { ...prev }; delete next.earchivePdfUrl; return next; });
+                                try {
+                                  const result = await api.uploadDocument(file, shipmentId || 0, "INVOICE");
+                                  if (result.url) {
+                                    update("earchivePdfUrl", result.url);
+                                  } else {
+                                    setFieldErrors(prev => ({ ...prev, earchivePdfUrl: "Yükleme başarısız" }));
+                                  }
+                                } catch (err: any) {
+                                  setFieldErrors(prev => ({ ...prev, earchivePdfUrl: err?.message || "Yükleme sırasında hata oluştu" }));
+                                }
+                              };
+                              input.click();
+                            }}
+                            className={cn(
+                              "relative flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-6 py-5 cursor-pointer transition-all",
+                              fieldErrors.earchivePdfUrl
+                                ? "border-red-400 bg-red-50/30 hover:border-red-500"
+                                : "border-slate-200 bg-slate-50/50 hover:border-slate-300 hover:bg-slate-50"
+                            )}
+                          >
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+                              <UploadCloud className="h-5 w-5 text-slate-400" />
+                            </div>
+                            <div className="text-center">
+                              <p className="text-[13px] font-medium text-slate-700">E-Arşiv faturanızı sürükleyip bırakın veya <span className="text-[#3959F2] font-semibold">seçin</span></p>
+                              <p className="text-[11px] text-slate-400 mt-0.5">Sadece PDF — maks. 25 MB</p>
+                            </div>
+                          </div>
+                        )}
+                        {fieldErrors.earchivePdfUrl && (
+                          <div className="mt-2 flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-[11px] text-red-700 ring-1 ring-red-100">
+                            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                            {fieldErrors.earchivePdfUrl}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Ürün Kalemleri Listesi */}
@@ -2813,12 +3101,20 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       {/* HS Kodu */}
                       <div className="sm:col-span-12 lg:col-span-5 flex flex-col gap-2">
                         <label className="text-[12px] font-bold text-slate-700 mt-1">HS Kodu (GTİP) <span className="text-red-500 text-sm ml-0.5">*</span></label>
-                        <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 focus-within:bg-white focus-within:ring-2 transition-all", fieldErrors[`item_${idx}_hsCode`] ? "border-red-500 bg-red-50/30 ring-2 ring-red-100 focus-within:border-red-500 focus-within:ring-red-200" : "border-slate-300 bg-slate-50/50 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
+                        <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 focus-within:bg-white focus-within:ring-2 transition-all", (fieldErrors[`item_${idx}_hsCode`] || (item.hsCode.length > 0 && (item.hsCode.length < 3 || item.hsCode.length > 12))) ? "border-red-500 bg-red-50/30 ring-2 ring-red-100 focus-within:border-red-500 focus-within:ring-red-200" : "border-slate-300 bg-slate-50/50 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
                           <span className="mr-3 font-medium text-slate-400 shrink-0">#</span>
                           <div className="flex-1 -ml-3">
                             <HSCodeCombobox value={item.hsCode} onChange={v => updateProformaItem(item.id, "hsCode", v)} productHint={item.productDescription} />
                           </div>
                         </div>
+                        {item.hsCode.length > 0 && (item.hsCode.length < 3 || item.hsCode.length > 12) && (
+                          <div className="flex items-start gap-2 mt-1 px-2 py-2 rounded-xl bg-red-50 border border-red-200">
+                            <AlertTriangle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+                            <p className="text-[11px] text-red-600 font-medium leading-relaxed">
+                              HS kodu <span className="font-bold">3 ile 12 karakter</span> arasında olmalıdır. Lütfen doğru kodu girdiğinizden emin olun.
+                            </p>
+                          </div>
+                        )}
                       </div>
 
                        {/* SKU */}
@@ -3146,7 +3442,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                         disabled={loading}
                         className="h-[44px] px-5 sm:px-6 bg-[#A3E635] hover:bg-[#84cc16] text-[#14532D] rounded-[12px] flex items-center gap-2 font-bold text-[14px] transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_2px_10px_rgba(163,230,53,0.3)]"
                       >
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Gönderiyi Oluştur <ArrowRight className="w-4 h-4 stroke-[2.5]" /></>}
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{adminMode ? "Ödeme Yapıldı — Oluştur" : "Gönderiyi Oluştur"} <ArrowRight className="w-4 h-4 stroke-[2.5]" /></>}
                       </button>
                     </div>
                   </div>
@@ -3395,11 +3691,99 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       <PlusSquare className="h-4 w-4 shrink-0 text-slate-500 stroke-[2.5]" /> 
                       <span className="whitespace-nowrap">Yeni Gönderi Oluştur</span>
                     </button>
-                    <button type="button" className="flex-1 flex items-center justify-center gap-2.5 h-[52px] rounded-[12px] bg-[#3B5FE5] hover:bg-[#324FC7] text-white text-[13px] font-bold transition-all shadow-sm px-2">
-                      <Tag className="h-4 w-4 shrink-0" /> 
-                      <span className="whitespace-nowrap">Etiket Oluştur ve Takip No Öğren</span>
-                    </button>
-                  </div>
+                    <button
+                       type="button"
+                       disabled={labelLoading}
+                       onClick={async () => {
+                         if (!shipmentId) return;
+                         setLabelLoading(true);
+                         setLabelError(null);
+                         setLabelData(null);
+                         const delayMs = (ms: number) => new Promise(r => setTimeout(r, ms));
+                         try {
+                           for (let i = 0; i < 4; i++) {
+                             const result = adminMode
+                               ? await adminService.getShipmentLabel(shipmentId)
+                               : await fetch(`${API_BASE}/api/shipments/${shipmentId}/label`, {
+                                   headers: { Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('zalusa.token') || '' : ''}` },
+                                 }).then(r => r.json());
+                             if (result.hasLabel) {
+                               setLabelData(result);
+                               setLabelLoading(false);
+                               return;
+                             }
+                             if (i < 3) await delayMs(3000);
+                           }
+                           setLabelError("Etiket henüz hazır değil. PTS entegrasyonu tamamlanıyor olabilir, birkaç dakika sonra tekrar deneyin.");
+                         } catch (err: any) {
+                           setLabelError(err?.message || "Etiket bilgisi alınamadı");
+                         } finally {
+                           setLabelLoading(false);
+                         }
+                       }}
+                       className="flex-1 flex items-center justify-center gap-2.5 h-[52px] rounded-[12px] bg-[#3B5FE5] hover:bg-[#324FC7] text-white text-[13px] font-bold transition-all shadow-sm px-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                     >
+                       {labelLoading ? (
+                         <><Loader2 className="h-4 w-4 shrink-0 animate-spin" /> <span className="whitespace-nowrap">Etiket Sorgulanıyor...</span></>
+                       ) : (
+                         <><Tag className="h-4 w-4 shrink-0" /> <span className="whitespace-nowrap">Etiket Oluştur ve Takip No Öğren</span></>
+                       )}
+                     </button>
+                   </div>
+
+                   {/* PTS Etiket Sonucu */}
+                   {labelData && labelData.hasLabel && (
+                     <div className="w-full max-w-[540px] mt-4 rounded-2xl bg-emerald-50 border border-emerald-200 p-5">
+                       <div className="flex items-center gap-2 mb-3">
+                         <CheckCircle className="h-5 w-5 text-emerald-600" />
+                         <span className="text-sm font-bold text-emerald-800">Kargo Etiketi Hazır</span>
+                       </div>
+                       {labelData.integrationType === "pts" && (
+                         <div className="space-y-2">
+                           <div className="flex items-center justify-between">
+                             <span className="text-xs font-medium text-emerald-600">PTS AWB Numarası</span>
+                             <span className="text-sm font-bold text-emerald-900 font-mono">{labelData.awb}</span>
+                           </div>
+                           {labelData.pdfUrl && (
+                             <a
+                               href={labelData.pdfUrl}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition-colors shadow-sm mt-3"
+                             >
+                               <Printer className="h-4 w-4" />
+                               Etiket PDF İndir
+                             </a>
+                           )}
+                         </div>
+                       )}
+                       {labelData.integrationType === "asset" && (
+                         <div className="space-y-2">
+                           <div className="flex items-center justify-between">
+                             <span className="text-xs font-medium text-emerald-600">Referans No</span>
+                             <span className="text-sm font-bold text-emerald-900 font-mono">{labelData.reference}</span>
+                           </div>
+                           {labelData.supplierRef && (
+                             <div className="flex items-center justify-between">
+                               <span className="text-xs font-medium text-emerald-600">Taşıyıcı Takip No</span>
+                               <span className="text-sm font-bold text-emerald-900 font-mono">{labelData.supplierRef}</span>
+                             </div>
+                           )}
+                         </div>
+                       )}
+                     </div>
+                   )}
+
+                   {/* Etiket Hata */}
+                   {labelError && !labelData?.hasLabel && (
+                     <div className="w-full max-w-[540px] mt-4 rounded-2xl bg-amber-50 border border-amber-200 p-4 flex items-start gap-3">
+                       <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                       <div>
+                         <p className="text-sm font-semibold text-amber-800">Etiket Henüz Hazır Değil</p>
+                         <p className="text-xs text-amber-700 mt-1">{labelError}</p>
+                       </div>
+                     </div>
+                   )}
                 </div>
               )}
             </div>
@@ -3639,7 +4023,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
               setDomesticValidationError("");
               
               // 1. Önce Basit Kargo ile kargo firmasını doğrula
-              const valResult = await domesticService.validateCarrier(String(shipmentId), selectedDomesticHandler);
+              const valResult = await api.validateDomesticCarrier(String(shipmentId), selectedDomesticHandler);
               if (!valResult.valid) {
                 setDomesticValidationError(valResult.error || "Bu kargo firması güzergahınızı desteklemiyor. Lütfen başka bir firma seçin.");
                 setLoading(false);
@@ -3647,7 +4031,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
               }
               
               // 2. Doğrulama başarılı → seçimi backend'e kaydet
-              await shipmentService.updateDraft(shipmentId, 3, {
+              await api.updateDraft(shipmentId, 3, {
                 domesticHandlerCode: selectedDomesticHandler,
               });
               setShowDomesticSelection(false);
@@ -3676,4 +4060,9 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
 )}
     </div>
   );
+}
+
+// Default export — user modunda çalışır
+export default function GonderiOlusturPage() {
+  return <ShipmentWizardCore />;
 }

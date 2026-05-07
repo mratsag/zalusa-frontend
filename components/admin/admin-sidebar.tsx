@@ -23,6 +23,7 @@ import {
   Package,
   Banknote,
   Printer,
+  ListOrdered,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
@@ -40,6 +41,7 @@ const adminNavItems = [
   { href: "/admin/margin-rules", label: "Fiyat & Marj Kuralları", icon: Calculator },
   { href: "/admin/yurt-ici-marjlari", label: "Yurt İçi Marjları", icon: Package },
   { href: "/admin/ekstra-marjlar", label: "Ekstra Marjlar (Desi/Genel)", icon: DollarSign },
+  { href: "/admin/pts-fiyat-list", label: "PTS Fiyat Listesi", icon: ListOrdered },
   { href: "/admin/gonderi-aciklama-tipleri", label: "Gönderi Açıklama Tipleri", icon: Tag },
   { href: "/admin/yardim-ogeleri", label: "Yardım Öğeleri", icon: HelpCircle },
   { href: "/admin/kullanicilar", label: "Kullanıcılar", icon: UsersRound },

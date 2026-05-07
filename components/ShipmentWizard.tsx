@@ -206,6 +206,16 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
       if (step === 3) {
         if (!selectedSenderAddressId) { setError("Gönderici adresi seçmeden devam edemezsiniz. Lütfen bir gönderici adresi seçin veya yeni adres ekleyin."); setLoading(false); return; }
         if (!selectedReceiverAddressId && !showNewReceiver) { setError("Alıcı adresi seçmeden devam edemezsiniz. Lütfen bir alıcı adresi seçin veya yeni adres ekleyin."); setLoading(false); return; }
+        // Kayıtlı alıcı adresi seçildiyse ülke uyumu kontrolü
+        if (selectedReceiverAddressId && !showNewReceiver) {
+          const selectedAddr = receiverAddresses.find(a => a.id === selectedReceiverAddressId);
+          if (selectedAddr && selectedAddr.countryCode && selectedAddr.countryCode.toUpperCase() !== receiverCountry.toUpperCase()) {
+            const addrCountryName = countries.find(c => c.isoCode.toUpperCase() === selectedAddr.countryCode.toUpperCase())?.countryName || selectedAddr.countryCode;
+            setError(`Seçtiğiniz alıcı adresi "${addrCountryName}" ülkesine ait. Ancak hedef ülke olarak "${selectedCountryName}" seçtiniz. Lütfen hedef ülkeyle eşleşen bir alıcı adresi seçin veya yeni adres ekleyin.`);
+            setLoading(false);
+            return;
+          }
+        }
         if (showNewReceiver) {
           if (!receiverName.trim()) { setError("Alıcı ad soyad alanını doldurmadan devam edemezsiniz."); setLoading(false); return; }
           if (!receiverPhone.trim()) { setError("Alıcı telefon numarasını girmeden devam edemezsiniz."); setLoading(false); return; }
@@ -814,17 +824,28 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                         return a.name.toLowerCase().includes(q) || a.address.toLowerCase().includes(q) || a.city.toLowerCase().includes(q);
                       }).map(a => {
                         const isSelected = selectedReceiverAddressId === a.id;
+                        const isCountryMismatch = a.countryCode && a.countryCode.toUpperCase() !== receiverCountry.toUpperCase();
                         return (
                           <button key={a.id} onClick={() => setSelectedReceiverAddressId(a.id)}
                             className={`text-left p-5 rounded-xl border-2 transition-all duration-200 relative ${
-                              isSelected
-                                ? "border-indigo-500 bg-indigo-50/60 shadow-md"
-                                : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm"
+                              isCountryMismatch
+                                ? isSelected
+                                  ? "border-amber-400 bg-amber-50/60 shadow-md"
+                                  : "border-amber-200 bg-amber-50/30 hover:border-amber-300 hover:shadow-sm"
+                                : isSelected
+                                  ? "border-indigo-500 bg-indigo-50/60 shadow-md"
+                                  : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm"
                             }`}>
                             {/* Checkmark */}
                             {isSelected && (
-                              <div className="absolute top-4 right-4 h-6 w-6 rounded-full bg-indigo-600 text-white flex items-center justify-center">
-                                <Check className="h-3.5 w-3.5" />
+                              <div className={`absolute top-4 right-4 h-6 w-6 rounded-full text-white flex items-center justify-center ${isCountryMismatch ? "bg-amber-500" : "bg-indigo-600"}`}>
+                                {isCountryMismatch ? <AlertTriangle className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
+                              </div>
+                            )}
+                            {/* Country mismatch warning badge */}
+                            {isCountryMismatch && !isSelected && (
+                              <div className="absolute top-4 right-4 h-6 w-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+                                <AlertTriangle className="h-3.5 w-3.5" />
                               </div>
                             )}
                             <div className="pr-8">
@@ -837,6 +858,12 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                               {a.address}{a.postalCode ? `, ${a.postalCode}` : ""} {a.city}{a.countryCode ? `, ${a.countryCode}` : ""}
                             </p>
                             {a.phone && <p className="text-[12px] text-slate-400 mt-1.5">{a.phone}</p>}
+                            {isCountryMismatch && (
+                              <p className="text-[10px] text-amber-600 font-semibold mt-2 flex items-center gap-1">
+                                <AlertTriangle className="h-3 w-3 shrink-0" />
+                                Hedef ülke ({selectedCountryName}) ile uyuşmuyor
+                              </p>
+                            )}
                           </button>
                         );
                       })}
