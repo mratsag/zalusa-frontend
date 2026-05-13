@@ -24,6 +24,7 @@ import {
   Banknote,
   Printer,
   ListOrdered,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
@@ -31,6 +32,7 @@ const adminNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/fiyat-hesaplama", label: "Fiyat Hesaplama", icon: Calculator },
   { href: "/admin/gonderiler", label: "Tüm Gönderiler", icon: Package },
+  { href: "/admin/kargo-takip", label: "Kargo Takip", icon: Truck },
   { href: "/admin/etiket-bas", label: "Etiket Bas", icon: Printer },
   { href: "/admin/kurye-talepleri", label: "Kurye Talepleri", icon: Truck },
   { href: "/admin/canli-destek", label: "Canlı Destek", icon: Headphones },
@@ -42,6 +44,7 @@ const adminNavItems = [
   { href: "/admin/yurt-ici-marjlari", label: "Yurt İçi Marjları", icon: Package },
   { href: "/admin/ekstra-marjlar", label: "Ekstra Marjlar (Desi/Genel)", icon: DollarSign },
   { href: "/admin/pts-fiyat-list", label: "PTS Fiyat Listesi", icon: ListOrdered },
+  { href: "/admin/pts-emails", label: "PTS Mail Gönderimi", icon: Mail },
   { href: "/admin/gonderi-aciklama-tipleri", label: "Gönderi Açıklama Tipleri", icon: Tag },
   { href: "/admin/yardim-ogeleri", label: "Yardım Öğeleri", icon: HelpCircle },
   { href: "/admin/kullanicilar", label: "Kullanıcılar", icon: UsersRound },

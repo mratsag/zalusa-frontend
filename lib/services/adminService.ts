@@ -829,6 +829,12 @@ export const adminService = {
       hasLabel: boolean;
       message?: string;
     }>(`/api/admin/shipments/${shipmentId}/label`),
+
+  // ── PTS Email Ayarları ──────────────────────────────────────────────
+  listPTSEmails: () => get<any[]>("/api/admin/pts-emails"),
+  createPTSEmail: (payload: { email: string }) => post<{ message: string; id: number }>("/api/admin/pts-emails", payload),
+  updatePTSEmail: (id: number, payload: { email: string }) => put<{ message: string }>("/api/admin/pts-emails/" + id, payload),
+  deletePTSEmail: (id: number) => del<{ message: string }>("/api/admin/pts-emails/" + id),
 };
 
 export interface BankTransfer {

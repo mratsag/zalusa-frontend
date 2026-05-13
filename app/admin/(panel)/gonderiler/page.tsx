@@ -18,7 +18,10 @@ import {
   FileText,
   Send,
   Users,
+  Map,
+  X,
 } from "lucide-react";
+import { CargoTrackingView, TrackingEvent } from "@/components/CargoTrackingView";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const TOKEN_KEY = "zalusa.admin.token";
@@ -82,6 +85,27 @@ export default function TumGonderilerPage() {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [stats, setStats] = useState<Record<string, number>>({});
+
+  const [trackingModalOpen, setTrackingModalOpen] = useState(false);
+  const [trackingData, setTrackingData] = useState<any>(null);
+  const [trackingLoading, setTrackingLoading] = useState(false);
+
+  const handleOpenTracking = async (e: React.MouseEvent, trackingCode: string) => {
+    e.stopPropagation();
+    if (!trackingCode) return;
+    setTrackingModalOpen(true);
+    setTrackingLoading(true);
+    setTrackingData(null);
+    try {
+      const res = await fetch(`${API}/api/shipments/track/${trackingCode}`);
+      const data = await res.json();
+      setTrackingData(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setTrackingLoading(false);
+    }
+  };
 
   const fetchShipments = useCallback(async () => {
     setLoading(true);
@@ -181,14 +205,14 @@ export default function TumGonderilerPage() {
       ) : (
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           {/* Table Header */}
-          <div className="grid grid-cols-[60px_1fr_1fr_140px_100px_120px_80px] gap-2 px-5 py-3 bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+          <div className="grid grid-cols-[60px_1fr_1fr_140px_100px_120px_140px] gap-2 px-5 py-3 bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
             <span>ID</span>
             <span>Kullanıcı</span>
             <span>Alıcı / Ülke</span>
             <span>Kargo Firması</span>
             <span>Durum</span>
             <span>Fiyat</span>
-            <span>Tarih</span>
+            <span>İşlemler / Tarih</span>
           </div>
           <div className="divide-y divide-slate-100">
             {shipments.map((s) => (
@@ -224,8 +248,18 @@ export default function TumGonderilerPage() {
                 {/* Price */}
                 <span className="text-sm font-semibold text-slate-800">{s.priceTry > 0 ? `${s.priceTry.toFixed(2)}₺` : "—"}</span>
 
-                {/* Date */}
-                <span className="text-[11px] text-slate-400">{new Date(s.createdAt).toLocaleDateString("tr-TR")}</span>
+                {/* Actions & Date */}
+                <div className="flex flex-col items-end gap-1.5">
+                  <span className="text-[11px] text-slate-400">{new Date(s.createdAt).toLocaleDateString("tr-TR")}</span>
+                  {s.trackingCode && (
+                    <button
+                      onClick={(e) => handleOpenTracking(e, s.trackingCode)}
+                      className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md hover:bg-indigo-100 transition-colors"
+                    >
+                      <Map className="h-3 w-3" /> Hareketler
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -253,6 +287,45 @@ export default function TumGonderilerPage() {
             >
               Sonraki <ChevronRight className="h-4 w-4" />
             </button>
+          </div>
+        </div>
+      )}
+      {/* Tracking Modal */}
+      {trackingModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Map className="h-5 w-5 text-indigo-600" />
+                Kargo Hareketleri
+              </h2>
+              <button
+                onClick={() => setTrackingModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto">
+              {trackingLoading ? (
+                <div className="flex justify-center py-12">
+                  <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-indigo-200 border-t-indigo-600" />
+                </div>
+              ) : trackingData ? (
+                <CargoTrackingView
+                  trackingCode={trackingData.tracking_code || trackingData.TrackingCode}
+                  mainStatus={trackingData.main_status || trackingData.MainStatus}
+                  carrier={trackingData.carrier || trackingData.Carrier}
+                  targetCountry={trackingData.target_country || trackingData.TargetCountry}
+                  domesticEvents={trackingData.domestic_events || trackingData.DomesticEvents || []}
+                  internationalEvents={trackingData.international_events || trackingData.InternationalEvents || []}
+                />
+              ) : (
+                <div className="text-center py-12 text-slate-500">
+                  Kargo hareketleri yüklenemedi.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { PackageSearch, Search, Truck, CheckCircle2, ChevronRight, PackageCheck, AlertCircle, Loader2, Info } from "lucide-react";
+import {
+  PackageSearch, Search, Truck, CheckCircle2, ChevronRight, PackageCheck,
+  AlertCircle, Loader2, MapPin, Clock, Globe, ArrowRight, ExternalLink, Package
+} from "lucide-react";
 
 interface TrackingEvent {
   date: string;
@@ -10,17 +13,36 @@ interface TrackingEvent {
   description: string;
 }
 
-interface TrackingData {
-  tracking_code: string;
-  main_status: string;
-  carrier: string;
-  target_country: string;
-  events: TrackingEvent[];
+interface ShipmentInfo {
+  handler?: string;
+  handlerShipmentCode?: string;
+  handlerTrackingLink?: string;
+  lastState?: string;
+  deliveredTime?: string;
+  orderNumber?: string;
+  recipient?: string;
+  sender?: string;
+}
+
+interface DebugResponse {
+  input_code: string;
+  timestamp: string;
+  db_lookup: any;
+  basit_kargo: { queried_code: string; raw_response: any; parsed: any; error: string };
+  pts: { queried_code: string; raw_response: any; parsed: any; error: string };
+  unified_tracking: {
+    tracking_code: string;
+    main_status: string;
+    carrier: string;
+    target_country: string;
+    domestic_events: TrackingEvent[];
+    international_events: TrackingEvent[];
+  };
 }
 
 export default function KargomNeredePage() {
   const [trackingCode, setTrackingCode] = useState("");
-  const [data, setData] = useState<TrackingData | null>(null);
+  const [data, setData] = useState<DebugResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -33,182 +55,335 @@ export default function KargomNeredePage() {
     setData(null);
 
     try {
-      // API call to the unified tracking endpoint
       const API = process.env.NEXT_PUBLIC_API_URL ?? "";
-      const res = await fetch(`${API}/api/shipments/track/${trackingCode.trim()}`);
+      const res = await fetch(`${API}/api/debug/track/${trackingCode.trim()}`);
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Girdiğiniz takip numarasına ait kargo bulunamadı. Lütfen takip numaranızı kontrol edin.");
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d?.error || "Girdiğiniz takip numarasına ait kargo bulunamadı.");
       }
       const json = await res.json();
       setData(json);
     } catch (err: any) {
-      if (err.message?.includes("Failed to fetch") || err.message?.includes("fetch")) {
+      if (err.message?.includes("Failed to fetch")) {
         setError("Kargo sorgulama servisi şu anda yanıt vermiyor. Lütfen daha sonra tekrar deneyin.");
       } else {
-        setError(err.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
+        setError(err.message || "Bir hata oluştu.");
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Status to icon mapper
-  const getIconForStatus = (status: string, index: number, isLast: boolean) => {
-    if (index === 0) return <PackageSearch className="w-5 h-5 text-indigo-500" />;
-    if (isLast && status.toLowerCase().includes("teslim")) return <PackageCheck className="w-5 h-5 text-green-500" />;
-    return <Truck className="w-5 h-5 text-amber-500" />;
-  };
+  // Basit Kargo parsed verisinden ek bilgileri çıkar
+  const shipmentInfo: ShipmentInfo | null = data?.basit_kargo?.parsed
+    ? extractShipmentInfo(data.basit_kargo.parsed)
+    : null;
+
+  const ut = data?.unified_tracking;
+  const hasDomestic = (ut?.domestic_events?.length ?? 0) > 0;
+  const hasInternational = (ut?.international_events?.length ?? 0) > 0;
+  const hasAnyEvents = hasDomestic || hasInternational;
+
+  // Basit Kargo'dan traces varsa domestic_events olarak kullan
+  const domesticEvents = hasDomestic
+    ? ut!.domestic_events
+    : (data?.basit_kargo?.parsed?.traces ?? []).map((t: any) => ({
+        date: formatDate(t.time),
+        location: [t.location, t.locationDetail].filter(Boolean).join(" / "),
+        status: "Yurt İçi Transfer",
+        description: t.status || "",
+      }));
+
+  const internationalEvents = ut?.international_events ?? [];
 
   const translateStatus = (s: string) => {
     if (!s) return s;
+    const m: Record<string, string> = {
+      draft: "Taslak", pending_payment: "Ödeme Bekleniyor", paid: "Sipariş Alındı",
+      label_created: "Etiket Oluşturuldu", shipped: "Gönderildi", delivered: "Teslim Edildi",
+      cancelled: "İptal Edildi", created: "Oluşturuldu", completed: "Tamamlandı",
+      "Sorgulanıyor": "Sorgulanıyor", "Bilinmiyor": "Bilinmiyor",
+    };
     const lower = s.toLowerCase();
-    
-    if (lower.includes("draft")) return "Taslak";
-    if (lower.includes("pending_payment")) return "Ödeme Bekleniyor";
-    if (lower.includes("paid")) return "Sipariş Alındı";
-    if (lower.includes("label_created")) return "Etiket Oluşturuldu";
-    if (lower.includes("shipped")) return "Gönderildi (Taşımada)";
-    if (lower.includes("delivered")) return "Teslim Edildi";
-    if (lower.includes("cancelled")) return "İptal Edildi";
-    if (lower.includes("created")) return "Oluşturuldu";
-    
+    for (const [k, v] of Object.entries(m)) {
+      if (lower.includes(k)) return v;
+    }
     return s;
   };
 
+  const getMainStatus = () => {
+    if (shipmentInfo?.lastState) return shipmentInfo.lastState;
+    if (ut?.main_status && ut.main_status !== "Sorgulanıyor") return translateStatus(ut.main_status);
+    if (data?.basit_kargo?.parsed?.status) return translateStatus(data.basit_kargo.parsed.status);
+    return "Sorgulanıyor";
+  };
+
+  const getCarrier = () => {
+    if (shipmentInfo?.handler) return shipmentInfo.handler;
+    if (ut?.carrier && ut.carrier !== "Bilinmiyor") return ut.carrier;
+    return "";
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 flex items-start justify-center pt-10 sm:pt-20 px-4 pb-20">
-      <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl shadow-slate-200/50 overflow-hidden border border-slate-100">
-        
-        {/* Header / Arama Bölümü */}
-        <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-5 sm:p-12 text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none hidden sm:block">
-            <PackageSearch className="w-48 h-48 text-white -rotate-12 transform scale-150" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-violet-50/20 flex items-start justify-center pt-6 sm:pt-12 px-4 pb-20">
+      <div className="w-full max-w-3xl">
+
+        {/* Header Card */}
+        <div className="bg-white rounded-3xl shadow-xl shadow-indigo-100/50 overflow-hidden border border-slate-100/80">
+          <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 p-6 sm:p-10 text-center relative overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white" />
+              <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-white" />
+            </div>
+
+            <h1 className="text-2xl sm:text-4xl font-black text-white mb-2 relative z-10">
+              Kargom Nerede?
+            </h1>
+            <p className="text-indigo-100/90 text-xs sm:text-sm font-medium max-w-md mx-auto mb-6 relative z-10">
+              ZLS takip kodunuz, kargo barkodunuz veya kargo firması takip numaranız ile sorgulama yapın.
+            </p>
+
+            <form onSubmit={handleSearch} className="relative z-10 max-w-lg mx-auto">
+              <div className="relative flex items-center bg-white/10 backdrop-blur-md rounded-2xl ring-1 ring-white/20 focus-within:ring-2 focus-within:ring-white/40 transition-all">
+                <div className="pl-4">
+                  <Search className="w-5 h-5 text-white/60" />
+                </div>
+                <input
+                  type="text"
+                  value={trackingCode}
+                  onChange={(e) => setTrackingCode(e.target.value.toUpperCase())}
+                  placeholder="ZLS-SHP-12345 veya 704388124138"
+                  className="flex-1 h-12 sm:h-14 pl-3 pr-4 bg-transparent text-white placeholder:text-white/40 font-bold text-sm sm:text-base uppercase tracking-wide focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="h-9 sm:h-10 px-5 mr-2 bg-white text-indigo-700 hover:bg-indigo-50 active:scale-95 transition-all font-extrabold rounded-xl flex items-center justify-center text-sm"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sorgula"}
+                </button>
+              </div>
+            </form>
           </div>
-          
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white mb-2 sm:mb-3 relative z-10">
-            Kargom Nerede?
-          </h1>
-          <p className="text-indigo-100 text-xs sm:text-base font-medium max-w-md mx-auto mb-6 sm:mb-8 relative z-10">
-            Zalusa takip numaranızı girerek kargonuzun tüm güncel hareketlerini anlık ve kesintisiz izleyin.
-          </p>
 
-          <form onSubmit={handleSearch} className="relative z-10 max-w-lg mx-auto">
-            <div className="relative flex items-center">
-              <div className="absolute flex items-center justify-center pl-4 pointer-events-none">
-                <Search className="w-5 h-5 text-slate-400" />
+          {/* Content */}
+          <div className="p-5 sm:p-8">
+
+            {/* Error */}
+            {error && (
+              <div className="flex items-center gap-3 p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100 mb-6 animate-in fade-in">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <p className="text-sm font-semibold">{error}</p>
               </div>
-              <input
-                type="text"
-                value={trackingCode}
-                onChange={(e) => setTrackingCode(e.target.value.toUpperCase())}
-                placeholder="ZLS-SHP-12345"
-                className="w-full h-12 sm:h-14 pl-10 sm:pl-12 pr-24 sm:pr-32 rounded-2xl border-0 shadow-lg ring-1 ring-white/20 bg-white/95 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:ring-4 focus:ring-white/40 focus:outline-none transition-all font-bold text-sm sm:text-lg uppercase tracking-wide"
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="absolute right-2 h-10 px-5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition-all text-white font-bold rounded-xl flex items-center justify-center"
-              >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sorgula"}
-              </button>
-            </div>
-          </form>
-        </div>
+            )}
 
-        {/* Sonuç Alanı */}
-        <div className="p-6 sm:p-10">
-          
-          {error && (
-            <div className="flex items-center gap-3 p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100 mb-6">
-              <AlertCircle className="w-6 h-6 shrink-0" />
-              <p className="text-sm font-semibold">{error}</p>
-            </div>
-          )}
-
-          {!data && !loading && !error && (
-            <div className="text-center py-12 flex flex-col items-center justify-center opacity-60">
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                <Search className="w-8 h-8 text-slate-400" />
+            {/* Loading */}
+            {loading && (
+              <div className="text-center py-16">
+                <Loader2 className="w-10 h-10 animate-spin text-indigo-400 mx-auto mb-4" />
+                <p className="text-slate-400 font-medium text-sm">Kargo bilgileri sorgulanıyor...</p>
               </div>
-              <p className="text-slate-500 font-medium">Sorgulama yapmak için takip kodunuzu girin.</p>
-            </div>
-          )}
+            )}
 
-          {data && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
-              
-              {/* Özet Kartı */}
-              <div className="flex flex-col sm:flex-row items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-200 mb-8 gap-4">
-                <div className="flex flex-col items-center sm:items-start text-center sm:text-left min-w-0">
-                  <span className="text-xs font-bold tracking-wider text-slate-400 uppercase">Durum</span>
-                  <div className="flex items-center gap-2 mt-1">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    <span className="text-lg font-extrabold text-slate-800 line-clamp-1">{translateStatus(data.main_status)}</span>
-                  </div>
+            {/* Empty State */}
+            {!data && !loading && !error && (
+              <div className="text-center py-16 flex flex-col items-center justify-center">
+                <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4">
+                  <PackageSearch className="w-8 h-8 text-indigo-300" />
                 </div>
-                
-                <div className="hidden sm:block w-px h-10 bg-slate-200"></div>
-                
-                <div className="flex flex-col items-center sm:items-start text-center sm:text-left min-w-0">
-                  <span className="text-xs font-bold tracking-wider text-slate-400 uppercase">Taşıyıcı / Hedef</span>
-                  <div className="flex items-center gap-1.5 mt-1 font-semibold text-slate-700 text-sm">
-                    {data.carrier}
-                    <ChevronRight className="w-4 h-4 text-slate-300" />
-                    {data.target_country}
-                  </div>
-                </div>
+                <p className="text-slate-400 font-medium">Sorgulama yapmak için takip kodunuzu girin.</p>
+                <p className="text-slate-300 text-xs mt-1">ZLS kodu, kargo barkod no veya firma takip no</p>
               </div>
+            )}
 
-              {/* Dikey Timeline */}
-              <div className="relative pl-4 sm:pl-8">
-                {/* Sol taraftaki ana çizgi */}
-                <div className="absolute top-4 bottom-4 left-[27px] sm:left-[43px] w-[2px] bg-indigo-100"></div>
+            {/* Results */}
+            {data && !loading && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-                <div className="space-y-8 relative">
-                  {data.events.map((event, idx) => {
-                    const isLast = idx === data.events.length - 1;
-                    const isFirst = idx === 0;
-                    
-                    return (
-                      <div key={idx} className="flex gap-4 sm:gap-6 relative group">
-                        {/* Status Icon */}
-                        <div className="relative flex-none">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm ring-1 ring-slate-100 z-10 relative bg-white transition-transform group-hover:scale-110 ${isLast ? 'bg-green-50 shadow-green-100 ring-green-200' : 'bg-slate-50'}`}>
-                            {getIconForStatus(event.status, idx, isLast)}
-                          </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 pb-2">
-                          <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between mb-1">
-                            <h3 className="text-base font-bold text-slate-900">{event.status}</h3>
-                            <span className="text-xs font-bold text-slate-400 tabular-nums">
-                              {event.date}
-                            </span>
-                          </div>
-                          
-                          <p className="text-sm font-medium text-slate-600 leading-relaxed max-w-sm">
-                            {event.description}
-                          </p>
-                          
-                          {event.location && (
-                            <div className="flex items-center gap-1.5 mt-2 text-xs font-semibold text-slate-400">
-                              <Info className="w-3.5 h-3.5" />
-                              Konum: {event.location}
-                            </div>
-                          )}
-                        </div>
+                {/* Status Summary Card */}
+                <div className="bg-gradient-to-r from-slate-50 to-indigo-50/50 rounded-2xl border border-slate-200/80 p-5">
+                  <div className="flex flex-col sm:flex-row items-center gap-4">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                        getMainStatus().includes("Teslim") ? "bg-emerald-100" :
+                        getMainStatus().includes("Yolda") || getMainStatus().includes("Gönderildi") ? "bg-amber-100" :
+                        "bg-indigo-100"
+                      }`}>
+                        {getMainStatus().includes("Teslim") ? (
+                          <PackageCheck className="w-6 h-6 text-emerald-600" />
+                        ) : getMainStatus().includes("Yolda") || getMainStatus().includes("Gönderildi") ? (
+                          <Truck className="w-6 h-6 text-amber-600" />
+                        ) : (
+                          <Package className="w-6 h-6 text-indigo-600" />
+                        )}
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Kargo Durumu</p>
+                        <p className="text-lg font-black text-slate-800">{getMainStatus()}</p>
+                      </div>
+                    </div>
 
-            </div>
-          )}
+                    <div className="flex items-center gap-4 text-sm">
+                      {getCarrier() && (
+                        <div className="text-center">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Taşıyıcı</p>
+                          <p className="font-bold text-slate-700">{getCarrier()}</p>
+                        </div>
+                      )}
+                      {ut?.target_country && ut.target_country !== "Bilinmiyor" && (
+                        <>
+                          <ChevronRight className="w-4 h-4 text-slate-300" />
+                          <div className="text-center">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase">Hedef</p>
+                            <p className="font-bold text-slate-700">{ut.target_country}</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Kargo firması takip linki */}
+                  {shipmentInfo?.handlerTrackingLink && (
+                    <a
+                      href={shipmentInfo.handlerTrackingLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 flex items-center gap-2 text-xs text-indigo-600 hover:text-indigo-700 font-semibold bg-white px-3 py-2 rounded-xl border border-indigo-100 w-fit transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      {shipmentInfo.handler} Takip Sayfası
+                    </a>
+                  )}
+                </div>
+
+                {/* Timeline Section */}
+                {(domesticEvents.length > 0 || internationalEvents.length > 0) && (
+                  <div className="grid gap-6 lg:grid-cols-2">
+
+                    {/* Yurt İçi */}
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                      <div className="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50/50 to-transparent">
+                        <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                          <Truck className="w-5 h-5 text-indigo-500" />
+                          Yurt İçi Süreç
+                          <span className="text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full font-bold ml-auto">
+                            {domesticEvents.length}
+                          </span>
+                        </h3>
+                      </div>
+                      <div className="p-5 max-h-[500px] overflow-y-auto">
+                        <TimelineList events={domesticEvents} color="indigo" />
+                      </div>
+                    </div>
+
+                    {/* Yurt Dışı */}
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                      <div className="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-emerald-50/50 to-transparent">
+                        <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-emerald-500" />
+                          Uluslararası Süreç
+                          <span className="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full font-bold ml-auto">
+                            {internationalEvents.length}
+                          </span>
+                        </h3>
+                      </div>
+                      <div className="p-5 max-h-[500px] overflow-y-auto">
+                        <TimelineList events={internationalEvents} color="emerald" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* No events at all */}
+                {!hasAnyEvents && domesticEvents.length === 0 && internationalEvents.length === 0 && (
+                  <div className="text-center py-10 bg-white rounded-2xl border border-slate-100">
+                    <Package className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                    <p className="text-sm text-slate-400 font-medium">Bu kargo için henüz hareket verisi bulunmuyor.</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
+}
+
+// ─── Timeline Component ─────────────────────────────────────────────────────
+function TimelineList({ events, color = "indigo" }: { events: TrackingEvent[]; color?: "indigo" | "emerald" }) {
+  if (!events || events.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-slate-300">
+        <Package className="w-10 h-10 mb-2" />
+        <p className="text-xs font-medium">Bu aşama için henüz veri bulunmuyor.</p>
+      </div>
+    );
+  }
+
+  const dotColor = color === "indigo" ? "bg-indigo-500" : "bg-emerald-500";
+  const lineColor = color === "indigo" ? "before:bg-indigo-100" : "before:bg-emerald-100";
+
+  return (
+    <div className={`relative pl-4 space-y-5 before:absolute before:inset-y-0 before:left-[7px] before:w-[2px] ${lineColor}`}>
+      {events.map((event, index) => {
+        const isFirst = index === 0;
+        return (
+          <div key={index} className="relative pl-7">
+            <div className={`absolute left-0 top-1 w-4 h-4 rounded-full ring-3 ring-white ${
+              isFirst ? dotColor : "bg-slate-200"
+            }`}>
+              {isFirst && <CheckCircle2 className="w-4 h-4 text-white p-[1px]" />}
+            </div>
+            <div>
+              <p className={`text-sm font-bold ${isFirst ? "text-slate-900" : "text-slate-600"}`}>
+                {event.description}
+              </p>
+              <div className="flex flex-wrap items-center gap-2 mt-1">
+                <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {event.date}
+                </span>
+                {event.location && (
+                  <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
+                    <MapPin className="w-3 h-3" />
+                    {event.location}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function extractShipmentInfo(parsed: any): ShipmentInfo | null {
+  if (!parsed) return null;
+  return {
+    handler: parsed.shipmentInfo?.handler?.name || "",
+    handlerShipmentCode: parsed.shipmentInfo?.handlerShipmentCode || "",
+    handlerTrackingLink: parsed.shipmentInfo?.handlerShipmentTrackingLink || "",
+    lastState: parsed.shipmentInfo?.lastState || "",
+    deliveredTime: parsed.shipmentInfo?.deliveredTime || "",
+    orderNumber: parsed.orderNumber || "",
+    recipient: parsed.recipient?.name || "",
+    sender: parsed.sender?.name || "",
+  };
+}
+
+function formatDate(d: string): string {
+  if (!d) return "";
+  try {
+    const date = new Date(d);
+    return date.toLocaleString("tr-TR", {
+      day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    });
+  } catch {
+    return d;
+  }
 }

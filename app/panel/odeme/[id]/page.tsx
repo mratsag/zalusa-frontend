@@ -92,7 +92,7 @@ export default function OdemePage() {
     if (shipmentId) fetchData();
   }, [shipmentId]);
 
-  const handleIyzicoPayment = async () => {
+  const handlePayTRPayment = async () => {
     setPaying(true);
     setError("");
 
@@ -483,43 +483,55 @@ export default function OdemePage() {
           </div>
 
           {/* ═══════════════════════════════════════════════════════════════ */}
-          {/* İYZİCO — Pasif */}
+          {/* PAYTR — Aktif */}
           {/* ═══════════════════════════════════════════════════════════════ */}
-          <div className="bg-white border border-border rounded-xl p-6 mb-6 opacity-75">
+          <div className="bg-white border-2 border-brand-200 rounded-xl p-6 mb-6 shadow-sm">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
-                <CreditCard className="w-5 h-5 text-gray-400" />
+              <div className="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center">
+                <CreditCard className="w-5 h-5 text-brand-600" />
               </div>
               <div>
                 <h3 className="font-bold text-foreground">Kredi / Banka Kartı ile Ödeme</h3>
-                <p className="text-xs text-muted">iyzico güvenli ödeme altyapısı</p>
+                <p className="text-xs text-muted">PayTR güvenli ödeme altyapısı</p>
               </div>
-              <span className="ml-auto text-xs font-bold text-white bg-gray-400 px-2.5 py-1 rounded-full">
-                PASİF
+              <span className="ml-auto text-xs font-bold text-white bg-green-500 px-2.5 py-1 rounded-full">
+                AKTİF
               </span>
             </div>
 
-            <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-lg p-3">
-              <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-              <p className="text-xs text-amber-700 leading-relaxed">
-                <strong>iyzico ödeme şu an pasif durumdadır.</strong> Havale/EFT ile ödeme yapmanız gerekmektedir. 
-                Kredi kartı ile ödeme seçeneği en kısa sürede aktif hale getirilecektir.
+            <div className="flex items-start gap-2.5 bg-brand-50 border border-brand-100 rounded-lg p-3">
+              <Shield className="w-4 h-4 text-brand-500 mt-0.5 shrink-0" />
+              <p className="text-xs text-brand-800 leading-relaxed">
+                Kart bilgileriniz sistemimizde tutulmaz. PayTR güvencesiyle <strong>3D Secure</strong> korumalı olarak anında ödeme yapabilir ve kargonuzu onaylatabilirsiniz.
               </p>
             </div>
 
             <button
-              onClick={handleIyzicoPayment}
-              disabled={true}
+              onClick={handlePayTRPayment}
+              disabled={paying}
               className="
-                mt-4 inline-flex items-center justify-center gap-2.5
+                group relative mt-4 inline-flex items-center justify-center gap-2.5
                 w-full px-8 py-4 rounded-xl font-semibold text-base
-                text-white cursor-not-allowed
-                bg-gray-300
-                opacity-50
+                text-white cursor-pointer
+                bg-gradient-to-r from-brand-600 to-indigo-600
+                hover:from-brand-700 hover:to-indigo-700
+                disabled:opacity-60 disabled:cursor-not-allowed
+                shadow-lg shadow-brand-500/25 hover:shadow-xl hover:shadow-brand-500/30
+                transition-all duration-300 ease-out
+                active:scale-[0.98]
               "
             >
-              <CreditCard className="w-5 h-5" />
-              <span>Kredi Kartı ile Öde — ₺{totalPrice.toFixed(2)}</span>
+              {paying ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Ödeme Sayfasına Yönlendiriliyor...</span>
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-5 h-5 transition-transform group-hover:scale-110" />
+                  <span>Kredi Kartı ile Öde — ₺{totalPrice.toFixed(2)}</span>
+                </>
+              )}
             </button>
           </div>
 

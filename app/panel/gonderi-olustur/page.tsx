@@ -1025,12 +1025,14 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
         if (!draft.receiverPostalCode) {
           step0Errors.receiverPostalCode = "Posta kodu zorunludur";
           step0Errors.receiverCity = "Şehir bilgisi zorunludur";
-        } else if (postalLookupError || !postalLookupResult) {
-          step0Errors.receiverPostalCode = postalLookupError || "Geçerli bir posta kodu girin";
-          step0Errors.receiverCity = "Şehir bilgisi bulunamadı";
-        }
-        if (postalLookupLoading) {
-          step0Errors.receiverPostalCode = "Posta kodu doğrulanıyor, lütfen bekleyin";
+        } else if (draft.shipmentType !== "Belge") {
+          // Belge tipinde posta kodu lookup zorunlu DEĞİL (sabit 0.5 desi kullanılır)
+          if (postalLookupLoading) {
+            step0Errors.receiverPostalCode = "Posta kodu doğrulanıyor, lütfen bekleyin";
+          } else if (postalLookupError || !postalLookupResult) {
+            step0Errors.receiverPostalCode = postalLookupError || "Geçerli bir posta kodu girin";
+            step0Errors.receiverCity = "Şehir bilgisi bulunamadı";
+          }
         }
         if (Object.keys(step0Errors).length > 0) {
           setFieldErrors(step0Errors);
@@ -1057,7 +1059,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           });
         }
 
-        // Belge tipi seçildiyse: sabit 0.5 Hacimsel Ağırlık, paket adımını atla, direkt fiyatlandırmaya git
+        // Belge tipi seçildiyse: sabit 0.5 desi, paket adımını atla, direkt fiyatlandırmaya git
         if (draft.shipmentType === "Belge") {
           const belgePackages = [{ widthCm: 1, lengthCm: 1, heightCm: 1, weightKg: 0.5, packageCount: 1 }];
           // Paket bilgisini backend'e kaydet
@@ -1071,26 +1073,30 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
               packageCount: "1", selectedPreset: "", saveMeasurement: false, measurementLabel: "",
             }],
           }));
-          // Fiyat tekliflerini çek
-          const quoteRes = await api.getQuotes({
-            senderCountry: draft.senderCountry,
-            receiverCountry: draft.receiverCountry,
-            receiverPostalCode: draft.receiverPostalCode,
-            packages: belgePackages,
-            shipmentType: draft.shipmentType,
-          });
-          const quotes = quoteRes.quotes ?? [];
-          setApiQuotes(quotes);
-          if (quotes.length === 0 && quoteRes.capacity_exceeded) {
-            setErrorModal({ title: "Kapasite Aşımı", message: quoteRes.message || "Girdiğiniz ölçüler mevcut kargo kapasitelerini aşmaktadır. Lütfen kapasitenize uygun bir ürün giriniz." });
-            setQuotesMessage(null);
-          } else {
-            setQuotesMessage(quotes.length === 0 ? (quoteRes.message || "Bu rota için kargo firması bulunamadı.") : null);
+          // Fiyat tekliflerini çek — hata olsa bile fiyatlandırma adımına git
+          try {
+            const quoteRes = await api.getQuotes({
+              senderCountry: draft.senderCountry,
+              receiverCountry: draft.receiverCountry,
+              receiverPostalCode: draft.receiverPostalCode,
+              packages: belgePackages,
+              shipmentType: "Belge",
+            });
+            const quotes = quoteRes.quotes ?? [];
+            setApiQuotes(quotes);
+            if (quotes.length === 0 && quoteRes.capacity_exceeded) {
+              setErrorModal({ title: "Kapasite Aşımı", message: quoteRes.message || "Kargo kapasitesi aşıldı." });
+              setQuotesMessage(null);
+            } else {
+              setQuotesMessage(quotes.length === 0 ? (quoteRes.message || "Bu rota için kargo firması bulunamadı.") : null);
+            }
+            const rec = quotes.find((q: ApiCarrierQuote) => q.tags.includes("recommended"));
+            const defaultId = rec?.carrierId || quotes[0]?.carrierId || "";
+            setDraft(d => ({ ...d, selectedCarrierId: defaultId }));
+          } catch (err: any) {
+            setQuotesMessage(err?.message || "Fiyat bilgileri alınamadı, lütfen tekrar deneyin.");
           }
-          const rec = quotes.find(q => q.tags.includes("recommended"));
-          const defaultId = rec?.carrierId || quotes[0]?.carrierId || "";
-          setDraft(d => ({ ...d, selectedCarrierId: defaultId }));
-          setStep(2); // Fiyatlandırma adımına atla
+          setStep(2); // Her durumda fiyatlandırma adımına atla
           setLoading(false);
           return;
         }
