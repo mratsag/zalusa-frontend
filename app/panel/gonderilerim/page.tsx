@@ -404,12 +404,15 @@ export default function GonderilerimPage() {
       }
 
       if (data.integrationType === "pts" && data.pdfUrl) {
-        setLabelModal({
-          pdfUrl: data.pdfUrl,
-          trackingCode: shipment.trackingCode || `ZLS-SHP-${shipment.id}`,
-          carrierName: shipment.carrierName || "Kargo",
-          receiverCountry: shipment.receiverCountry || "",
-        });
+        window.open(data.pdfUrl, "_blank");
+      } else if (data.integrationType === "asset" && data.labelContent) {
+        // Base64 etiket verisini PDF formatında Data URL'ye dönüştür ve yeni sekmede aç
+        const pdfDataUrl = `data:application/pdf;base64,${data.labelContent}#toolbar=0&navpanes=0&view=Fit`;
+        const win = window.open("", "_blank");
+        if (win) {
+          win.document.write(`<!DOCTYPE html><html><head><title>Etiket - ${shipment.trackingCode || `ZLS-SHP-${shipment.id}`}</title></head><body style="margin:0;padding:0;overflow:hidden;height:100vh;width:100vw;"><iframe src="${pdfDataUrl}" width="100%" height="100%" style="border:none;height:100vh;width:100vw;"></iframe></body></html>`);
+          win.document.close();
+        }
       } else if (data.integrationType === "asset" && data.reference) {
         setToast({ message: "Asset etiketi hazırlanıyor, lütfen destek ile iletişime geçin.", type: "error" });
       } else if (!data.hasLabel) {
@@ -707,7 +710,7 @@ export default function GonderilerimPage() {
                       <span className="text-[18px] font-bold text-slate-900 tracking-tight mt-0.5">
                         {s.carrierCurrency === "TRY"
                           ? `${(s.carrierPriceTry ?? 0).toLocaleString("tr-TR")} ₺`
-                          : `$${(s.carrierPrice ?? 0).toFixed(2)}`}
+                          : `${s.carrierCurrency === "EUR" ? "€" : s.carrierCurrency === "GBP" ? "£" : "$"}${(s.carrierPrice ?? 0).toFixed(2)}`}
                       </span>
                       {s.discountAmountTry && s.discountAmountTry > 0 ? (
                         <div className="mt-1 flex items-center justify-center gap-1 rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">

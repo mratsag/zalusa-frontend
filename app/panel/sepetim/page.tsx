@@ -347,7 +347,7 @@ export default function SepetimPage() {
                         {s.carrierPriceTry
                           ? `${s.carrierPriceTry.toLocaleString("tr-TR")} ₺`
                           : s.carrierPrice
-                          ? `$${s.carrierPrice.toFixed(2)}`
+                          ? `${s.carrierCurrency === "EUR" ? "€" : s.carrierCurrency === "GBP" ? "£" : "$"}${s.carrierPrice.toFixed(2)}`
                           : "—"}
                       </span>
                       {s.discountAmountTry && s.discountAmountTry > 0 ? (

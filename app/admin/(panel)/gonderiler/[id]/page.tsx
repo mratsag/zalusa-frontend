@@ -292,6 +292,39 @@ export default function ShipmentDetailPage() {
     }
   }
 
+  const [assetLabelLoading, setAssetLabelLoading] = React.useState(false);
+  const handleDownloadAssetLabel = async (reference: string) => {
+    if (!reference) return;
+    setAssetLabelLoading(true);
+    try {
+      const token = globalThis.localStorage?.getItem("zalusa.admin.token") ?? "";
+      const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
+      const res = await fetch(`${API_BASE}/api/admin/asset-label?reference=${encodeURIComponent(reference)}`, { headers });
+      const resData = await res.json();
+      
+      if (resData.type === "base64" && resData.labelBase64) {
+        const cleanUrl = `data:application/pdf;base64,${resData.labelBase64}#toolbar=0&navpanes=0&view=Fit`;
+        const win = window.open("", "_blank");
+        if (win) {
+          win.document.write(`<!DOCTYPE html><html><head><title>Asset Etiket - ${reference}</title></head><body style="margin:0;padding:0;overflow:hidden;height:100vh;width:100vw;"><iframe src="${cleanUrl}" width="100%" height="100%" style="border:none;height:100vh;width:100vw;"></iframe></body></html>`);
+          win.document.close();
+        }
+      } else if (resData.type === "html" && resData.content) {
+        const win = window.open("", "_blank");
+        if (win) {
+          win.document.write(resData.content);
+          win.document.close();
+        }
+      } else {
+        alert(resData.message || "Etiket alınamadı.");
+      }
+    } catch (err: any) {
+      alert("Hata oluştu: " + err.message);
+    } finally {
+      setAssetLabelLoading(false);
+    }
+  }
+
   if (loading) return (
     <div className="space-y-4">
       <div className="h-8 w-56 animate-pulse rounded-xl bg-slate-200" />
@@ -1478,11 +1511,19 @@ export default function ShipmentDetailPage() {
                <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 flex flex-col">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider"><Plane className="h-3.5 w-3.5" /> Yurt Dışı Kargo</div>
-                    {data.ptsLogs?.[0]?.pdfUrl && (
-                      <a href={data.ptsLogs[0].pdfUrl} target="_blank" rel="noreferrer" className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-1.5 rounded-md border border-indigo-100 transition-colors flex items-center gap-1.5 shadow-sm">
-                        <FileText className="w-3.5 h-3.5" /> Etiket İndir
-                      </a>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {data.ptsLogs?.[0]?.pdfUrl && (
+                        <a href={data.ptsLogs[0].pdfUrl} target="_blank" rel="noreferrer" className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-1.5 rounded-md border border-indigo-100 transition-colors flex items-center gap-1.5 shadow-sm">
+                          <FileText className="w-3.5 h-3.5" /> PTS Etiketi
+                        </a>
+                      )}
+                      {(data.assetLogs?.[0]?.assetReference || data.carrierId?.includes('asset') || data.carrierName?.toLowerCase()?.includes('asset')) && data.trackingCode && (
+                        <button onClick={() => handleDownloadAssetLabel(data.assetLogs?.[0]?.assetReference || data.trackingCode)} disabled={assetLabelLoading} className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-1.5 rounded-md border border-indigo-100 transition-colors flex items-center gap-1.5 shadow-sm disabled:opacity-50">
+                          {assetLabelLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                          Asset Etiketi
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="text-[13px] font-medium text-slate-600 mb-4 space-y-1.5 flex-1">
                     <div>Entegrasyon Servisi: <span className="font-bold text-slate-900">{data.carrierName} {data.serviceName ? `- ${data.serviceName}` : ''} <span className="text-emerald-600 bg-emerald-100/50 px-1.5 py-0.5 rounded text-[11px]">{(data.carrierId?.includes('pts') || data.ptsLogs?.length > 0) ? 'PTS' : (data.carrierId?.includes('asset') || data.assetLogs?.length > 0) ? 'ASSET' : 'DİĞER'}</span></span></div>

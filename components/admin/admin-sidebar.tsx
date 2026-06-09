@@ -44,6 +44,7 @@ const adminNavItems = [
   { href: "/admin/yurt-ici-marjlari", label: "Yurt İçi Marjları", icon: Package },
   { href: "/admin/ekstra-marjlar", label: "Ekstra Marjlar (Desi/Genel)", icon: DollarSign },
   { href: "/admin/pts-fiyat-list", label: "PTS Fiyat Listesi", icon: ListOrdered },
+  { href: "/admin/pts-toplu-fiyat", label: "PTS Toplu Excel", icon: ListOrdered },
   { href: "/admin/pts-emails", label: "PTS Mail Gönderimi", icon: Mail },
   { href: "/admin/gonderi-aciklama-tipleri", label: "Gönderi Açıklama Tipleri", icon: Tag },
   { href: "/admin/yardim-ogeleri", label: "Yardım Öğeleri", icon: HelpCircle },

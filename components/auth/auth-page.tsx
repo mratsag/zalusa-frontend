@@ -79,8 +79,9 @@ export function AuthPage() {
   const [password2, setPassword2] = React.useState("");
   const [firstName, setFirstName] = React.useState("");
   const [lastName, setLastName] = React.useState("");
-  const [phoneCode, setPhoneCode] = React.useState("TR (+90)");
   const [phone, setPhone] = React.useState("");
+  const [phoneError, setPhoneError] = React.useState<string | null>(null);
+  const [emailError, setEmailError] = React.useState<string | null>(null);
 
   const [tc, setTc] = React.useState("");
   const [taxNo, setTaxNo] = React.useState("");
@@ -207,9 +208,60 @@ export function AuthPage() {
     }
   }
 
+  /* ── Telefon formatlama: 555 444 33 22 ── */
+  function formatPhoneDisplay(raw: string): string {
+    const d = raw.replace(/\D/g, "").slice(0, 10);
+    if (d.length <= 3) return d;
+    if (d.length <= 6) return `${d.slice(0, 3)} ${d.slice(3)}`;
+    if (d.length <= 8) return `${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}`;
+    return `${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6, 8)} ${d.slice(8)}`;
+  }
+
+  function handlePhoneChange(val: string) {
+    const digits = val.replace(/\D/g, "").slice(0, 10);
+    setPhone(digits);
+    if (digits.length > 0 && digits.length < 10) {
+      setPhoneError("Telefon numarası 10 haneli olmalıdır.");
+    } else {
+      setPhoneError(null);
+    }
+  }
+
+  /* ── E-posta validasyonu ── */
+  const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
+  function handleEmailChange(val: string) {
+    setEmail(val);
+    if (val.length > 0 && !emailRegex.test(val)) {
+      setEmailError("Geçerli bir e-posta adresi girin. (örn: ornek@mail.com)");
+    } else {
+      setEmailError(null);
+    }
+  }
+
   async function onRegister(e: React.FormEvent) {
     e.preventDefault();
     setMessage(null);
+    setPhoneError(null);
+    setEmailError(null);
+
+    // Telefon validasyonu – tam 10 hane
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (phoneDigits.length !== 10) {
+      setPhoneError("Telefon numarası 10 haneli olmalıdır. (örn: 555 444 33 22)");
+      return;
+    }
+    if (!/^[5][0-9]{9}$/.test(phoneDigits)) {
+      setPhoneError("Geçerli bir cep telefonu numarası girin. (5XX ile başlamalı)");
+      return;
+    }
+
+    // E-posta validasyonu
+    if (!emailRegex.test(email)) {
+      setEmailError("Geçerli bir e-posta adresi girin. (örn: ornek@mail.com)");
+      return;
+    }
+
     if (password !== password2) { setMessage("Şifreler eşleşmiyor."); return; }
     if (!pwValid) { setMessage("Şifre kuralları karşılanmıyor."); return; }
     if (!kvkk) { setMessage("KVKK onayını vermeniz gerekiyor."); return; }
@@ -218,7 +270,7 @@ export function AuthPage() {
       const inv = buildInvoice();
       await authService.register({
         email, password,
-        firstName, lastName, phone,
+        firstName, lastName, phone: `+90${phoneDigits}`,
         kind,
         tc: (inv as any).tc || "",
         taxNo: (inv as any).taxNo || "",
@@ -658,20 +710,59 @@ export function AuthPage() {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
-                  <div className="w-2/5 relative">
-                    <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"><PhoneCall className="h-4 w-4" /></div>
-                    <input placeholder="Ülke Kodu" value={phoneCode} onChange={e => setPhoneCode(e.target.value)} required className={fieldInputClass} />
+                <div>
+                  <div className="flex gap-2">
+                    {/* +90 sabit prefix */}
+                    <div className="flex h-[40px] w-[72px] shrink-0 items-center justify-center gap-1.5 rounded-[10px] border border-[#E2E8F0] bg-[#F8FAFC] text-[13px] font-bold text-[#14141F] shadow-[0_1px_3px_rgba(0,0,0,0.08)] select-none">
+                      <span className="text-[15px]">🇹🇷</span>
+                      <span>+90</span>
+                    </div>
+                    {/* Telefon numarası – otomatik formatlı */}
+                    <div className="relative flex-1">
+                      <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"><PhoneCall className="h-4 w-4" /></div>
+                      <input
+                        placeholder="555 444 33 22"
+                        value={formatPhoneDisplay(phone)}
+                        onChange={e => handlePhoneChange(e.target.value)}
+                        inputMode="numeric"
+                        maxLength={13}
+                        required
+                        className={cn(
+                          fieldInputClass,
+                          phoneError && "border-red-400 focus:border-red-500 focus:ring-red-100"
+                        )}
+                      />
+                    </div>
                   </div>
-                  <div className="w-3/5 relative">
-                    <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"><PhoneCall className="h-4 w-4" /></div>
-                    <input placeholder="Telefon Numarası" value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ""))} maxLength={20} inputMode="numeric" required className={fieldInputClass} />
-                  </div>
+                  {phoneError && (
+                    <p className="mt-1.5 text-[12px] font-medium text-red-500 flex items-center gap-1">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                      {phoneError}
+                    </p>
+                  )}
                 </div>
 
-                <div className="relative">
-                  <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"><Mail className="h-4 w-4" /></div>
-                  <input type="email" placeholder="Mail" value={email} onChange={e => setEmail(e.target.value)} required className={fieldInputClass} />
+                <div>
+                  <div className="relative">
+                    <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]"><Mail className="h-4 w-4" /></div>
+                    <input
+                      type="email"
+                      placeholder="ornek@mail.com"
+                      value={email}
+                      onChange={e => handleEmailChange(e.target.value)}
+                      required
+                      className={cn(
+                        fieldInputClass,
+                        emailError && "border-red-400 focus:border-red-500 focus:ring-red-100"
+                      )}
+                    />
+                  </div>
+                  {emailError && (
+                    <p className="mt-1.5 text-[12px] font-medium text-red-500 flex items-center gap-1">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                      {emailError}
+                    </p>
+                  )}
                 </div>
 
                 {/* Fatura bilgileri */}

@@ -831,10 +831,8 @@ export const adminService = {
     }>(`/api/admin/shipments/${shipmentId}/label`),
 
   // ── PTS Email Ayarları ──────────────────────────────────────────────
-  listPTSEmails: () => get<any[]>("/api/admin/pts-emails"),
-  createPTSEmail: (payload: { email: string }) => post<{ message: string; id: number }>("/api/admin/pts-emails", payload),
-  updatePTSEmail: (id: number, payload: { email: string }) => put<{ message: string }>("/api/admin/pts-emails/" + id, payload),
-  deletePTSEmail: (id: number) => del<{ message: string }>("/api/admin/pts-emails/" + id),
+  getPTSEmailSettings: () => get<{ emails: string; metin: string; cc: string }>("/api/admin/pts-email-settings"),
+  savePTSEmailSettings: (payload: { emails: string; metin: string; cc: string }) => post<{ message: string }>("/api/admin/pts-email-settings", payload),
 };
 
 export interface BankTransfer {

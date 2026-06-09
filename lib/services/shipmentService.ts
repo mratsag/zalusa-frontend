@@ -244,6 +244,11 @@ export const shipmentService = {
     return { draft: null, message: "Taslak bulunamadı" };
   },
 
+  /** GET /api/shipments/:id — Belirli bir gönderiyi/taslağı detaylarıyla getir */
+  getDraftDetail(id: string | number) {
+    return apiGet<any>(`/api/shipments/${id}`);
+  },
+
   /** PUT /api/shipments/draft/:id — Taslağı adım adım güncelle */
   updateDraft(
     id: number,

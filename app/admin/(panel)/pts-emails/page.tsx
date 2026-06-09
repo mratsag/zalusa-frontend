@@ -1,82 +1,57 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, Mail, Loader2, Pencil } from "lucide-react";
+import { Mail, Loader2, Save, FileText, Users, Settings } from "lucide-react";
 import { adminService } from "@/lib/services/adminService";
 
-interface PTSEmail {
-  id: number;
-  email: string;
-}
-
 export default function PTSEmailsPage() {
-  const [emails, setEmails] = useState<PTSEmail[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
-  const [newEmail, setNewEmail] = useState("");
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editEmail, setEditEmail] = useState("");
+
+  const [emails, setEmails] = useState("");
+  const [metin, setMetin] = useState("");
+  const [cc, setCc] = useState("");
 
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const fetchEmails = async () => {
+  const fetchSettings = async () => {
     try {
       setLoading(true);
-      const data = await adminService.listPTSEmails();
-      setEmails(data);
+      const data = await adminService.getPTSEmailSettings();
+      if (data) {
+        setEmails(data.emails || "");
+        setMetin(data.metin || "");
+        setCc(data.cc || "");
+      }
     } catch (err: any) {
       console.error(err);
-      setError("Veriler yüklenirken hata oluştu");
+      setError("Ayarlar yüklenirken hata oluştu");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchEmails();
+    fetchSettings();
   }, []);
 
-  const handleAdd = async (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmail.trim()) return;
-    try {
-      setSaving(true);
-      setError("");
-      await adminService.createPTSEmail({ email: newEmail });
-      setNewEmail("");
-      fetchEmails();
-    } catch (err: any) {
-      setError(err.message || "Eklenirken hata oluştu");
-    } finally {
-      setSaving(false);
+    if (!emails.trim()) {
+      setError("Lütfen en az bir alıcı e-posta adresi girin.");
+      return;
     }
-  };
-
-  const handleUpdate = async (id: number) => {
-    if (!editEmail.trim()) return;
+    
     try {
       setSaving(true);
       setError("");
-      await adminService.updatePTSEmail(id, { email: editEmail });
-      setEditingId(null);
-      fetchEmails();
+      setSuccess("");
+      await adminService.savePTSEmailSettings({ emails, metin, cc });
+      setSuccess("Ayarlar başarıyla kaydedildi!");
+      setTimeout(() => setSuccess(""), 3000);
     } catch (err: any) {
-      setError(err.message || "Güncellenirken hata oluştu");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    if (!confirm("Bu e-postayı silmek istediğinize emin misiniz?")) return;
-    try {
-      setSaving(true);
-      setError("");
-      await adminService.deletePTSEmail(id);
-      fetchEmails();
-    } catch (err: any) {
-      setError(err.message || "Silinirken hata oluştu");
+      setError(err.message || "Kaydedilirken hata oluştu");
     } finally {
       setSaving(false);
     }
@@ -86,11 +61,12 @@ export default function PTSEmailsPage() {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-          <Mail className="h-6 w-6 text-indigo-600" />
-          PTS MSDS Mail Gönderimi
+          <Settings className="h-6 w-6 text-indigo-600" />
+          PTS Kargo Belge Mail Ayarları
         </h1>
         <p className="text-slate-500 mt-2">
-          Kargo oluşturulduğunda MSDS belgesinin kopyasının gönderileceği e-posta adreslerini yönetin.
+          PTS kargo oluşturulduğunda belgeler (MSDS, INVOICE vb.) aşağıdaki ayarlara göre otomatik olarak gönderilir. 
+          Sistem sadece bu tek konfigürasyonu okur.
         </p>
       </div>
 
@@ -100,94 +76,90 @@ export default function PTSEmailsPage() {
         </div>
       )}
 
-      {/* Ekleme Formu */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">Yeni E-posta Ekle</h2>
-        <form onSubmit={handleAdd} className="flex gap-4">
-          <input
-            type="email"
-            value={newEmail}
-            onChange={(e) => setNewEmail(e.target.value)}
-            placeholder="ornek@pts.net"
-            required
-            className="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-          />
-          <button
-            type="submit"
-            disabled={saving || !newEmail.trim()}
-            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
-          >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            Ekle
-          </button>
-        </form>
-      </div>
+      {success && (
+        <div className="mb-4 p-4 bg-green-50 text-green-600 rounded-xl text-sm font-medium border border-green-100 flex items-center gap-2">
+          <Save className="h-4 w-4" />
+          {success}
+        </div>
+      )}
 
-      {/* Liste */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
         {loading ? (
-          <div className="p-8 text-center text-slate-500 flex flex-col items-center">
-            <Loader2 className="h-8 w-8 animate-spin mb-2" />
-            Yükleniyor...
-          </div>
-        ) : emails.length === 0 ? (
-          <div className="p-8 text-center text-slate-500">
-            Kayıtlı e-posta adresi bulunmuyor. Eklenmediğinde varsayılan olarak "nilay.yavas@pts.net" adresi kullanılır.
+          <div className="p-12 flex flex-col items-center justify-center text-slate-500">
+            <Loader2 className="h-8 w-8 animate-spin mb-4 text-indigo-500" />
+            <p>Ayarlar Yükleniyor...</p>
           </div>
         ) : (
-          <ul className="divide-y divide-slate-100">
-            {emails.map((item) => (
-              <li key={item.id} className="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors">
-                {editingId === item.id ? (
-                  <div className="flex-1 flex gap-3 mr-4">
-                    <input
-                      type="email"
-                      value={editEmail}
-                      onChange={(e) => setEditEmail(e.target.value)}
-                      className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 outline-none focus:border-indigo-500 text-sm"
-                    />
-                    <button
-                      onClick={() => handleUpdate(item.id)}
-                      disabled={saving}
-                      className="rounded-lg bg-green-500 px-4 py-1.5 text-xs font-semibold text-white hover:bg-green-600"
-                    >
-                      Kaydet
-                    </button>
-                    <button
-                      onClick={() => setEditingId(null)}
-                      className="rounded-lg bg-slate-200 px-4 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-300"
-                    >
-                      İptal
-                    </button>
-                  </div>
-                ) : (
-                  <span className="text-slate-800 font-medium">{item.email}</span>
-                )}
+          <form onSubmit={handleSave} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <Mail className="inline h-4 w-4 mr-1 text-slate-400" /> Alıcı E-postalar (To) *
+                </label>
+                <textarea
+                  value={emails}
+                  onChange={(e) => setEmails(e.target.value)}
+                  placeholder="ornek1@pts.net, ornek2@pts.net"
+                  rows={3}
+                  required
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-sm resize-none"
+                />
+                <p className="text-xs text-slate-500 mt-2">Mailin asıl gideceği kişiler. Birden fazlaysa virgülle ayırın.</p>
+              </div>
 
-                {editingId !== item.id && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => {
-                        setEditingId(item.id);
-                        setEditEmail(item.email);
-                      }}
-                      className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      disabled={saving}
-                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <Users className="inline h-4 w-4 mr-1 text-slate-400" /> Bilgi E-postaları (CC)
+                </label>
+                <textarea
+                  value={cc}
+                  onChange={(e) => setCc(e.target.value)}
+                  placeholder="ali@firma.com, veli@firma.com"
+                  rows={3}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-sm resize-none"
+                />
+                <p className="text-xs text-slate-500 mt-2"><strong>yusuf@semengineer.com</strong> her zaman sabittir. Ek olarak eklemek istediklerinizi virgülle ayırın.</p>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 pt-6">
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <FileText className="inline h-4 w-4 mr-1 text-slate-400" /> E-posta Metin İçeriği (Gövde)
+              </label>
+              <textarea
+                value={metin}
+                onChange={(e) => setMetin(e.target.value)}
+                placeholder="Merhaba, Zalusa sistemi üzerinden yeni bir kargo oluşturulmuştur. Ekteki belgeleri incelemenizi rica ederiz."
+                rows={5}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-sm resize-y"
+              />
+              <p className="text-xs text-slate-500 mt-2">
+                Mailin içine eklenecek sabit metin. PTS AWB barcode numarası ve takip linki otomatik olarak bu metne eklenir.
+              </p>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <button
+                type="submit"
+                disabled={saving || !emails.trim()}
+                className="flex items-center gap-2 rounded-xl bg-indigo-600 px-8 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-700 hover:shadow-lg disabled:opacity-50 disabled:hover:shadow-none"
+              >
+                {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
+                Ayarları Kaydet
+              </button>
+            </div>
+          </form>
         )}
+      </div>
+
+      <div className="mt-6 p-5 bg-amber-50 rounded-xl border border-amber-200">
+        <h3 className="text-sm font-bold text-amber-800 mb-3">📌 Nasıl Çalışır?</h3>
+        <ul className="text-sm text-amber-700 space-y-2">
+          <li>• PTS kargo oluşturulduğu anda, shipment&apos;a ait belge varsa <strong>otomatik</strong> e-posta gönderilir.</li>
+          <li>• Gidecek olan e-posta, tamamen buradaki ayarlara göre şekillenir. Başka bir işlem yapmanıza gerek yoktur.</li>
+          <li>• Mailde <strong>PTS AWB Barcode numarası</strong> otomatik olarak yer alır.</li>
+          <li>• Metin boş bırakılırsa varsayılan &quot;Zalusa üzerinden oluşturulan kargo...&quot; tarzı bir sistem metni gönderilir.</li>
+        </ul>
       </div>
     </div>
   );

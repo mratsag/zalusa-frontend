@@ -487,6 +487,7 @@ export function ShipmentWizardCore({ adminMode, adminUserId, adminUserName }: Sh
   const [domesticLoading, setDomesticLoading] = React.useState(false);
   const [showDomesticSelection, setShowDomesticSelection] = React.useState(false);
   const [domesticValidationError, setDomesticValidationError] = React.useState("");
+  const [domesticSelfShipping, setDomesticSelfShipping] = React.useState(false);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [errorModal, setErrorModal] = React.useState<{ title: string; message: string } | null>(null);
   const [showNewSenderForm, setShowNewSenderForm] = React.useState(false);
@@ -984,19 +985,19 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
       if (!item.unitPrice || toNumber(item.unitPrice) <= 0) errors[`item_${idx}_unitPrice`] = "Zorunlu";
     });
 
-    // FedEx seçildiyse fatura bilgileri zorunlu
-    const selectedCarrier = apiQuotes.find(q => q.carrierId === draft.selectedCarrierId);
-    const isFedExSelected = selectedCarrier?.carrierName?.toUpperCase().includes("FEDEX") || selectedCarrier?.serviceName?.toUpperCase().includes("FEDEX");
-    if (isFedExSelected) {
-      if (!draft.invoiceNo.trim()) errors.invoiceNo = "FedEx için fatura numarası zorunludur";
-      if (!draft.invoiceDate.trim()) errors.invoiceDate = "FedEx için fatura tarihi zorunludur";
-      if (!draft.earchivePdfUrl.trim()) errors.earchivePdfUrl = "FedEx için e-arşiv fatura PDF linki zorunludur";
+    // Mikro İhracat seçildiyse fatura bilgileri zorunlu
+    const isMikroIhracat = draft.proformaDescription.toLowerCase().includes("mikro") || draft.proformaDescription.toLowerCase().includes("micro");
+
+    if (isMikroIhracat) {
+      if (!draft.invoiceNo.trim()) errors.invoiceNo = "Mikro İhracat için fatura numarası zorunludur";
+      if (!draft.invoiceDate.trim()) errors.invoiceDate = "Mikro İhracat için fatura tarihi zorunludur";
+      if (!draft.earchivePdfUrl.trim()) errors.earchivePdfUrl = "Mikro İhracat için e-arşiv fatura PDF linki zorunludur";
     }
 
-    // Belge yükleme zorunluluğu
-    if (docUploadedFiles.length === 0) {
+    // Belge yükleme zorunluluğu (Sadece Mikro İhracat için)
+    if (isMikroIhracat && docUploadedFiles.length === 0) {
       errors.documentUpload = "Zorunlu";
-      setDocError("Belge yüklemeden ilerleyemezsiniz. Lütfen en az bir gümrük belgesi yükleyiniz.");
+      setDocError("Mikro İhracat gönderilerinde gümrük belgesi yüklemek zorunludur.");
       // Belge bölümüne scroll
       const docSection = document.getElementById("customs-documents-section");
       if (docSection) docSection.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1248,6 +1249,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           receiverAddressPostalCode: receiverAddr ? receiverAddr.postalCode : draft.receiverAddressPostalCode,
           saveReceiverAddress: draft.saveReceiverAddress,
           domesticHandlerCode: selectedDomesticHandler || undefined,
+          domesticSelfShipping: domesticSelfShipping || false,
         });
         
         // ── Yurt içi kargo seçimi gerekiyor mu? ──
@@ -1399,6 +1401,19 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           carrierName: apiQuotes.find(q => q.carrierId === draft.selectedCarrierId)?.carrierName || "",
           serviceName: apiQuotes.find(q => q.carrierId === draft.selectedCarrierId)?.serviceName || "",
         });
+        // ForceCreate sonrasi domestic bilgileri cek
+        try {
+          const draftDetail = await (adminMode 
+            ? adminService.getShipmentDetail(shipmentId)
+            : shipmentService.getDraftDetail(String(shipmentId)));
+          if (draftDetail?.requiresDomesticTransfer) {
+            setRequiresDomesticTransfer(true);
+            setDomesticSelfShipping(!!draftDetail?.domesticSelfShipping);
+            setDomesticTrackingCode(draftDetail?.domesticShipment?.trackingCode || draftDetail?.domesticTrackingCode || '');
+            setDomesticCarrierCompany(draftDetail?.domesticShipment?.carrierCompany || draftDetail?.domesticCarrierCompany || '');
+          }
+          setCreatedShipmentTrackingCode(draftDetail?.trackingCode || '');
+        } catch {}
         setDone(true);
         setStep(STEPS.length - 1);
       } else {
@@ -1423,7 +1438,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
     setDraft(DEFAULT_DRAFT); setStep(0); setDone(false); setShipmentId(null);
     setShowNewReceiverForm(false); setReceiverSearch(""); setApiQuotes([]); setApiError(null);
     setPendingDraft(null); setDraftBannerDismissed(true);
-    setRequiresDomesticTransfer(false); setDomesticTrackingCode(""); setDomesticCarrierCompany(""); setCreatedShipmentTrackingCode("");
+    setRequiresDomesticTransfer(false); setDomesticTrackingCode(""); setDomesticCarrierCompany(""); setCreatedShipmentTrackingCode(""); setDomesticSelfShipping(false);
   }
 
   if (!hydrated || draftLoading) return <div className="space-y-5"><Skeleton className="h-[96px] rounded-2xl" /><Skeleton className="h-[420px] rounded-2xl" /></div>;
@@ -2908,29 +2923,32 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                   </div>
                 </div>
 
-                {/* ── Fatura Bilgileri (Mikro İhracat - FedEx zorunlu tutar) ── */}
+                {/* ── Fatura Bilgileri (Mikro İhracat seçiliyse zorunlu) ── */}
                 {(() => {
-                  const sq = apiQuotes.find(q => q.carrierId === draft.selectedCarrierId);
-                  const isFedEx = sq?.carrierName?.toUpperCase().includes("FEDEX") || sq?.serviceName?.toUpperCase().includes("FEDEX");
+                  const isMikroIhracat = draft.proformaDescription.toLowerCase().includes("mikro") || draft.proformaDescription.toLowerCase().includes("micro");
+
+                  if (!isMikroIhracat) return null;
                   return (
-                    <div className={cn("mt-6 rounded-2xl border p-5 transition-all", isFedEx ? "border-amber-300 bg-amber-50/40" : "border-slate-200 bg-slate-50/30")}>
+
+                    <div className={cn("mt-6 rounded-2xl border p-5 transition-all border-amber-300 bg-amber-50/40")}>
+
                       <div className="flex items-center gap-2 mb-4">
                         <Receipt className="h-4 w-4 text-amber-600" />
                         <span className="text-[14px] font-bold text-slate-800">Fatura Bilgileri</span>
-                        {isFedEx && <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">FedEx - Zorunlu</span>}
+                        <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">Mikro İhracat - Zorunlu</span>
                       </div>
-                      {isFedEx && (
+
                         <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2.5 mb-4">
                           <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                           <p className="text-[11px] text-amber-800 leading-relaxed">
-                            <span className="font-bold">FedEx</span> ile yapılan gönderilerde fatura numarası, tarihi ve e-arşiv fatura PDF yüklemesi zorunludur.
+                            <span className="font-bold">Mikro İhracat (ETGB)</span> beyanı ile yapılan gönderilerde fatura numarası, tarihi ve e-arşiv fatura PDF yüklemesi zorunludur.
                           </p>
                         </div>
-                      )}
+
                       <div className="grid gap-x-4 gap-y-4 grid-cols-1 sm:grid-cols-2">
                         {/* Fatura No */}
                         <div className="flex flex-col gap-2">
-                          <label className="text-[12px] font-bold text-slate-700">Fatura Numarası {isFedEx && <span className="text-red-500 text-sm ml-0.5">*</span>}</label>
+                          <label className="text-[12px] font-bold text-slate-700">Fatura Numarası <span className="text-red-500 text-sm ml-0.5">*</span></label>
                           <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 focus-within:bg-white focus-within:ring-2 transition-all", fieldErrors.invoiceNo ? "border-red-500 bg-red-50/30 ring-2 ring-red-100" : "border-slate-300 bg-slate-50/50 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
                             <Receipt className="mr-3 h-4 w-4 text-slate-400 shrink-0" />
                             <Input value={draft.invoiceNo} onChange={e => update("invoiceNo", e.target.value)} placeholder="Örn: FTR-2026-001" className="flex-1 border-0 ring-0 shadow-none bg-transparent p-0 text-[14px] font-medium text-slate-700 focus:ring-0 placeholder:text-slate-400" />
@@ -2938,7 +2956,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                         </div>
                         {/* Fatura Tarihi */}
                         <div className="flex flex-col gap-2">
-                          <label className="text-[12px] font-bold text-slate-700">Fatura Tarihi {isFedEx && <span className="text-red-500 text-sm ml-0.5">*</span>}</label>
+                          <label className="text-[12px] font-bold text-slate-700">Fatura Tarihi <span className="text-red-500 text-sm ml-0.5">*</span></label>
                           <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 focus-within:bg-white focus-within:ring-2 transition-all", fieldErrors.invoiceDate ? "border-red-500 bg-red-50/30 ring-2 ring-red-100" : "border-slate-300 bg-slate-50/50 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
                             <Calendar className="mr-3 h-4 w-4 text-slate-400 shrink-0" />
                             <Input type="date" value={draft.invoiceDate} onChange={e => update("invoiceDate", e.target.value)} className="flex-1 border-0 ring-0 shadow-none bg-transparent p-0 text-[14px] font-medium text-slate-700 focus:ring-0" />
@@ -2948,7 +2966,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
 
                       {/* E-Arşiv Fatura PDF Yükleme */}
                       <div className="mt-4">
-                        <label className="text-[12px] font-bold text-slate-700 mb-2 block">E-Arşiv Fatura PDF {isFedEx && <span className="text-red-500 text-sm ml-0.5">*</span>}</label>
+                        <label className="text-[12px] font-bold text-slate-700 mb-2 block">E-Arşiv Fatura PDF <span className="text-red-500 text-sm ml-0.5">*</span></label>
                         {draft.earchivePdfUrl ? (
                           /* Yüklendi — Dosya gösterimi */
                           <div className={cn("flex items-center gap-3 rounded-2xl border-[1.5px] px-4 py-3 transition-all", "border-emerald-300 bg-emerald-50/40")}>
@@ -3163,7 +3181,10 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                 <div className={cn("flex items-center gap-2 mb-4 p-3 rounded-xl transition-all", fieldErrors.documentUpload ? "bg-red-50 ring-2 ring-red-300" : "")}>
                   <FileUp className={cn("h-5 w-5", fieldErrors.documentUpload ? "text-red-500" : "text-slate-500")} />
                   <h3 className={cn("text-[15px] font-semibold", fieldErrors.documentUpload ? "text-red-600" : "text-slate-800")}>Gümrük Belgeleri</h3>
-                  <span className="text-red-500 text-sm font-bold">*</span>
+                  {(() => {
+                    const isMikro = draft.proformaDescription.toLowerCase().includes("mikro") || draft.proformaDescription.toLowerCase().includes("micro");
+                    return isMikro && <span className="text-red-500 text-sm font-bold">*</span>;
+                  })()}
                   {docUploadedFiles.length > 0 && <span className="text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold ml-1">{docUploadedFiles.length} belge yüklendi</span>}
                 </div>
 
@@ -3489,31 +3510,81 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
 
                           {/* Body */}
                           <div className="p-5">
-                            {/* Kargo Kodu — Devasa */}
-                            <div className="text-center mb-4">
-                              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Yurt İçi Kargo Kodu</div>
-                              <div className="text-[34px] sm:text-[42px] font-black text-slate-900 tracking-widest leading-none font-mono bg-slate-50 border-2 border-dashed border-amber-300 rounded-2xl py-4 px-4 select-all">
-                                {domesticTrackingCode || "—"}
-                              </div>
-                              {domesticCarrierCompany && (
-                                <div className="mt-2.5 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-full px-4 py-1.5">
-                                  <span className="text-amber-700 font-bold text-[13px]">{domesticCarrierCompany}</span>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Uyarı Kutusu */}
-                            <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-[14px] p-4">
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 mt-0.5">
-                                <AlertTriangle className="h-4 w-4" />
-                              </div>
+                            {domesticSelfShipping ? (
+                              /* "Ben kendim göndereceğim" seçildiğinde Zalusa adresi göster */
                               <div>
-                                <div className="text-[13px] font-bold text-amber-800 mb-1">Paketi şubeye teslim edin</div>
-                                <p className="text-[12px] text-amber-700 leading-relaxed">
-                                  Lütfen paketinizi yukarıdaki kod ile en yakın <strong>{domesticCarrierCompany || "kargo"}</strong> şubesine <strong>ücretsiz</strong> olarak teslim ediniz. Yurt içi kargo ücreti sisteminiz tarafından ödenmiştir.
-                                </p>
+                                <div className="text-center mb-4">
+                                  <div className="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mb-2">Göndermeniz Gereken Adres</div>
+                                  <div className="text-[12px] text-slate-500 mb-3">Lütfen paketinizi aşağıdaki adrese kendiniz gönderin</div>
+                                </div>
+
+                                <div className="relative bg-slate-50 border-2 border-dashed border-emerald-300 rounded-2xl p-5">
+                                  <button
+                                    type="button"
+                                    className="absolute top-3 right-3 flex items-center gap-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg px-3 py-1.5 text-[11px] font-bold transition-colors"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText("Orta Mah. Marifet Sk. No: 6 İç Kapı No: 26, Kartal / İstanbul, Telefon: 5411341534");
+                                      const btn = document.getElementById("copyAddrBtn");
+                                      if (btn) { btn.textContent = "✓ Kopyalandı!"; setTimeout(() => { btn.textContent = "📋 Kopyala"; }, 2000); }
+                                    }}
+                                    id="copyAddrBtn"
+                                  >
+                                    📋 Kopyala
+                                  </button>
+                                  <div className="space-y-2 pr-24">
+                                    <div className="text-[15px] font-bold text-slate-900 leading-snug">
+                                      Orta Mah. Marifet Sk. No: 6<br />İç Kapı No: 26
+                                    </div>
+                                    <div className="text-[14px] font-semibold text-slate-700">
+                                      Kartal / İstanbul
+                                    </div>
+                                    <div className="flex items-center gap-2 text-[13px] text-slate-600">
+                                      <span className="font-semibold">Telefon:</span>
+                                      <span className="font-mono font-bold text-slate-800">5411341534</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 rounded-[14px] p-4 mt-4">
+                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mt-0.5">
+                                    <Info className="h-4 w-4" />
+                                  </div>
+                                  <div>
+                                    <div className="text-[13px] font-bold text-emerald-800 mb-1">Lütfen bu adresi not alınız</div>
+                                    <p className="text-[12px] text-emerald-700 leading-relaxed">
+                                      Paketinizi yukarıdaki adrese <strong>kendiniz</strong> göndermeniz gerekmektedir. Paket merkezimize ulaştığında yurtdışı kargo işleminiz otomatik olarak başlatılacaktır.
+                                    </p>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
+                            ) : (
+                              /* Normal Basit Kargo akışı */
+                              <div>
+                                <div className="text-center mb-4">
+                                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Yurt İçi Kargo Kodu</div>
+                                  <div className="text-[34px] sm:text-[42px] font-black text-slate-900 tracking-widest leading-none font-mono bg-slate-50 border-2 border-dashed border-amber-300 rounded-2xl py-4 px-4 select-all">
+                                    {domesticTrackingCode || "—"}
+                                  </div>
+                                  {domesticCarrierCompany && (
+                                    <div className="mt-2.5 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-full px-4 py-1.5">
+                                      <span className="text-amber-700 font-bold text-[13px]">{domesticCarrierCompany}</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-[14px] p-4">
+                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 mt-0.5">
+                                    <AlertTriangle className="h-4 w-4" />
+                                  </div>
+                                  <div>
+                                    <div className="text-[13px] font-bold text-amber-800 mb-1">Paketi şubeye teslim edin</div>
+                                    <p className="text-[12px] text-amber-700 leading-relaxed">
+                                      Lütfen paketinizi yukarıdaki kod ile en yakın <strong>{domesticCarrierCompany || "kargo"}</strong> şubesine <strong>ücretsiz</strong> olarak teslim ediniz. Yurt içi kargo ücreti sisteminiz tarafından ödenmiştir.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -3959,11 +4030,48 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
           </div>
         ) : (
           <div className="space-y-2.5">
+            {/* Ben kendim göndereceğim seçeneği */}
+            <button
+              type="button"
+              onClick={() => { setSelectedDomesticHandler("SELF"); setDomesticSelfShipping(true); setDomesticValidationError(""); }}
+              className={cn(
+                "w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-150 text-left",
+                selectedDomesticHandler === "SELF"
+                  ? "border-emerald-500 bg-emerald-50/50 shadow-sm"
+                  : "border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30"
+              )}
+            >
+              <div className={cn(
+                "w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors",
+                selectedDomesticHandler === "SELF"
+                  ? "border-emerald-500 bg-emerald-500"
+                  : "border-slate-300"
+              )}>
+                {selectedDomesticHandler === "SELF" && (
+                  <div className="w-2 h-2 rounded-full bg-white" />
+                )}
+              </div>
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <Package className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[14px] font-semibold text-[#0F172A]">Ben Kendim Göndereceğim</p>
+                <p className="text-[11px] text-[#94A3B8] mt-0.5">Paketi kendiniz Zalusa merkezine gönderebilirsiniz</p>
+              </div>
+            </button>
+
+            {/* Ayırıcı */}
+            <div className="flex items-center gap-3 py-1">
+              <div className="flex-1 h-px bg-slate-200" />
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">veya kargo firması seçin</span>
+              <div className="flex-1 h-px bg-slate-200" />
+            </div>
+
             {domesticCarriers.map((carrier) => (
               <button
                 key={carrier.handlerCode}
                 type="button"
-                onClick={() => { setSelectedDomesticHandler(carrier.handlerCode); setDomesticValidationError(""); }}
+                onClick={() => { setSelectedDomesticHandler(carrier.handlerCode); setDomesticSelfShipping(false); setDomesticValidationError(""); }}
                 className={cn(
                   "w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-150 text-left",
                   selectedDomesticHandler === carrier.handlerCode
@@ -4027,23 +4135,34 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
             try {
               setLoading(true);
               setDomesticValidationError("");
+
+              if (selectedDomesticHandler === "SELF") {
+                // "Ben kendim gonderecegim" - validasyon yok, direkt kaydet
+                await api.updateDraft(shipmentId, 3, {
+                  domesticHandlerCode: "SELF",
+                  domesticSelfShipping: true,
+                });
+                setShowDomesticSelection(false);
+                setDomesticValidationError("");
+                setStep(4);
+              } else {
+                // Basit Kargo ile kargo firmasini dogrula
+                const valResult = await api.validateDomesticCarrier(String(shipmentId), selectedDomesticHandler);
+                if (!valResult.valid) {
+                  setDomesticValidationError(valResult.error || "Bu kargo firmasi guzergahinizi desteklemiyor. Lutfen baska bir firma secin.");
+                  setLoading(false);
+                  return;
+                }
               
-              // 1. Önce Basit Kargo ile kargo firmasını doğrula
-              const valResult = await api.validateDomesticCarrier(String(shipmentId), selectedDomesticHandler);
-              if (!valResult.valid) {
-                setDomesticValidationError(valResult.error || "Bu kargo firması güzergahınızı desteklemiyor. Lütfen başka bir firma seçin.");
-                setLoading(false);
-                return;
+                // Dogrulama basarili - secimi backend'e kaydet
+                await api.updateDraft(shipmentId, 3, {
+                  domesticHandlerCode: selectedDomesticHandler,
+                  domesticSelfShipping: false,
+                });
+                setShowDomesticSelection(false);
+                setDomesticValidationError("");
+                setStep(4);
               }
-              
-              // 2. Doğrulama başarılı → seçimi backend'e kaydet
-              await api.updateDraft(shipmentId, 3, {
-                domesticHandlerCode: selectedDomesticHandler,
-              });
-              setShowDomesticSelection(false);
-              setDomesticValidationError("");
-              // Step 4'e geç
-              setStep(4);
             } catch (err: any) {
               setDomesticValidationError("Kargo firması doğrulanamadı: " + (err?.message || ""));
             } finally {

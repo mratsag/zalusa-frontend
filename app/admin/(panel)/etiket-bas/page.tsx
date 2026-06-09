@@ -51,7 +51,7 @@ export default function EtiketBasPage() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchLabels(); }, []);
+  useEffect(() => { fetchLabels(); }, [filterType]);
 
   const toggleSelect = (id: number) => {
     setSelectedIds(prev => {
@@ -222,11 +222,25 @@ export default function EtiketBasPage() {
       // Asset HTML'ini ayrı oluştur
       let assetHtml = "";
       if (assetLabels.length > 0) {
-        assetHtml += '<div class="section-title" style="page-break-before:' + (ptsSelected.length > 0 ? "always" : "auto") + '">Asset Kargo Etiketleri (' + assetLabels.length + ' adet)</div>';
-        assetHtml += assetLabels.map((al, idx) =>
-          '<div class="asset-label"><img src="data:image/png;base64,' + al.base64 + '" alt="Etiket ' + (idx+1) + '" />' +
-          '<div class="label-info">' + al.item.trackingCode + ' \xB7 ' + al.item.receiverName + ' \xB7 ' + al.item.carrierName + ' \xB7 ' + al.item.barcodeValue + '</div></div>'
-        ).join("");
+        assetHtml += '<div class="section-title" style="page-break-before:' + (ptsSelected.length > 0 ? "always" : "auto") + '">Asset Kargo Etiketleri (' + assetLabels.length + ' adet) — A4 sayfada 4 etiket</div>';
+        for (let g = 0; g < assetLabels.length; g += 4) {
+          const group = assetLabels.slice(g, g + 4);
+          if (g > 0) assetHtml += '<div class="page-break"></div>';
+          assetHtml += '<div class="pts-pdf-grid">';
+          group.forEach(i => {
+            const cleanUrl = 'data:application/pdf;base64,' + i.base64 + '#toolbar=0&navpanes=0&view=Fit';
+            assetHtml += '<div class="pts-pdf-cell">' +
+              '<div class="pts-pdf-wrapper">' +
+              '<iframe src="' + cleanUrl + '" class="pts-pdf-frame"></iframe>' +
+              '</div>' +
+              '<div class="pts-pdf-info">' + i.item.trackingCode + ' \xB7 ' + i.item.receiverName + ' \xB7 ' + i.item.barcodeValue + '</div>' +
+              '</div>';
+          });
+          for (let f = group.length; f < 4; f++) {
+            assetHtml += '<div class="pts-pdf-cell pts-pdf-empty"></div>';
+          }
+          assetHtml += '</div>';
+        }
       }
 
       const printWindow = window.open("", "_blank");
