@@ -104,6 +104,7 @@ export default function ShipmentDetailPage() {
   const [proformaCurrency, setProformaCurrency] = React.useState("EUR");
   const [proformaDescription, setProformaDescription] = React.useState("");
   const [proformaIOSS, setProformaIOSS] = React.useState("");
+  const [customsType, setCustomsType] = React.useState<"H" | "D">("H"); // H=DAP (varsayılan), D=DDP
 
   const [descriptionTypes, setDescriptionTypes] = React.useState<{ id: number; label: string }[]>([]);
   
@@ -225,6 +226,7 @@ export default function ShipmentDetailPage() {
         // Proforma detayları
         if (res.proformaDescription) setProformaDescription(res.proformaDescription);
         if (res.proformaIOSS) setProformaIOSS(res.proformaIOSS);
+        if (res.customsType) setCustomsType(res.customsType === "D" ? "D" : "H");
         if (res.proformaCurrency) setProformaCurrency(res.proformaCurrency);
         if (res.proformaItems?.length > 0) {
           setProformaItems(res.proformaItems.map((p: any, i: number) => ({
@@ -936,6 +938,43 @@ export default function ShipmentDetailPage() {
                           <span className="font-semibold text-slate-500">IOSS</span>: Yalnızca <span className="font-semibold">AB ülkelerine</span> yapılan ve değeri <span className="font-semibold">150€&apos;yu geçmeyen</span> gönderilerde kullanılır.
                         </p>
                       </div>
+
+                      {/* Teslim Şekli (Incoterm) */}
+                      <div className="sm:col-span-full flex flex-col gap-2 mt-2">
+                        <label className="text-[12px] font-bold text-slate-700 mt-1">Teslim Şekli (Incoterm) <span className="text-red-500 text-sm ml-0.5">*</span></label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {([
+                            { value: "H" as const, label: "DAP", title: "Delivered At Place", desc: "Gümrük vergi ve masrafları alıcı tarafından ödenir. (Kapıda veya online ödeme)" },
+                            { value: "D" as const, label: "DDP", title: "Delivered Duty Paid", desc: "Gümrük vergi ve masrafları gönderici tarafından ödenir. (Fiyata dahildir)" },
+                          ]).map((opt) => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => setCustomsType(opt.value)}
+                              className={cn(
+                                "relative flex flex-col rounded-2xl border-[1.5px] p-4 text-left transition-all",
+                                customsType === opt.value
+                                  ? "border-[#3959F2] bg-blue-50/60 ring-2 ring-[#3959F2]/20 shadow-sm"
+                                  : "border-slate-300 bg-slate-50/50 hover:border-slate-400 hover:shadow-sm"
+                              )}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                  <div className={cn(
+                                    "flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors",
+                                    customsType === opt.value ? "border-[#3959F2] bg-[#3959F2]" : "border-slate-300 bg-white"
+                                  )}>
+                                    {customsType === opt.value && <Check className="h-3 w-3 text-white" />}
+                                  </div>
+                                  <span className="text-[15px] font-bold text-slate-900">{opt.label}</span>
+                                  <span className="text-[11px] font-medium text-slate-400">({opt.title})</span>
+                                </div>
+                              </div>
+                              <p className="mt-2 ml-[30px] text-[12px] leading-relaxed text-slate-500">{opt.desc}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -1147,6 +1186,7 @@ export default function ShipmentDetailPage() {
                                 proformaDescription,
                                 proformaCurrency,
                                 proformaIOSS,
+                                customsType,
                                 proformaItems: proformaItems.map(item => ({
                                   productDescription: item.desc,
                                   hsCode: item.hsCode,

@@ -35,6 +35,9 @@ interface DebugResponse {
     main_status: string;
     carrier: string;
     target_country: string;
+    last_mile_tracking_no: string;
+    last_mile_tracking_url: string;
+    last_mile_carrier: string;
     domestic_events: TrackingEvent[];
     international_events: TrackingEvent[];
   };
@@ -256,6 +259,41 @@ export default function KargomNeredePage() {
                     </a>
                   )}
                 </div>
+
+                {/* Son Dağıtıcı (Last Mile) Takip Kartı */}
+                {ut?.last_mile_tracking_no && (
+                  <div className="bg-gradient-to-r from-amber-50 to-orange-50/50 rounded-2xl border border-amber-200/80 p-5">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-amber-100">
+                          <Truck className="w-6 h-6 text-amber-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-amber-500 uppercase tracking-wider">Son Dağıtıcı</p>
+                          <p className="text-lg font-black text-slate-800">{ut.last_mile_carrier || "Taşıyıcı"}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col sm:items-end gap-1">
+                        <p className="text-[10px] font-bold text-amber-500 uppercase">Acente Takip No</p>
+                        <p className="font-mono font-bold text-slate-700 text-sm tracking-wider">{ut.last_mile_tracking_no}</p>
+                      </div>
+                    </div>
+
+                    {ut.last_mile_tracking_url && (
+                      <a
+                        href={ut.last_mile_tracking_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex items-center gap-2 text-sm text-white font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 px-5 py-2.5 rounded-xl shadow-lg shadow-amber-200/50 transition-all active:scale-95"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        {ut.last_mile_carrier || "Taşıyıcı"} Takip Sayfası
+                        <ArrowRight className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+                )}
 
                 {/* Timeline Section */}
                 {(domesticEvents.length > 0 || internationalEvents.length > 0) && (

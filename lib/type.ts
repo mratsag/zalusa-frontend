@@ -50,6 +50,7 @@ export type ShipmentDraft = {
   proformaCurrency: "EUR" | "USD" | "GBP";
   proformaIOSS: string;
   proformaItems: ProformaItem[];
+  customsType: "H" | "D"; // H=DAP (alıcı öder, varsayılan), D=DDP (gönderici öder)
 
   // Fatura bilgileri (PTS API - Mikro İhracat beyanında zorunlu, FedEx sıkı uygular)
   invoiceNo: string;
