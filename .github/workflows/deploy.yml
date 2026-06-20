@@ -1,7 +1,9 @@
 name: Build & Deploy frontend
 
-# SU AN sadece elle (ilk testler). Dogrulaninca push: [main] eklenecek.
+# main'e push'ta otomatik deploy + elle tetikleme
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
