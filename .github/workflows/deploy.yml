@@ -1,6 +1,6 @@
-name: Deploy frontend to prod
+name: Build & Deploy frontend
 
-# Tetikleme: SU AN sadece elle (ilk testler icin). Dogrulaninca push: [main] eklenecek.
+# SU AN sadece elle (ilk testler). Dogrulaninca push: [main] eklenecek.
 on:
   workflow_dispatch:
 
@@ -8,27 +8,53 @@ concurrency:
   group: deploy-zalusa-frontend
   cancel-in-progress: false
 
+env:
+  IMAGE: ghcr.io/mratsag/zalusa-frontend
+
 jobs:
-  deploy:
+  # 1) GitHub-hosted runner: image build + GHCR push
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
-
-      - name: rsync kaynagi sunucuya + konteyneri yeniden build et
-        uses: easingthemes/ssh-deploy@v6.0.1
+      - uses: docker/login-action@v3
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
-          REMOTE_USER: ${{ secrets.DEPLOY_USER }}
-          REMOTE_PORT: ${{ secrets.DEPLOY_PORT }}
-          SOURCE: "./"
-          TARGET: "/home/zalusa/frontend/"
-          ARGS: "-rlptDz --delete"
-          # Prod-only dosyalar korunur:
-          #   Dockerfile + .env* (.env.local = prod NEXT_PUBLIC_API_URL) sunucuda kalir.
-          #   node_modules / .next konteyner build'inde uretilir, yuke dahil edilmez.
-          EXCLUDE: "/.git/, /.github/, /Dockerfile, /node_modules/, /.next/, /.env*"
-          SCRIPT_AFTER: |
-            cd /home/zalusa
-            docker compose up -d --build zalusafrontend
-            docker image prune -f
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          # NEXT_PUBLIC_API_URL build-time'da gomulur (public deger)
+          build-args: |
+            NEXT_PUBLIC_API_URL=https://api.zalusa.com
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # 2) Self-hosted runner (sunucuda): GHCR'dan pull + compose up
+  deploy:
+    needs: build
+    runs-on: [self-hosted, zalusa-frontend]
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: GHCR pull + restart
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          cd /home/zalusa
+          docker compose pull zalusafrontend
+          docker compose up -d zalusafrontend
+          docker image prune -f
+          docker logout ghcr.io
+      - name: Health check
+        run: |
+          sleep 5
+          curl -fsS --retry 8 --retry-delay 3 -o /dev/null http://localhost:3000 && echo " frontend OK"
