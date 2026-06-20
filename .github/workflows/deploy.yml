@@ -1,0 +1,36 @@
+name: Deploy frontend to prod
+
+# Tetikleme: main'e push + elle (ilk testler icin workflow_dispatch)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-zalusa-frontend
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: rsync kaynagi sunucuya + konteyneri yeniden build et
+        uses: easingthemes/ssh-deploy@v5
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
+          REMOTE_USER: ${{ secrets.DEPLOY_USER }}
+          REMOTE_PORT: ${{ secrets.DEPLOY_PORT }}
+          SOURCE: "./"
+          TARGET: "/home/zalusa/frontend/"
+          ARGS: "-rlptDz --delete"
+          # Prod-only dosyalar korunur:
+          #   Dockerfile + .env* (.env.local = prod NEXT_PUBLIC_API_URL) sunucuda kalir.
+          #   node_modules / .next konteyner build'inde uretilir, yuke dahil edilmez.
+          EXCLUDE: "/.git/, /.github/, /Dockerfile, /node_modules/, /.next/, /.env*"
+          SCRIPT_AFTER: |
+            cd /home/zalusa
+            docker compose up -d --build zalusafrontend
+            docker image prune -f
