@@ -458,7 +458,7 @@ export default function ShipmentDetailPage() {
                       <div>
                         <div className="mb-4 text-[14px] font-bold text-[#0F172A]">Gönderi Tipi</div>
                         <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                          {(["Belge","Paket","Koli"] as const).map(t=>{const active=shipmentType===t;const d:any={Belge:"Dosya, sözleşme vb.",Paket:"Ürün, aksesuar vb.",Koli:"Ürün, aksesuar vb."};return(
+                          {(["Belge","Paket","Koli"] as const).map(t=>{const active=shipmentType===t;const d:any={Belge:"Evrak / sözleşme / fatura",Paket:"Küçük ürün gönderileri",Koli:"Büyük hacimli gönderiler"};return(
                             <button key={t} type="button" onClick={()=>setShipmentType(t)} className={cn("relative flex items-center justify-between rounded-2xl px-3 py-3 sm:px-5 sm:py-4 text-left transition-all duration-200",active?"bg-[#3959F2] text-white shadow-lg shadow-[#4F46E5]/25":"bg-[#F8FAFC] text-[#0F172A] ring-1 ring-[#E2E8F0] hover:ring-[#CBD5E1] hover:shadow-sm")}>
                               <div className="min-w-0 flex-1">
                                 <div className="text-[13px] sm:text-[15px] font-bold">{t}</div>

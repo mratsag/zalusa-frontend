@@ -291,9 +291,9 @@ function AddressCard({ addr, selected, onSelect, onDelete }: { addr: ApiAddress;
 
 /* ── Shipment type descriptions for Step 0 ── */
 const SHIPMENT_TYPE_META: Record<string, { icon: React.ComponentType<{ className?: string }>; description: string; badge?: string; emoji: string }> = {
-  Belge: { icon: FileText,  description: "Dosya, sözleşme, fatura vb.", emoji: "📄" },
-  Paket: { icon: Package, description: "Ürün, aksesuar, numune vb.", badge: "En çok tercih edilen", emoji: "📦" },
-  Koli:  { icon: BoxSelect,  description: "Ürün, aksesuar, numune vb.", emoji: "📦" },
+  Belge: { icon: FileText,  description: "Evrak / sözleşme / fatura", emoji: "📄" },
+  Paket: { icon: Package, description: "Küçük ürün gönderileri", badge: "En çok tercih edilen", emoji: "📦" },
+  Koli:  { icon: BoxSelect,  description: "Büyük hacimli gönderiler", emoji: "📦" },
 };
 
 /* ── Pending draft info type (for the resume banner) ── */
