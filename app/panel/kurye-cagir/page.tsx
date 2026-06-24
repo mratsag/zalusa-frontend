@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Search, Plus, Calendar, ChevronDown, Loader2, AlertCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { courierService, CourierPickup } from "@/lib/services/courierService";
 
 // Adres ve gönderi listesi için basit tipler
@@ -417,20 +418,13 @@ export default function KuryeCagirPage() {
                 </div>
 
                 {/* Phone */}
-                <div className="relative flex h-[50px]">
-                  <div className="flex shrink-0 items-center justify-center gap-1.5 rounded-l-lg border border-r-0 border-slate-300 bg-white pl-3 pr-2 py-3.5 cursor-pointer">
-                    <div className="h-4 w-6 bg-red-600 flex items-center justify-center text-[10px] text-white font-bold rounded-[2px]">
-                      TR
-                    </div>
-                    <ChevronDown className="h-3.5 w-3.5 text-slate-600" />
-                  </div>
-                  <input
-                    type="text"
-                    value={form.contactPhone}
-                    onChange={(e) => setForm((f) => ({ ...f, contactPhone: e.target.value }))}
-                    className="w-full rounded-r-lg border border-slate-300 bg-white px-3 py-3.5 text-[14px] text-slate-700 outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
-                  />
-                </div>
+                <PhoneInput
+                  defaultDialCode="+90"
+                  value={form.contactPhone}
+                  onChange={(v) => setForm((f) => ({ ...f, contactPhone: v }))}
+                  placeholder="Toplama yapacak kişi telefonu"
+                  className="h-[50px] rounded-lg"
+                />
               </div>
 
               {/* Gönderi Seçin */}

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Users,
   UserPlus,
@@ -715,12 +716,11 @@ function CreateCustomerModal({
             <label className="mb-1 block text-xs font-semibold text-slate-600">
               Telefon
             </label>
-            <input
-              type="tel"
+            <PhoneInput
+              defaultDialCode="+90"
               value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-              placeholder="+90 555 123 45 67"
+              onChange={(v) => setForm({ ...form, phone: v })}
+              placeholder="555 123 45 67"
             />
           </div>
 

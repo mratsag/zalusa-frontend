@@ -13,6 +13,7 @@ import { CitySelect } from "@/components/ui/city-select";
 import { StateSelect } from "@/components/ui/state-select";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { HSCodeCombobox } from "@/components/HSCodeCombobox";
 import { cn } from "@/lib/cn";
 import { Stepper } from "@/components/panel/stepper";
@@ -603,7 +604,7 @@ export default function ShipmentDetailPage() {
                       <h4 className="text-sm font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-2"><MapPin className="h-4 w-4" /> Gönderici Bilgileri</h4>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div><label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Ad Soyad <span className="text-red-500">*</span></label><input value={senderForm.name} onChange={e => setSenderForm(p => ({...p, name: e.target.value}))} className="w-full h-11 rounded-xl border border-slate-200 px-4 text-[13px] font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow" placeholder="Gönderici adı" /></div>
-                        <div><label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Telefon <span className="text-red-500">*</span></label><input value={senderForm.phone} onChange={e => setSenderForm(p => ({...p, phone: e.target.value}))} className="w-full h-11 rounded-xl border border-slate-200 px-4 text-[13px] font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow" placeholder="5XX XXX XX XX" /></div>
+                        <div><label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Telefon <span className="text-red-500">*</span></label><PhoneInput defaultDialCode="+90" value={senderForm.phone} onChange={v => setSenderForm(p => ({...p, phone: v}))} placeholder="5XX XXX XX XX" /></div>
                         <div>
                           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Ülke <span className="text-red-500">*</span></label>
                           <SearchableSelect value={senderForm.country} onChange={val => { setSenderForm(p => ({...p, country: val, city: ""})); }} options={apiCountries} placeholder="Ülke seçin..." className="h-11" />
@@ -628,7 +629,7 @@ export default function ShipmentDetailPage() {
                       <h4 className="text-sm font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-2"><MapPin className="h-4 w-4" /> Alıcı Bilgileri</h4>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div><label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Ad Soyad <span className="text-red-500">*</span></label><input value={receiverForm.name} onChange={e => setReceiverForm(p => ({...p, name: e.target.value}))} className="w-full h-11 rounded-xl border border-slate-200 px-4 text-[13px] font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow" placeholder="Alıcı adı" /></div>
-                        <div><label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Telefon <span className="text-red-500">*</span></label><input value={receiverForm.phone} onChange={e => setReceiverForm(p => ({...p, phone: e.target.value}))} className="w-full h-11 rounded-xl border border-slate-200 px-4 text-[13px] font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow" placeholder="5XX XXX XX XX" /></div>
+                        <div><label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Telefon <span className="text-red-500">*</span></label><PhoneInput defaultDialCode="+90" value={receiverForm.phone} onChange={v => setReceiverForm(p => ({...p, phone: v}))} placeholder="5XX XXX XX XX" /></div>
                         <div>
                           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Ülke <span className="text-red-500">*</span></label>
                           <SearchableSelect value={receiverForm.country} onChange={val => { setReceiverForm(p => ({...p, country: val, city: "", town: ""})); setReceiverHasStates(true); }} options={apiCountries} placeholder="Ülke seçin..." className="h-11" />

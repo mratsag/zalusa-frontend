@@ -14,6 +14,7 @@ import {
   Phone,
 } from "lucide-react";
 import { adminService, type AdminUser } from "@/lib/services/adminService";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 // ── Toast notification ──────────────────────────────────────────────────────
 
@@ -274,7 +275,7 @@ export default function AdminManagementPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1">Telefon (opsiyonel)</label>
-            <input className={inputCls} value={createForm.phone} onChange={(e) => setCreateForm((p) => ({ ...p, phone: e.target.value }))} placeholder="05XX XXX XX XX" />
+            <PhoneInput defaultDialCode="+90" value={createForm.phone} onChange={(v) => setCreateForm((p) => ({ ...p, phone: v }))} placeholder="5XX XXX XX XX" />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1">Şifre</label>

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import { ApiProfile, profileService } from "@/lib/services/profileService";
 import { addressService, ApiAddress, ApiMeasurement, measurementService } from "@/lib/services/shipmentService";
@@ -615,7 +616,7 @@ export default function ProfilPage() {
                   <div className="mb-2 inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700">
                     <User className="h-4 w-4 text-slate-400" /> Telefon
                   </div>
-                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
+                  <PhoneInput defaultDialCode="+90" value={phone} onChange={(v) => setPhone(v)} className="h-[44px] rounded-[12px]" />
                 </label>
                 <label className="block">
                   <div className="mb-2 inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700">
@@ -782,7 +783,7 @@ export default function ProfilPage() {
                       </div>
                       <div>
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Telefon <span className="text-red-500">*</span></div>
-                        <Input value={newSenderAddr.phone} onChange={e => setNewSenderAddr(p => ({ ...p, phone: e.target.value }))} placeholder="05XX XXX XX XX" maxLength={15} className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
+                        <PhoneInput defaultDialCode="+90" value={newSenderAddr.phone} onChange={v => setNewSenderAddr(p => ({ ...p, phone: v }))} placeholder="5XX XXX XX XX" className="h-[44px] rounded-[12px]" />
                         {newSenderAddr.countryCode === "TR" && <p className="mt-1 text-[11px] text-slate-400">Örn: 05321234567</p>}
                       </div>
                       <div>
@@ -887,7 +888,7 @@ export default function ProfilPage() {
                       </div>
                       <div>
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Telefon <span className="text-red-500">*</span></div>
-                        <Input value={newReceiverAddr.phone} onChange={e => setNewReceiverAddr(p => ({ ...p, phone: e.target.value }))} placeholder="+49 ..." className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
+                        <PhoneInput defaultDialCode="+90" value={newReceiverAddr.phone} onChange={v => setNewReceiverAddr(p => ({ ...p, phone: v }))} placeholder="Telefon numarası" className="h-[44px] rounded-[12px]" />
                       </div>
                       <div>
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Ülke <span className="text-red-500">*</span></div>

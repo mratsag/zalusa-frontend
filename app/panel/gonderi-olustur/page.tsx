@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { cn } from "@/lib/cn";
@@ -316,77 +317,6 @@ export const descriptionTypeService = {
 
 
 
-// ─── Telefon Formatlama ──────────────────────────────────────────────────────
-// Ülke koduna göre telefon numarasını uluslararası standartlarda formatlar
-const PHONE_FORMATS: Record<string, { len: number; groups: number[] }> = {
-  "+90": { len: 10, groups: [3, 3, 2, 2] },       // TR: +90 532 123 45 67
-  "+1":  { len: 10, groups: [3, 3, 4] },            // US/CA: +1 212 555 1234
-  "+44": { len: 10, groups: [4, 6] },               // GB: +44 7911 123456
-  "+49": { len: 10, groups: [3, 7] },               // DE: +49 151 1234567
-  "+33": { len: 9,  groups: [1, 2, 2, 2, 2] },      // FR: +33 6 12 34 56 78
-  "+39": { len: 10, groups: [3, 3, 4] },             // IT: +39 312 345 6789
-  "+34": { len: 9,  groups: [3, 3, 3] },             // ES: +34 612 345 678
-  "+31": { len: 9,  groups: [1, 4, 4] },             // NL: +31 6 1234 5678
-  "+32": { len: 8,  groups: [3, 2, 2, 2] },          // BE: +32 470 12 34 56
-  "+43": { len: 10, groups: [3, 7] },               // AT: +43 664 1234567
-  "+41": { len: 9,  groups: [2, 3, 2, 2] },         // CH: +41 76 123 45 67
-  "+48": { len: 9,  groups: [3, 3, 3] },             // PL: +48 512 345 678
-  "+46": { len: 9,  groups: [2, 3, 2, 2] },         // SE: +46 70 123 45 67
-  "+45": { len: 8,  groups: [2, 2, 2, 2] },         // DK: +45 20 12 34 56
-  "+47": { len: 8,  groups: [3, 2, 3] },             // NO: +47 412 34 567
-  "+351": { len: 9, groups: [3, 3, 3] },            // PT: +351 912 345 678
-  "+353": { len: 9, groups: [2, 3, 4] },            // IE: +353 85 123 4567
-  "+81": { len: 10, groups: [2, 4, 4] },            // JP: +81 90 1234 5678
-  "+86": { len: 11, groups: [3, 4, 4] },            // CN: +86 138 1234 5678
-  "+82": { len: 10, groups: [2, 4, 4] },            // KR: +82 10 1234 5678
-  "+61": { len: 9,  groups: [3, 3, 3] },            // AU: +61 412 345 678
-  "+55": { len: 11, groups: [2, 5, 4] },            // BR: +55 11 98765 4321
-  "+966": { len: 9, groups: [2, 3, 4] },            // SA: +966 50 123 4567
-  "+971": { len: 9, groups: [2, 3, 4] },            // AE: +971 50 123 4567
-};
-// Varsayılan format: 3-3-4 gruplama
-const DEFAULT_FORMAT = { len: 10, groups: [3, 3, 4] };
-
-function detectPhonePrefix(phone: string): string {
-  // En uzun prefix'ten kısaya doğru dene
-  if (phone.startsWith("+")) {
-    for (const len of [4, 3, 2]) {
-      const prefix = phone.slice(0, len + 1); // +XXX
-      if (PHONE_FORMATS[prefix]) return prefix;
-    }
-    // Bilinmeyen prefix - ilk + ve rakamları al
-    const m = phone.match(/^(\+\d{1,4})/);
-    return m ? m[1] : "";
-  }
-  return "";
-}
-
-function formatPhoneDisplay(raw: string): string {
-  if (!raw || raw.length <= 1) return raw;
-  const prefix = detectPhonePrefix(raw);
-  if (!prefix) return raw;
-  
-  const digits = raw.slice(prefix.length).replace(/\D/g, "");
-  if (!digits) return prefix;
-  
-  const fmt = PHONE_FORMATS[prefix] || DEFAULT_FORMAT;
-  const parts: string[] = [];
-  let pos = 0;
-  for (const g of fmt.groups) {
-    if (pos >= digits.length) break;
-    parts.push(digits.slice(pos, pos + g));
-    pos += g;
-  }
-  // Kalan rakamlar varsa ekle
-  if (pos < digits.length) parts.push(digits.slice(pos));
-  
-  return prefix + " " + parts.join(" ");
-}
-
-function cleanPhoneDigits(formatted: string): string {
-  // Sadece + ve rakamları tut
-  return formatted.replace(/[^\d+]/g, "");
-}
 
 // Bayrak URL helper
 function getFlagImageUrl(code: string, size: number = 40): string {
@@ -2404,7 +2334,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                   <div className="grid gap-3 sm:grid-cols-2">
                                     <Field label="Ad Soyad" icon={User}><Input value={editingSenderAddr.name} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); setEditingSenderAddr({ ...editingSenderAddr, name: v }); }} placeholder="Ad soyad" maxLength={60} /></Field>
                                     <Field label="Firma Adı" icon={Building}><Input value={editingSenderAddr.company || ""} onChange={e => setEditingSenderAddr({ ...editingSenderAddr, company: e.target.value })} placeholder="Firma (opsiyonel)" /></Field>
-                                    <Field label="Telefon" icon={Phone}><Input value={editingSenderAddr.phone || ""} onChange={e => setEditingSenderAddr({ ...editingSenderAddr, phone: e.target.value })} placeholder="+90 5XX XXX XX XX" /></Field>
+                                    <Field label="Telefon" icon={Phone}><PhoneInput bare value={editingSenderAddr.phone || ""} onChange={v => setEditingSenderAddr({ ...editingSenderAddr, phone: v })} defaultDialCode="+90" placeholder="5XX XXX XX XX" /></Field>
                                     <Field label="Şehir" icon={MapPin}><Input value={editingSenderAddr.city} onChange={e => setEditingSenderAddr({ ...editingSenderAddr, city: e.target.value })} placeholder="Şehir" /></Field>
                                     <Field label="İlçe" icon={MapPin}><Input value={(editingSenderAddr as any).town || ""} onChange={e => setEditingSenderAddr({ ...editingSenderAddr, town: e.target.value } as any)} placeholder="İlçe" /></Field>
                                     <div className="sm:col-span-2"><Field label="Açık Adres" icon={MapPinned}><Input value={editingSenderAddr.address} onChange={e => setEditingSenderAddr({ ...editingSenderAddr, address: e.target.value })} placeholder="Sokak, cadde, bina no..." /></Field></div>
@@ -2481,7 +2411,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                         <div className="grid gap-3 sm:grid-cols-2">
                           <Field label="Ad Soyad" icon={User}><Input value={draft.senderName} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); if (v.length <= 60) update("senderName", v); }} placeholder="Gönderici adı soyadı" maxLength={60} /></Field>
                           <Field label="Firma Adı" icon={Building}><Input value={draft.senderCompany} onChange={e => update("senderCompany", e.target.value)} placeholder="Firma adı (opsiyonel)" /></Field>
-                          <Field label="Telefon" icon={Phone}><Input value={formatPhoneDisplay(draft.senderPhone)} onChange={e => { const raw = cleanPhoneDigits(e.target.value); update("senderPhone", raw); }} placeholder="+90 5XX XXX XX XX" /></Field>
+                          <Field label="Telefon" icon={Phone}><PhoneInput bare value={draft.senderPhone} onChange={raw => update("senderPhone", raw)} defaultDialCode="+90" placeholder="5XX XXX XX XX" /></Field>
                           <Field label="Şehir" icon={MapPin}>
                             <CitySelect
                               countryCode={draft.senderCountry || "TR"}
@@ -2589,7 +2519,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                   <div className="grid gap-3 sm:grid-cols-2">
                                     <Field label="Ad Soyad" icon={User}><Input value={editingReceiverAddr.name} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); setEditingReceiverAddr({ ...editingReceiverAddr, name: v }); }} placeholder="Ad soyad" maxLength={60} /></Field>
                                     <Field label="Firma Adı" icon={Building}><Input value={editingReceiverAddr.company || ""} onChange={e => setEditingReceiverAddr({ ...editingReceiverAddr, company: e.target.value })} placeholder="Firma (opsiyonel)" /></Field>
-                                    <Field label="Telefon" icon={Phone}><Input value={editingReceiverAddr.phone || ""} onChange={e => setEditingReceiverAddr({ ...editingReceiverAddr, phone: e.target.value })} placeholder="Telefon" /></Field>
+                                    <Field label="Telefon" icon={Phone}><PhoneInput bare value={editingReceiverAddr.phone || ""} onChange={v => setEditingReceiverAddr({ ...editingReceiverAddr, phone: v })} defaultDialCode="+90" placeholder="Telefon numarası" /></Field>
                                     <Field label="Şehir" icon={MapPin}><Input value={editingReceiverAddr.city} onChange={e => setEditingReceiverAddr({ ...editingReceiverAddr, city: e.target.value })} placeholder="Şehir" /></Field>
                                     <Field label="Posta Kodu" icon={MapPin}><Input value={editingReceiverAddr.postalCode || ""} onChange={e => setEditingReceiverAddr({ ...editingReceiverAddr, postalCode: e.target.value })} placeholder="Posta kodu" /></Field>
                                     <Field label="Ülke Kodu" icon={Globe}><Input value={editingReceiverAddr.countryCode || ""} onChange={e => setEditingReceiverAddr({ ...editingReceiverAddr, countryCode: e.target.value.toUpperCase() })} placeholder="DE, US..." maxLength={2} /></Field>
@@ -2686,16 +2616,15 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                           <Field label="Ad Soyad" icon={User} error={fieldErrors.receiverName}><Input value={draft.receiverName} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); if (v.length <= 60) update("receiverName", v); }} placeholder="Alıcı adı soyadı" maxLength={60} /></Field>
                           <Field label="Firma Adı" icon={Building}><Input value={draft.receiverCompany} onChange={e => update("receiverCompany", e.target.value)} placeholder="Firma adı (opsiyonel)" /></Field>
                           <Field label="Telefon" icon={Phone} error={fieldErrors.receiverPhone}>
-                            <Input
-                              value={formatPhoneDisplay(draft.receiverPhone)}
-                              onChange={e => {
-                                const raw = cleanPhoneDigits(e.target.value);
-                                update("receiverPhone", raw);
-                              }}
-                              placeholder={(() => {
+                            <PhoneInput
+                              bare
+                              value={draft.receiverPhone}
+                              onChange={raw => update("receiverPhone", raw)}
+                              defaultDialCode={(() => {
                                 const country = apiCountries.find((c: any) => c.value === (draft.receiverAddressCountry || draft.receiverCountry));
-                                return country?.phoneCode ? `${country.phoneCode} ...` : "Telefon";
+                                return country?.phoneCode || "+90";
                               })()}
+                              placeholder="Telefon numarası"
                             />
                           </Field>
                           <Field label="Ülke" icon={MapPin} error={fieldErrors.receiverAddressCountry}>
