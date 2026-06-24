@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import {
   Building2,
   Plus,
@@ -78,8 +79,8 @@ function RateForm({
     zone: initial?.zone ?? "",
     weightMinKg: initial?.weightMinKg ?? 0,
     weightMaxKg: initial?.weightMaxKg ?? 0,
-    basePrice: initial?.basePrice ?? 0,
-    perKgPrice: initial?.perKgPrice ?? 0,
+    basePrice: String(initial?.basePrice ?? ""),
+    perKgPrice: String(initial?.perKgPrice ?? ""),
     currency: initial?.currency ?? "USD",
     fuelSurchargePct: initial?.fuelSurchargePct ?? 0,
     minTransitDays: initial?.minTransitDays ?? 1,
@@ -101,6 +102,8 @@ function RateForm({
     try {
       const payload = {
         ...form,
+        basePrice: parseFloat(form.basePrice) || 0,
+        perKgPrice: parseFloat(form.perKgPrice) || 0,
         validTo: form.validTo || null,
       } as any;
       if (initial) {
@@ -150,11 +153,11 @@ function RateForm({
         </div>
         <div>
           <label className="block text-xs font-medium text-slate-500 mb-1">Baz Fiyat</label>
-          <input className={inputCls} type="number" step="0.01" value={form.basePrice} onChange={(e) => update("basePrice", +e.target.value)} required />
+          <DecimalInput bare className={inputCls} value={form.basePrice} onChange={(v) => update("basePrice", v)} required />
         </div>
         <div>
           <label className="block text-xs font-medium text-slate-500 mb-1">Kg Başı Fiyat</label>
-          <input className={inputCls} type="number" step="0.01" value={form.perKgPrice} onChange={(e) => update("perKgPrice", +e.target.value)} />
+          <DecimalInput bare className={inputCls} value={form.perKgPrice} onChange={(v) => update("perKgPrice", v)} />
         </div>
         <div>
           <label className="block text-xs font-medium text-slate-500 mb-1">Yakıt Ek (%)</label>
