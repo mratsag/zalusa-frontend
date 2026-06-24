@@ -55,6 +55,18 @@ export default function OdemePage() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState("");
 
+  // "Geri": sihirbazdan gelindiyse taslak finalize olup sihirbaz boş açılacağı için
+  // doğrudan Gönderilerim'e (gönderi orada, ödenebilir); sepet/liste gibi yerlerden
+  // gelindiyse tarayıcı geçmişine (geldiği ekrana) dön.
+  const goBack = () => {
+    const ref = typeof document !== "undefined" ? document.referrer : "";
+    if (!ref || ref.includes("/panel/gonderi-olustur")) {
+      router.push("/panel/gonderilerim");
+    } else {
+      router.back();
+    }
+  };
+
   // Havale state
   const [description, setDescription] = useState("");
   const [submittingTransfer, setSubmittingTransfer] = useState(false);
@@ -189,7 +201,7 @@ export default function OdemePage() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <p className="text-danger-600 font-medium">{error}</p>
         <button
-          onClick={() => router.back()}
+          onClick={goBack}
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -216,7 +228,7 @@ export default function OdemePage() {
       {/* Header */}
       <div className="mb-8">
         <button
-          onClick={() => router.back()}
+          onClick={goBack}
           className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-foreground transition-colors mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
