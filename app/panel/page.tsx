@@ -12,6 +12,8 @@ import {
   ShoppingCart,
   ReceiptText,
   Scale,
+  Clock,
+  Ban,
   Loader2,
 } from "lucide-react";
 
@@ -459,31 +461,50 @@ export default function PanelHomePage() {
               </div>
             ) : (
               <div className="divide-y divide-[#F1F5F9]">
-                {stats.recentOrders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="flex items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F1F5F9]">
-                        <PackageCheck className="h-[18px] w-[18px] text-[#64748B]" />
+                {stats.recentOrders.map((order) => {
+                  const paid = ["paid", "processing", "shipped", "delivered"].includes(order.status);
+                  const cancelled = order.status === "cancelled";
+                  const pay = paid
+                    ? { label: "Ödeme Tamamlandı", badge: "bg-emerald-50 text-emerald-600", dot: "bg-emerald-500", Icon: PackageCheck, iconWrap: "bg-emerald-50 text-emerald-600", amountCls: "text-[#EF4444]", sign: "-", note: null }
+                    : cancelled
+                      ? { label: "İptal Edildi", badge: "bg-slate-100 text-slate-500", dot: "bg-slate-400", Icon: Ban, iconWrap: "bg-slate-100 text-slate-400", amountCls: "text-[#CBD5E1] line-through", sign: "", note: null }
+                      : { label: "Ödeme Bekleniyor", badge: "bg-orange-50 text-orange-600", dot: "bg-orange-500", Icon: Clock, iconWrap: "bg-orange-50 text-orange-500", amountCls: "text-[#F59E0B]", sign: "", note: "Henüz tahsil edilmedi" };
+                  const PayIcon = pay.Icon;
+                  return (
+                    <div
+                      key={order.id}
+                      className="flex items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${pay.iconWrap}`}>
+                          <PayIcon className="h-[18px] w-[18px]" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-[13px] font-bold text-[#1E293B] leading-snug">
+                            {getCountryName(order.countryCode)} Gönderi Ücreti
+                          </div>
+                          <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                            <span className={`${pay.badge} px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 whitespace-nowrap`}>
+                              <span className={`w-[5px] h-[5px] rounded-full ${pay.dot}`} />
+                              {pay.label}
+                            </span>
+                            <span className="text-[11px] font-medium text-[#94A3B8]">{formatDate(order.createdAt)}</span>
+                            <span className="text-[11px] font-medium text-[#94A3B8]">·</span>
+                            <span className="text-[11px] font-medium text-[#94A3B8] font-mono">{order.trackingCode || `ZLS-SHP-${order.id}`}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <div className="text-[13px] font-bold text-[#1E293B] leading-snug">
-                          {getCountryName(order.countryCode)} Gönderi Ücreti
-                        </div>
-                        <div className="mt-0.5 flex items-center gap-1.5 text-[11px] font-medium text-[#94A3B8]">
-                          <span>{formatDate(order.createdAt)}</span>
-                          <span>·</span>
-                          <span className="font-mono">{order.trackingCode || `ZLS-SHP-${order.id}`}</span>
-                        </div>
+                      <div className="shrink-0 text-right">
+                        <span className={`block text-[14px] font-extrabold ${pay.amountCls}`}>
+                          {pay.sign}{order.priceTry.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ₺
+                        </span>
+                        {pay.note && (
+                          <span className="block text-[10px] font-semibold text-[#F59E0B] mt-0.5">{pay.note}</span>
+                        )}
                       </div>
                     </div>
-                    <span className="shrink-0 text-[14px] font-extrabold text-[#EF4444]">
-                      -{order.priceTry.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ₺
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
