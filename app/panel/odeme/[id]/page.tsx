@@ -20,6 +20,8 @@ interface ShipmentInfo {
   id: number;
   trackingCode: string;
   carrierName: string;
+  carrierPrice?: number;
+  carrierCurrency?: string;
   carrierPriceTry: number;
   receiverCountry: string;
   shipmentType: string;
@@ -201,6 +203,11 @@ export default function OdemePage() {
     ? shipment.carrierPriceTry + (shipment.hasInsurance ? shipment.insuranceCost : 0)
     : 0;
 
+  // Kur denkliği: carrierPrice (USD/EUR/GBP) ile carrierPriceTry'den kur türetilir, her TL tutarın yabancı karşılığı gösterilir
+  const fxRate = shipment && shipment.carrierPrice && shipment.carrierPrice > 0 ? shipment.carrierPriceTry / shipment.carrierPrice : 0;
+  const fxSym = shipment?.carrierCurrency === "EUR" ? "€" : shipment?.carrierCurrency === "GBP" ? "£" : "$";
+  const fxEquiv = (tryAmount: number) => (fxRate > 0 ? `${fxSym}${(tryAmount / fxRate).toFixed(2)}` : "");
+
   // Havale bildirimi zaten yapılmış mı?
   const hasExistingTransfer = transferStatus?.exists && transferStatus.status === "pending";
 
@@ -273,8 +280,11 @@ export default function OdemePage() {
 
             <div className="flex justify-between items-center">
               <span className="text-[14px] text-slate-500">Kargo Ücreti</span>
-              <span className="text-[15px] font-bold text-slate-900">
-                ₺{shipment.carrierPriceTry?.toFixed(2)}
+              <span className="text-right">
+                <span className="block text-[15px] font-bold text-slate-900">₺{shipment.carrierPriceTry?.toFixed(2)}</span>
+                {fxEquiv(shipment.carrierPriceTry) && (
+                  <span className="block text-[11px] font-medium text-slate-400">≈ {fxEquiv(shipment.carrierPriceTry)}</span>
+                )}
               </span>
             </div>
 
@@ -294,8 +304,11 @@ export default function OdemePage() {
 
             <div className="flex justify-between items-center">
               <span className="text-base font-bold text-slate-900">Toplam</span>
-              <span className="text-xl font-bold text-brand-600">
-                ₺{totalPrice.toFixed(2)}
+              <span className="text-right">
+                <span className="block text-xl font-bold text-brand-600">₺{totalPrice.toFixed(2)}</span>
+                {fxEquiv(totalPrice) && (
+                  <span className="block text-[11px] font-medium text-slate-400">≈ {fxEquiv(totalPrice)}</span>
+                )}
               </span>
             </div>
           </div>
@@ -432,6 +445,7 @@ export default function OdemePage() {
 							<div>
 								<p className="text-xs text-slate-400 font-semibold mb-1">Gönderilecek Tutar</p>
 								<p className="text-lg font-bold text-brand-600">₺{totalPrice.toFixed(2)}</p>
+									{fxEquiv(totalPrice) && <p className="text-[11px] font-medium text-slate-400">≈ {fxEquiv(totalPrice)}</p>}
 							</div>
             </div>
 
@@ -529,7 +543,7 @@ export default function OdemePage() {
               ) : (
                 <>
                   <CreditCard className="w-5 h-5 transition-transform group-hover:scale-110" />
-                  <span>Kredi Kartı ile Öde — ₺{totalPrice.toFixed(2)}</span>
+                  <span>Kredi Kartı ile Öde — ₺{totalPrice.toFixed(2)}{fxEquiv(totalPrice) ? ` (≈ ${fxEquiv(totalPrice)})` : ""}</span>
                 </>
               )}
             </button>

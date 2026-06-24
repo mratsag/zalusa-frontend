@@ -3324,8 +3324,13 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                     
                     <div className="flex items-center gap-5 shrink-0 relative">
                       {apiError && <div className="absolute top-[-40px] right-0 text-red-500 font-bold text-sm bg-white px-3 py-1 rounded shadow-sm">{apiError}</div>}
-                      <div className="text-[26px] font-black tracking-tighter text-white mb-0.5 leading-none">
-                        {selectedQuote ? getCurrencySymbol(selectedQuote.currency) : "$"}{(selectedQuote?.price || 275.15).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <div className="flex flex-col items-end mb-0.5">
+                        <div className="text-[26px] font-black tracking-tighter text-white leading-none">
+                          {selectedQuote ? getCurrencySymbol(selectedQuote.currency) : "$"}{(selectedQuote?.price || 275.15).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        {selectedQuote?.priceTry ? (
+                          <div className="text-[12px] font-semibold text-white/70 leading-none mt-1">≈ ₺{selectedQuote.priceTry.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                        ) : null}
                       </div>
                       <button 
                         type="button" 
