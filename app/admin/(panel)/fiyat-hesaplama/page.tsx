@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { MeasurementInput } from "@/components/ui/measurement-input";
 import {
   Package, Plus, Trash2, Search, Loader2,
   ArrowRight, MapPin, Scale, Star, Zap,
@@ -206,20 +207,20 @@ export default function FiyatHesaplamaPage() {
                       <label className="sm:hidden text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1 block">Ağırlık (kg)</label>
                       <div className="flex items-center h-9 rounded-lg bg-white border border-[#E2E8F0] px-2.5 focus-within:border-[#4F46E5] focus-within:ring-2 focus-within:ring-[#4F46E5]/10 transition-all">
                         <Scale className="h-3.5 w-3.5 text-[#94A3B8] mr-1.5 shrink-0" />
-                        <input type="text" inputMode="decimal" value={pkg.weightKg} onChange={e => updatePkg(pkg.id, "weightKg", e.target.value)} placeholder="0.5" className="w-full bg-transparent text-[13px] font-bold text-[#0F172A] outline-none placeholder:text-[#CBD5E1]" />
+                        <MeasurementInput bare value={pkg.weightKg} onChange={v => updatePkg(pkg.id, "weightKg", v)} placeholder="0.5" className="w-full bg-transparent text-[13px] font-bold text-[#0F172A] outline-none placeholder:text-[#CBD5E1]" />
                       </div>
                     </div>
                     <div>
                       <label className="sm:hidden text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1 block">En (cm)</label>
-                      <input type="text" inputMode="decimal" value={pkg.widthCm} onChange={e => updatePkg(pkg.id, "widthCm", e.target.value)} placeholder="En" className="h-9 w-full rounded-lg bg-white border border-[#E2E8F0] px-2.5 text-[13px] font-bold text-[#0F172A] outline-none placeholder:text-[#CBD5E1] text-center focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/10 transition-all" />
+                      <MeasurementInput bare value={pkg.widthCm} onChange={v => updatePkg(pkg.id, "widthCm", v)} placeholder="En" className="h-9 w-full rounded-lg bg-white border border-[#E2E8F0] px-2.5 text-[13px] font-bold text-[#0F172A] outline-none placeholder:text-[#CBD5E1] text-center focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/10 transition-all" />
                     </div>
                     <div>
                       <label className="sm:hidden text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1 block">Boy (cm)</label>
-                      <input type="text" inputMode="decimal" value={pkg.lengthCm} onChange={e => updatePkg(pkg.id, "lengthCm", e.target.value)} placeholder="Boy" className="h-9 w-full rounded-lg bg-white border border-[#E2E8F0] px-2.5 text-[13px] font-bold text-[#0F172A] outline-none placeholder:text-[#CBD5E1] text-center focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/10 transition-all" />
+                      <MeasurementInput bare value={pkg.lengthCm} onChange={v => updatePkg(pkg.id, "lengthCm", v)} placeholder="Boy" className="h-9 w-full rounded-lg bg-white border border-[#E2E8F0] px-2.5 text-[13px] font-bold text-[#0F172A] outline-none placeholder:text-[#CBD5E1] text-center focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/10 transition-all" />
                     </div>
                     <div>
                       <label className="sm:hidden text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1 block">Yükseklik (cm)</label>
-                      <input type="text" inputMode="decimal" value={pkg.heightCm} onChange={e => updatePkg(pkg.id, "heightCm", e.target.value)} placeholder="Yük." className="h-9 w-full rounded-lg bg-white border border-[#E2E8F0] px-2.5 text-[13px] font-bold text-[#0F172A] outline-none placeholder:text-[#CBD5E1] text-center focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/10 transition-all" />
+                      <MeasurementInput bare value={pkg.heightCm} onChange={v => updatePkg(pkg.id, "heightCm", v)} placeholder="Yük." className="h-9 w-full rounded-lg bg-white border border-[#E2E8F0] px-2.5 text-[13px] font-bold text-[#0F172A] outline-none placeholder:text-[#CBD5E1] text-center focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/10 transition-all" />
                     </div>
                     <div className="flex items-center justify-center col-span-2 sm:col-span-1">
                       {packages.length > 1 && (

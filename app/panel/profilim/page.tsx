@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { NameInput } from "@/components/ui/name-input";
+import { MeasurementInput } from "@/components/ui/measurement-input";
 import { Textarea } from "@/components/ui/textarea";
 import { ApiProfile, profileService } from "@/lib/services/profileService";
 import { addressService, ApiAddress, ApiMeasurement, measurementService } from "@/lib/services/shipmentService";
@@ -989,28 +990,28 @@ export default function ProfilPage() {
                       <label className="block sm:col-span-1">
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">En (cm)</div>
                         <div className="relative">
-                          <Input inputMode="decimal" value={newMeas.widthCm} onChange={(e) => setNewMeas({ ...newMeas, widthCm: e.target.value })} placeholder="0" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px] pr-10" />
+                          <MeasurementInput value={newMeas.widthCm} onChange={(v) => setNewMeas({ ...newMeas, widthCm: v })} placeholder="0" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px] pr-10" />
                           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[13px] font-bold text-slate-400">cm</span>
                         </div>
                       </label>
                       <label className="block sm:col-span-1">
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Boy (cm)</div>
                         <div className="relative">
-                          <Input inputMode="decimal" value={newMeas.lengthCm} onChange={(e) => setNewMeas({ ...newMeas, lengthCm: e.target.value })} placeholder="0" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px] pr-10" />
+                          <MeasurementInput value={newMeas.lengthCm} onChange={(v) => setNewMeas({ ...newMeas, lengthCm: v })} placeholder="0" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px] pr-10" />
                           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[13px] font-bold text-slate-400">cm</span>
                         </div>
                       </label>
                       <label className="block sm:col-span-1">
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Yükseklik (cm)</div>
                         <div className="relative">
-                          <Input inputMode="decimal" value={newMeas.heightCm} onChange={(e) => setNewMeas({ ...newMeas, heightCm: e.target.value })} placeholder="0" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px] pr-10" />
+                          <MeasurementInput value={newMeas.heightCm} onChange={(v) => setNewMeas({ ...newMeas, heightCm: v })} placeholder="0" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px] pr-10" />
                           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[13px] font-bold text-slate-400">cm</span>
                         </div>
                       </label>
                       <label className="block sm:col-span-1">
                         <div className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-500">Ağırlık (kg)</div>
                         <div className="relative">
-                          <Input inputMode="decimal" value={newMeas.weightKg} onChange={(e) => setNewMeas({ ...newMeas, weightKg: e.target.value })} placeholder="0" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px] pr-10" />
+                          <MeasurementInput value={newMeas.weightKg} onChange={(v) => setNewMeas({ ...newMeas, weightKg: v })} placeholder="0" className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px] pr-10" />
                           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[13px] font-bold text-slate-400">kg</span>
                         </div>
                       </label>
