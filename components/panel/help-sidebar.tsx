@@ -16,6 +16,8 @@ import {
   Wallet,
   FileText,
   HelpCircle,
+  Calculator,
+  MapPin,
   Loader2,
   type LucideIcon,
 } from "lucide-react";
@@ -33,6 +35,8 @@ const iconMap: Record<string, LucideIcon> = {
   MessageCircle,
   Megaphone,
   Sparkles,
+  Calculator,
+  MapPin,
 };
 
 function getIcon(name: string): LucideIcon {
@@ -230,7 +234,7 @@ export function HelpSidebar() {
               return (
                 <a
                   key={item.id}
-                  href={item.link || "#"}
+                  href={item.link || undefined}
                   target={item.external ? "_blank" : undefined}
                   rel={item.external ? "noopener noreferrer" : undefined}
                   className="group flex items-start gap-3.5 rounded-2xl bg-white border border-slate-100 p-4 hover:border-blue-200 hover:shadow-[0_4px_20px_rgba(45,91,255,0.08)] transition-all duration-200"
