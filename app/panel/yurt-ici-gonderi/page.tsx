@@ -735,6 +735,12 @@ export default function YurtIciGonderiPage() {
                                 <div className="flex items-center gap-2 mb-3 text-[13px] font-semibold text-[#475569]">
                                   <Package className="h-4 w-4 text-[#94A3B8]" />
                                   Kargo firmaları yüksek olan ağırlığı baz alır
+                                  <span tabIndex={0} className="group relative inline-flex shrink-0 outline-none" aria-label="Ücretlendirme nasıl hesaplanır?">
+                                    <Info className="h-3.5 w-3.5 cursor-help text-[#94A3B8] transition-colors hover:text-[#475569]" />
+                                    <span role="tooltip" className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-64 -translate-x-1/2 rounded-lg bg-slate-800 px-3 py-2 text-[11px] font-normal leading-relaxed text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus:opacity-100">
+                                      Ücretlendirme hesaplanırken tartı ağırlığı ve hacimsel (desi) ağırlık karşılaştırılır; taşıyıcı firmalar, iki değerden yüksek olanı ücretlendirmede baz alır.
+                                    </span>
+                                  </span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                   <div className={cn("rounded-xl p-3 ring-1", !isVolHigher ? "bg-white ring-[#10B981]/30" : "bg-white ring-[#E2E8F0]")}>
