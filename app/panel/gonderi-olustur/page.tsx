@@ -22,6 +22,7 @@ import { NameInput } from "@/components/ui/name-input";
 import { NumericInput } from "@/components/ui/numeric-input";
 import { DecimalInput } from "@/components/ui/decimal-input";
 import { MeasurementInput } from "@/components/ui/measurement-input";
+import { InfoTip } from "@/components/ui/info-tip";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { cn } from "@/lib/cn";
@@ -2687,7 +2688,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                 </button>
               </div>
               <div>
-                <h2 className="text-[22px] font-bold text-slate-900 tracking-tight">Gümrük (Proforma) Beyanı</h2>
+                <h2 className="text-[22px] font-bold text-slate-900 tracking-tight">Gümrük (Proforma) Beyanı <InfoTip placement="bottom" width="w-72" text="Proforma fatura, gönderdiğiniz ürünlerin gümrük beyanı için içerik, adet ve değer dökümüdür. Gümrük vergilendirmesi bu bilgilere göre yapılır; eksik veya yanlış beyan gümrükte gecikmeye yol açabilir." /></h2>
                 <p className="mt-1 text-sm text-slate-500">Her kolinin boyut ve ağırlık bilgilerini girin.</p>
               </div>
 
@@ -2739,7 +2740,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
 
                   {/* IOSS/VAT */}
                   <div className="flex flex-col gap-2">
-                    <label className="text-[12px] font-bold text-slate-700 mt-1">IOSS / VAT Numarası</label>
+                    <label className="text-[12px] font-bold text-slate-700 mt-1">IOSS / VAT Numarası <InfoTip placement="bottom" width="w-72" text="IOSS (Import One-Stop Shop), AB ülkelerine yapılan ve toplam değeri 150 €'yu geçmeyen gönderilerde KDV'nin önceden tahsil edilmesini sağlayan AB sistemidir. IOSS numaranız varsa alıcı gümrükte ekstra KDV ödemez. Zorunlu değildir; AB dışı (ABD, İngiltere vb.) gönderilerde boş bırakılabilir." /></label>
                     <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 focus-within:bg-white focus-within:ring-2 transition-all", fieldErrors.proformaIOSS ? "border-red-500 bg-red-50/30 ring-2 ring-red-100 focus-within:border-red-500 focus-within:ring-red-200" : "border-slate-300 bg-slate-50/50 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
                       <span className="flex h-[20px] w-[20px] items-center justify-center rounded-full border border-slate-200 bg-[#F8FAFC] text-[11px] font-medium text-slate-500 shrink-0 mr-3">#</span>
                       <Input value={draft.proformaIOSS} onChange={e => update("proformaIOSS", e.target.value)} placeholder="Örn: IM0000000123 veya EU372000000" className="flex-1 border-0 ring-0 shadow-none bg-transparent p-0 text-[14px] font-medium text-slate-700 focus:ring-0 placeholder:text-slate-400" />
@@ -2956,7 +2957,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       
                       {/* Menşei */}
                       <div className="sm:col-span-12 lg:col-span-3 flex flex-col gap-2">
-                        <label className="text-[12px] font-bold text-slate-700 mt-1">Menşei <span className="text-red-500 text-sm ml-0.5">*</span></label>
+                        <label className="text-[12px] font-bold text-slate-700 mt-1">Menşei <span className="text-red-500 text-sm ml-0.5">*</span> <InfoTip text="Menşei, ürünün üretildiği (imal edildiği) ülkedir — satın alındığı ülke değil. Gümrük vergi oranları menşe ülkesine göre değişebilir." /></label>
                         <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 focus-within:bg-white focus-within:ring-2 transition-all", fieldErrors[`item_${idx}_origin`] ? "border-red-500 bg-red-50/30 ring-2 ring-red-100 focus-within:border-red-500 focus-within:ring-red-200" : "border-slate-300 bg-slate-50/50 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
                           <Globe className="mr-3 h-4 w-4 text-slate-400 shrink-0" />
                           <SearchableSelect options={[{ label: "Türkiye", value: "TR" }]} value={item.origin} onChange={v => updateProformaItem(item.id, "origin", v)} hideSearchAndSort className="flex-1 border-0 ring-0 shadow-none bg-transparent p-0 text-[14px] font-medium text-slate-700 focus:ring-0" />
@@ -2988,7 +2989,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
 
                       {/* HS Kodu */}
                       <div className="sm:col-span-12 lg:col-span-5 flex flex-col gap-2">
-                        <label className="text-[12px] font-bold text-slate-700 mt-1">HS Kodu (GTİP) <span className="text-red-500 text-sm ml-0.5">*</span></label>
+                        <label className="text-[12px] font-bold text-slate-700 mt-1">HS Kodu (GTİP) <span className="text-red-500 text-sm ml-0.5">*</span> <InfoTip text="GTİP / HS Kodu, ürünün gümrükte sınıflandırıldığı uluslararası tarife kodudur. Doğru kod, vergi ve gümrük işlemlerinin hızlı ilerlemesini sağlar. Ürün adını yazınca sistem uygun kodu otomatik önerir." /></label>
                         <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 focus-within:bg-white focus-within:ring-2 transition-all", (fieldErrors[`item_${idx}_hsCode`] || (item.hsCode.length > 0 && (item.hsCode.length < 3 || item.hsCode.length > 12))) ? "border-red-500 bg-red-50/30 ring-2 ring-red-100 focus-within:border-red-500 focus-within:ring-red-200" : "border-slate-300 bg-slate-50/50 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
                           <span className="mr-3 font-medium text-slate-400 shrink-0">#</span>
                           <div className="flex-1 -ml-3">
