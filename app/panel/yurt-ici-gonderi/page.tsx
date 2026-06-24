@@ -10,6 +10,7 @@ import { Stepper } from "@/components/panel/stepper";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { NumericInput } from "@/components/ui/numeric-input";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { cn } from "@/lib/cn";
 import { useAppState } from "@/hooks/useAppState";
@@ -723,7 +724,7 @@ export default function YurtIciGonderiPage() {
                                 <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Adet</div>
                                 <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                   <span className="pl-2.5 text-[#94A3B8]"><Package className="h-3.5 w-3.5" /></span>
-                                  <Input inputMode="numeric" value={pkg.packageCount} onChange={e => { const v = e.target.value; if (/^\d*$/.test(v)) updatePkg(pkg.id, "packageCount", v); }} placeholder="1" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <NumericInput value={pkg.packageCount} onChange={v => updatePkg(pkg.id, "packageCount", v)} placeholder="1" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">adet</span>
                                 </div>
                               </div>

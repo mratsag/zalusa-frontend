@@ -16,6 +16,7 @@ import { CitySelect } from "@/components/ui/city-select";
 import { useToast } from "@/components/ui/toast";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { NameInput } from "@/components/ui/name-input";
+import { NumericInput } from "@/components/ui/numeric-input";
 
 // ─── Config ────────────────────────────────────────────────────────────────────
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -433,7 +434,7 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                 </div>
                 <div>
                   <label className={labelCls}>Adet</label>
-                  <input type="number" value={packageCount} onChange={e => setPackageCount(e.target.value)} placeholder="1" className={inputCls} />
+                  <NumericInput value={packageCount} onChange={setPackageCount} placeholder="1" className={inputCls} />
                 </div>
 
                 {/* Desi bilgisi */}

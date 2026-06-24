@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { NameInput } from "@/components/ui/name-input";
+import { NumericInput } from "@/components/ui/numeric-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { cn } from "@/lib/cn";
@@ -1809,7 +1810,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                 <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Adet</div>
                                 <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                   <span className="pl-2.5 text-[#94A3B8]"><Package className="h-3.5 w-3.5" /></span>
-                                  <Input inputMode="numeric" value={pkg.packageCount} onChange={e => { const v = e.target.value; if (/^\d*$/.test(v)) updatePackageItem(pkg.id, "packageCount", v); }} placeholder="1" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <NumericInput value={pkg.packageCount} onChange={v => updatePackageItem(pkg.id, "packageCount", v)} placeholder="1" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">adet</span>
                                 </div>
                               </div>
@@ -2973,7 +2974,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       <div className="sm:col-span-12 lg:col-span-2 flex flex-col gap-2">
                          <label className="text-[12px] font-bold text-slate-700 mt-1">Miktar <span className="text-red-500 text-sm ml-0.5">*</span></label>
                          <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 focus-within:bg-white focus-within:ring-2 transition-all justify-between", fieldErrors[`item_${idx}_quantity`] ? "border-red-500 bg-red-50/30 ring-2 ring-red-100 focus-within:border-red-500 focus-within:ring-red-200" : "border-slate-300 bg-slate-50/50 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
-                          <Input inputMode="numeric" value={item.quantity} onChange={e => updateProformaItem(item.id, "quantity", e.target.value)} placeholder="4" className="w-[40px] border-0 ring-0 shadow-none bg-transparent p-0 text-[15px] font-semibold text-slate-700 focus:ring-0" />
+                          <NumericInput value={item.quantity} onChange={v => updateProformaItem(item.id, "quantity", v)} placeholder="4" className="w-[40px] border-0 ring-0 shadow-none bg-transparent p-0 text-[15px] font-semibold text-slate-700 focus:ring-0" />
                           <div className="flex flex-col gap-[2px] border-l border-slate-100 pl-2">
                             <button type="button" onClick={() => updateProformaItem(item.id, "quantity", String(toNumber(item.quantity) + 1))} className="flex h-[18px] w-[24px] items-center justify-center rounded-[6px] bg-[#F1F5F9] hover:bg-[#E2E8F0] text-slate-500 transition-colors"><ChevronUp className="h-3 w-3" /></button>
                             <button type="button" onClick={() => updateProformaItem(item.id, "quantity", String(Math.max(1, toNumber(item.quantity) - 1)))} className="flex h-[18px] w-[24px] items-center justify-center rounded-[6px] bg-[#F1F5F9] hover:bg-[#E2E8F0] text-slate-500 transition-colors"><ChevronDown className="h-3 w-3" /></button>
