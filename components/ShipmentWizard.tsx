@@ -17,6 +17,7 @@ import { useToast } from "@/components/ui/toast";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { NameInput } from "@/components/ui/name-input";
 import { NumericInput } from "@/components/ui/numeric-input";
+import { MeasurementInput } from "@/components/ui/measurement-input";
 
 // ─── Config ────────────────────────────────────────────────────────────────────
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -417,19 +418,19 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className={labelCls}>En (cm)</label>
-                    <input type="number" value={widthCm} onChange={e => setWidthCm(e.target.value)} placeholder="30" className={inputCls} />
+                    <MeasurementInput value={widthCm} onChange={setWidthCm} placeholder="30" className={inputCls} />
                   </div>
                   <div>
                     <label className={labelCls}>Boy (cm)</label>
-                    <input type="number" value={lengthCm} onChange={e => setLengthCm(e.target.value)} placeholder="20" className={inputCls} />
+                    <MeasurementInput value={lengthCm} onChange={setLengthCm} placeholder="20" className={inputCls} />
                   </div>
                   <div>
                     <label className={labelCls}>Yükseklik (cm)</label>
-                    <input type="number" value={heightCm} onChange={e => setHeightCm(e.target.value)} placeholder="15" className={inputCls} />
+                    <MeasurementInput value={heightCm} onChange={setHeightCm} placeholder="15" className={inputCls} />
                   </div>
                   <div>
                     <label className={labelCls}>Ağırlık (kg)</label>
-                    <input type="number" value={weightKg} onChange={e => setWeightKg(e.target.value)} placeholder="2.5" className={inputCls} />
+                    <MeasurementInput value={weightKg} onChange={setWeightKg} placeholder="2.5" className={inputCls} />
                   </div>
                 </div>
                 <div>

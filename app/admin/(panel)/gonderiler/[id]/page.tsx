@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { NumericInput } from "@/components/ui/numeric-input";
 import { DecimalInput } from "@/components/ui/decimal-input";
+import { MeasurementInput } from "@/components/ui/measurement-input";
 import { HSCodeCombobox } from "@/components/HSCodeCombobox";
 import { cn } from "@/lib/cn";
 import { Stepper } from "@/components/panel/stepper";
@@ -758,7 +759,7 @@ export default function ShipmentDetailPage() {
                                     <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Genişlik</div>
                                     <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                       <span className="pl-2.5 text-[#94A3B8]"><Box className="h-3.5 w-3.5" /></span>
-                                      <input inputMode="decimal" value={pkg.widthCm} onChange={e => setPackageItems(prev => prev.map(p => p.id === pkg.id ? {...p, widthCm: e.target.value} : p))} placeholder="0" className="flex-1 h-10 text-[13px] font-semibold border-0 ring-0 bg-transparent px-2 outline-none placeholder:text-[#CBD5E1]" />
+                                      <MeasurementInput value={pkg.widthCm} onChange={v => setPackageItems(prev => prev.map(p => p.id === pkg.id ? {...p, widthCm: v} : p))} placeholder="0" className="flex-1 h-10 text-[13px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 bg-transparent px-2 outline-none placeholder:text-[#CBD5E1]" />
                                       <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                     </div>
                                   </div>
@@ -766,7 +767,7 @@ export default function ShipmentDetailPage() {
                                     <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Uzunluk</div>
                                     <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                       <span className="pl-2.5 text-[#94A3B8]"><Box className="h-3.5 w-3.5 rotate-90" /></span>
-                                      <input inputMode="decimal" value={pkg.lengthCm} onChange={e => setPackageItems(prev => prev.map(p => p.id === pkg.id ? {...p, lengthCm: e.target.value} : p))} placeholder="0" className="flex-1 h-10 text-[13px] font-semibold border-0 ring-0 bg-transparent px-2 outline-none placeholder:text-[#CBD5E1]" />
+                                      <MeasurementInput value={pkg.lengthCm} onChange={v => setPackageItems(prev => prev.map(p => p.id === pkg.id ? {...p, lengthCm: v} : p))} placeholder="0" className="flex-1 h-10 text-[13px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 bg-transparent px-2 outline-none placeholder:text-[#CBD5E1]" />
                                       <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                     </div>
                                   </div>
@@ -774,7 +775,7 @@ export default function ShipmentDetailPage() {
                                     <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Yükseklik</div>
                                     <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                       <span className="pl-2.5 text-[#94A3B8]"><Box className="h-3.5 w-3.5" /></span>
-                                      <input inputMode="decimal" value={pkg.heightCm} onChange={e => setPackageItems(prev => prev.map(p => p.id === pkg.id ? {...p, heightCm: e.target.value} : p))} placeholder="0" className="flex-1 h-10 text-[13px] font-semibold border-0 ring-0 bg-transparent px-2 outline-none placeholder:text-[#CBD5E1]" />
+                                      <MeasurementInput value={pkg.heightCm} onChange={v => setPackageItems(prev => prev.map(p => p.id === pkg.id ? {...p, heightCm: v} : p))} placeholder="0" className="flex-1 h-10 text-[13px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 bg-transparent px-2 outline-none placeholder:text-[#CBD5E1]" />
                                       <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                     </div>
                                   </div>
@@ -784,7 +785,7 @@ export default function ShipmentDetailPage() {
                                     <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Ağırlık</div>
                                     <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                       <span className="pl-2.5 text-[#94A3B8]"><Package className="h-3.5 w-3.5" /></span>
-                                      <input inputMode="decimal" value={pkg.weightKg} onChange={e => setPackageItems(prev => prev.map(p => p.id === pkg.id ? {...p, weightKg: e.target.value} : p))} placeholder="0" className="flex-1 h-10 text-[13px] font-semibold border-0 ring-0 bg-transparent px-2 outline-none placeholder:text-[#CBD5E1]" />
+                                      <MeasurementInput value={pkg.weightKg} onChange={v => setPackageItems(prev => prev.map(p => p.id === pkg.id ? {...p, weightKg: v} : p))} placeholder="0" className="flex-1 h-10 text-[13px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 bg-transparent px-2 outline-none placeholder:text-[#CBD5E1]" />
                                       <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">kg</span>
                                     </div>
                                   </div>

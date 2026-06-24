@@ -21,6 +21,7 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { NameInput } from "@/components/ui/name-input";
 import { NumericInput } from "@/components/ui/numeric-input";
 import { DecimalInput } from "@/components/ui/decimal-input";
+import { MeasurementInput } from "@/components/ui/measurement-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { cn } from "@/lib/cn";
@@ -1776,7 +1777,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                 <div className={cn("mb-1.5 text-[11px] font-semibold", fieldErrors[`pkg_${idx}_widthCm`] ? "text-red-500" : "text-[#64748B]")}>Genişlik {fieldErrors[`pkg_${idx}_widthCm`] && <span className="text-red-500">*</span>}</div>
                                 <div className={cn("flex items-center rounded-lg ring-1 bg-[#F8FAFC] overflow-hidden transition-colors", fieldErrors[`pkg_${idx}_widthCm`] ? "ring-2 ring-red-500 bg-red-50/30" : "ring-[#E2E8F0] focus-within:ring-[#3B82F6]")}>
                                   <span className="pl-2.5 text-[#94A3B8]"><Ruler className="h-3.5 w-3.5" /></span>
-                                  <Input inputMode="decimal" maxLength={7} value={pkg.widthCm} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "widthCm", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <MeasurementInput value={pkg.widthCm} onChange={v => updatePackageItem(pkg.id, "widthCm", v)} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                 </div>
                               </div>
@@ -1784,7 +1785,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                 <div className={cn("mb-1.5 text-[11px] font-semibold", fieldErrors[`pkg_${idx}_lengthCm`] ? "text-red-500" : "text-[#64748B]")}>Uzunluk {fieldErrors[`pkg_${idx}_lengthCm`] && <span className="text-red-500">*</span>}</div>
                                 <div className={cn("flex items-center rounded-lg ring-1 bg-[#F8FAFC] overflow-hidden transition-colors", fieldErrors[`pkg_${idx}_lengthCm`] ? "ring-2 ring-red-500 bg-red-50/30" : "ring-[#E2E8F0] focus-within:ring-[#3B82F6]")}>
                                   <span className="pl-2.5 text-[#94A3B8]"><Ruler className="h-3.5 w-3.5 rotate-90" /></span>
-                                  <Input inputMode="decimal" maxLength={7} value={pkg.lengthCm} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "lengthCm", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <MeasurementInput value={pkg.lengthCm} onChange={v => updatePackageItem(pkg.id, "lengthCm", v)} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                 </div>
                               </div>
@@ -1792,7 +1793,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                 <div className={cn("mb-1.5 text-[11px] font-semibold", fieldErrors[`pkg_${idx}_heightCm`] ? "text-red-500" : "text-[#64748B]")}>Yükseklik {fieldErrors[`pkg_${idx}_heightCm`] && <span className="text-red-500">*</span>}</div>
                                 <div className={cn("flex items-center rounded-lg ring-1 bg-[#F8FAFC] overflow-hidden transition-colors", fieldErrors[`pkg_${idx}_heightCm`] ? "ring-2 ring-red-500 bg-red-50/30" : "ring-[#E2E8F0] focus-within:ring-[#3B82F6]")}>
                                   <span className="pl-2.5 text-[#94A3B8]"><Ruler className="h-3.5 w-3.5" /></span>
-                                  <Input inputMode="decimal" maxLength={7} value={pkg.heightCm} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "heightCm", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <MeasurementInput value={pkg.heightCm} onChange={v => updatePackageItem(pkg.id, "heightCm", v)} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                 </div>
                               </div>
@@ -1803,7 +1804,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                 <div className={cn("mb-1.5 text-[11px] font-semibold", fieldErrors[`pkg_${idx}_weightKg`] ? "text-red-500" : "text-[#64748B]")}>Ağırlık {fieldErrors[`pkg_${idx}_weightKg`] && <span className="text-red-500">*</span>}</div>
                                 <div className={cn("flex items-center rounded-lg ring-1 bg-[#F8FAFC] overflow-hidden transition-colors", fieldErrors[`pkg_${idx}_weightKg`] ? "ring-2 ring-red-500 bg-red-50/30" : "ring-[#E2E8F0] focus-within:ring-[#3B82F6]")}>
                                   <span className="pl-2.5 text-[#94A3B8]"><Package className="h-3.5 w-3.5" /></span>
-                                  <Input inputMode="decimal" maxLength={7} value={pkg.weightKg} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePackageItem(pkg.id, "weightKg", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <MeasurementInput value={pkg.weightKg} onChange={v => updatePackageItem(pkg.id, "weightKg", v)} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">kg</span>
                                 </div>
                               </div>

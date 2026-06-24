@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { NumericInput } from "@/components/ui/numeric-input";
+import { MeasurementInput } from "@/components/ui/measurement-input";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { cn } from "@/lib/cn";
 import { useAppState } from "@/hooks/useAppState";
@@ -689,7 +690,7 @@ export default function YurtIciGonderiPage() {
                                 <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Genişlik</div>
                                 <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                   <span className="pl-2.5 text-[#94A3B8]"><Ruler className="h-3.5 w-3.5" /></span>
-                                  <Input inputMode="decimal" maxLength={7} value={pkg.width} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePkg(pkg.id, "width", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <MeasurementInput value={pkg.width} onChange={v => updatePkg(pkg.id, "width", v)} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                 </div>
                               </div>
@@ -697,7 +698,7 @@ export default function YurtIciGonderiPage() {
                                 <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Uzunluk</div>
                                 <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                   <span className="pl-2.5 text-[#94A3B8]"><Ruler className="h-3.5 w-3.5 rotate-90" /></span>
-                                  <Input inputMode="decimal" maxLength={7} value={pkg.depth} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePkg(pkg.id, "depth", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <MeasurementInput value={pkg.depth} onChange={v => updatePkg(pkg.id, "depth", v)} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                 </div>
                               </div>
@@ -705,7 +706,7 @@ export default function YurtIciGonderiPage() {
                                 <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Yükseklik</div>
                                 <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                   <span className="pl-2.5 text-[#94A3B8]"><Ruler className="h-3.5 w-3.5" /></span>
-                                  <Input inputMode="decimal" maxLength={7} value={pkg.height} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePkg(pkg.id, "height", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <MeasurementInput value={pkg.height} onChange={v => updatePkg(pkg.id, "height", v)} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">cm</span>
                                 </div>
                               </div>
@@ -716,7 +717,7 @@ export default function YurtIciGonderiPage() {
                                 <div className="mb-1.5 text-[11px] font-semibold text-[#64748B]">Ağırlık</div>
                                 <div className="flex items-center rounded-lg ring-1 ring-[#E2E8F0] bg-[#F8FAFC] overflow-hidden focus-within:ring-[#3B82F6] transition-colors">
                                   <span className="pl-2.5 text-[#94A3B8]"><Package className="h-3.5 w-3.5" /></span>
-                                  <Input inputMode="decimal" maxLength={7} value={pkg.weight} onChange={e => { const v = e.target.value.replace(",", "."); if (/^\d*\.?\d*$/.test(v)) updatePkg(pkg.id, "weight", v); }} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
+                                  <MeasurementInput value={pkg.weight} onChange={v => updatePkg(pkg.id, "weight", v)} placeholder="0" className="h-10 text-[14px] font-semibold border-0 ring-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-transparent px-2" />
                                   <span className="pr-2.5 text-[11px] text-[#94A3B8] shrink-0">kg</span>
                                 </div>
                               </div>
