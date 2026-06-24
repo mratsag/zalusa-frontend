@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { NameInput } from "@/components/ui/name-input";
 import { MeasurementInput } from "@/components/ui/measurement-input";
+import { OTPInput, type OTPInputHandle } from "@/components/ui/otp-input";
 import { Textarea } from "@/components/ui/textarea";
 import { ApiProfile, profileService } from "@/lib/services/profileService";
 import { addressService, ApiAddress, ApiMeasurement, measurementService } from "@/lib/services/shipmentService";
@@ -103,7 +104,7 @@ export default function ProfilPage() {
   const [forgotConfirmPw, setForgotConfirmPw] = React.useState("");
   const [showForgotNewPw, setShowForgotNewPw] = React.useState(false);
   const [showForgotConfirmPw, setShowForgotConfirmPw] = React.useState(false);
-  const codeInputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
+  const forgotOtpRef = React.useRef<OTPInputHandle>(null);
 
   // Countries for address forms
   const [apiCountries, setApiCountries] = React.useState<{ value: string; label: React.ReactNode; searchableText: string }[]>([]);
@@ -419,35 +420,11 @@ export default function ProfilPage() {
     try {
       await profileService.forgotPassword(profile.email);
       setForgotStep(2);
-      setTimeout(() => codeInputRefs.current[0]?.focus(), 100);
+      setTimeout(() => forgotOtpRef.current?.focus(), 100);
     } catch (err: any) {
       setForgotError(err.message || "Kod gönderilemedi.");
     } finally {
       setForgotLoading(false);
-    }
-  }
-
-  function handleCodeInput(index: number, value: string) {
-    // Paste desteği: yapıştırılan 6 haneli kodu otomatik dağıt
-    if (value.length > 1) {
-      const digits = value.replace(/[^0-9]/g, "").slice(0, 6).split("");
-      const newCode = [...forgotCode];
-      digits.forEach((d, i) => { if (index + i < 6) newCode[index + i] = d; });
-      setForgotCode(newCode);
-      const nextIdx = Math.min(index + digits.length, 5);
-      codeInputRefs.current[nextIdx]?.focus();
-      return;
-    }
-    const digit = value.replace(/[^0-9]/g, "");
-    const newCode = [...forgotCode];
-    newCode[index] = digit;
-    setForgotCode(newCode);
-    if (digit && index < 5) codeInputRefs.current[index + 1]?.focus();
-  }
-
-  function handleCodeKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Backspace" && !forgotCode[index] && index > 0) {
-      codeInputRefs.current[index - 1]?.focus();
     }
   }
 
@@ -1258,30 +1235,15 @@ export default function ProfilPage() {
                   <div className="text-[14px] font-bold text-slate-700 mb-1">Doğrulama Kodu</div>
                   <div className="text-[13px] text-slate-500"><span className="font-bold text-[#2563EB]">{profile?.email}</span> adresine gönderildi</div>
                 </div>
-                <div className="flex items-center justify-center gap-2.5">
-                  {forgotCode.map((digit, idx) => (
-                    <input
-                      key={idx}
-                      ref={el => { codeInputRefs.current[idx] = el; }}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={6}
-                      value={digit}
-                      onChange={e => handleCodeInput(idx, e.target.value)}
-                      onKeyDown={e => handleCodeKeyDown(idx, e)}
-                      onPaste={e => {
-                        e.preventDefault();
-                        const pasted = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 6);
-                        if (pasted) handleCodeInput(0, pasted);
-                      }}
-                      className={cn(
-                        "h-14 w-12 rounded-[14px] border border-slate-200 bg-slate-50 text-center text-[20px] font-bold transition-all outline-none shadow-inner",
-                        "focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100 focus:bg-white",
-                        digit ? "border-blue-300 bg-blue-50 text-[#2563EB] shadow-none" : "text-slate-900"
-                      )}
-                    />
-                  ))}
-                </div>
+                <OTPInput
+                  ref={forgotOtpRef}
+                  value={forgotCode}
+                  onChange={setForgotCode}
+                  className="flex items-center justify-center gap-2.5"
+                  boxClassName="h-14 w-12 rounded-[14px] border border-slate-200 bg-slate-50 text-center text-[20px] font-bold transition-all outline-none shadow-inner focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100 focus:bg-white"
+                  filledClassName="border-blue-300 bg-blue-50 text-[#2563EB] shadow-none"
+                  emptyClassName="text-slate-900"
+                />
                 <div className="text-center text-[12px] text-slate-400 font-medium">Kod 10 dakika içinde geçerlidir. Kodu yapıştırarak da girebilirsiniz.</div>
                 <button
                   onClick={handleForgotVerifyCode}
