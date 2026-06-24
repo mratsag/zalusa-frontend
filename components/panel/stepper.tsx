@@ -4,7 +4,7 @@ import React from "react";
 import { Check, FileText, Ruler, LayoutGrid, MapPin, FileSpreadsheet, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-const STEP_IMAGES = [
+export const STEP_IMAGES = [
   "/stepper/kargobilgilericon.png",
   "/stepper/paketölçüleri.png",
   "/stepper/fiyatlandırma.png",
@@ -27,11 +27,15 @@ export function Stepper({
   steps,
   current,
   onStepClick,
+  images,
 }: {
   steps: string[];
   current: number; // 0-based
   onStepClick?: (index: number) => void;
+  /** Adım ikonları (steps ile aynı sırada). Verilmezse varsayılan pozisyonel ikonlar kullanılır. */
+  images?: string[];
 }) {
+  const imgs = images ?? STEP_IMAGES;
   return (
     <>
       {/* ── Mobile: icons on top, labels below ── */}
@@ -40,7 +44,7 @@ export function Stepper({
           const done = idx < current;
           const active = idx === current;
           const clickable = done && !!onStepClick;
-          const stepImage = STEP_IMAGES[idx] || STEP_IMAGES[0];
+          const stepImage = imgs[idx] || STEP_IMAGES[0];
           const mobileLabel = MOBILE_LABELS[label] || label.split(" ")[0];
 
           return (
@@ -93,7 +97,7 @@ export function Stepper({
           const done = idx < current;
           const active = idx === current;
           const clickable = done && !!onStepClick;
-          const stepImage = STEP_IMAGES[idx] || STEP_IMAGES[0];
+          const stepImage = imgs[idx] || STEP_IMAGES[0];
 
           return (
             <React.Fragment key={label}>

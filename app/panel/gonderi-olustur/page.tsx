@@ -12,7 +12,7 @@ import {
   FileUp, CheckCircle, File as FileIcon, Pencil
 } from "lucide-react";
 import { HSCodeCombobox } from "@/components/HSCodeCombobox";
-import { Stepper } from "@/components/panel/stepper";
+import { Stepper, STEP_IMAGES } from "@/components/panel/stepper";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -349,6 +349,13 @@ const [showPackageExcel, setShowPackageExcel] = React.useState(false);
     2: { title: "3. Adım Tamam!", desc: "Kargo firması seçildi, sırada adres seçimi." },
     3: { title: "4. Adım Tamam!", desc: "Adresler girildi, sırada gümrük beyanı." },
     4: { title: "5. Adım Tamam!", desc: "Gönderi tamamlandı, harika!" },
+  };
+  // Belge tipinde "Paket Ölçüleri" adımı atlandığı için numara/metin farklı
+  const STEP_TOAST_MESSAGES_BELGE: Record<number, { title: string; desc: string }> = {
+    0: { title: "1. Adım Tamam!", desc: "Kargo bilgileri girildi, sırada fiyatlandırma." },
+    2: { title: "2. Adım Tamam!", desc: "Kargo firması seçildi, sırada adres seçimi." },
+    3: { title: "3. Adım Tamam!", desc: "Adresler girildi, sırada gümrük beyanı." },
+    4: { title: "4. Adım Tamam!", desc: "Gönderi tamamlandı, harika!" },
   };
   function showStepToast(completedStep: number) {
     if (stepToastTimer.current) clearTimeout(stepToastTimer.current);
@@ -1302,10 +1309,10 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
             </div>
             <div className="min-w-0">
               <div className="text-[15px] font-extrabold text-[#1E293B]">
-                {STEP_TOAST_MESSAGES[stepToast.step]?.title}
+                {(draft.shipmentType === "Belge" ? STEP_TOAST_MESSAGES_BELGE : STEP_TOAST_MESSAGES)[stepToast.step]?.title}
               </div>
               <div className="text-[13px] text-[#64748B] mt-0.5">
-                {STEP_TOAST_MESSAGES[stepToast.step]?.desc}
+                {(draft.shipmentType === "Belge" ? STEP_TOAST_MESSAGES_BELGE : STEP_TOAST_MESSAGES)[stepToast.step]?.desc}
               </div>
             </div>
           </div>
@@ -1379,13 +1386,14 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
       </div>
 
       <Stepper
-        steps={[...STEPS]}
-        current={step}
+        steps={draft.shipmentType === "Belge" ? STEPS.filter((_, i) => i !== 1) : [...STEPS]}
+        images={draft.shipmentType === "Belge" ? STEP_IMAGES.filter((_, i) => i !== 1) : undefined}
+        current={draft.shipmentType === "Belge" && step > 1 ? step - 1 : step}
         onStepClick={(idx) => {
-          if (idx < step) {
-            // Belge tipinde step 1'e (Paket Ölçüleri) tıklanmasını engelle
-            if (idx === 1 && draft.shipmentType === "Belge") return;
-            setStep(idx);
+          // Belge'de "Paket Ölçüleri" gizli; görünen index'i gerçek adım index'ine çevir
+          const internalIdx = draft.shipmentType === "Belge" && idx >= 1 ? idx + 1 : idx;
+          if (internalIdx < step) {
+            setStep(internalIdx);
             setDone(false);
             setApiError(null);
           }
