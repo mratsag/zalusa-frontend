@@ -3,6 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { NameInput } from "@/components/ui/name-input";
 import {
   Users,
   Wallet,
@@ -425,20 +426,18 @@ export default function AdminResellersPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1.5 block text-sm font-semibold text-slate-700">Ad *</label>
-                  <input
-                    type="text"
+                  <NameInput
                     value={createForm.firstName}
-                    onChange={(e) => setCreateForm({ ...createForm, firstName: e.target.value })}
+                    onChange={(v) => setCreateForm({ ...createForm, firstName: v })}
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-purple-400 focus:bg-white focus:ring-2 focus:ring-purple-100"
                     disabled={creating}
                   />
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-semibold text-slate-700">Soyad *</label>
-                  <input
-                    type="text"
+                  <NameInput
                     value={createForm.lastName}
-                    onChange={(e) => setCreateForm({ ...createForm, lastName: e.target.value })}
+                    onChange={(v) => setCreateForm({ ...createForm, lastName: v })}
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-purple-400 focus:bg-white focus:ring-2 focus:ring-purple-100"
                     disabled={creating}
                   />

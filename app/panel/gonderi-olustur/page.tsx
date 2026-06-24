@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { NameInput } from "@/components/ui/name-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { cn } from "@/lib/cn";
@@ -2223,7 +2224,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                     <button type="button" onClick={() => setEditingSenderAddr(null)} className="text-[12px] font-medium text-[#94A3B8] hover:text-[#475569]">İptal</button>
                                   </div>
                                   <div className="grid gap-3 sm:grid-cols-2">
-                                    <Field label="Ad Soyad" icon={User}><Input value={editingSenderAddr.name} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); setEditingSenderAddr({ ...editingSenderAddr, name: v }); }} placeholder="Ad soyad" maxLength={60} /></Field>
+                                    <Field label="Ad Soyad" icon={User}><NameInput value={editingSenderAddr.name} onChange={v => setEditingSenderAddr({ ...editingSenderAddr, name: v })} placeholder="Ad soyad" maxLength={60} /></Field>
                                     <Field label="Firma Adı" icon={Building}><Input value={editingSenderAddr.company || ""} onChange={e => setEditingSenderAddr({ ...editingSenderAddr, company: e.target.value })} placeholder="Firma (opsiyonel)" /></Field>
                                     <Field label="Telefon" icon={Phone}><PhoneInput bare value={editingSenderAddr.phone || ""} onChange={v => setEditingSenderAddr({ ...editingSenderAddr, phone: v })} defaultDialCode="+90" placeholder="5XX XXX XX XX" /></Field>
                                     <Field label="Şehir" icon={MapPin}><Input value={editingSenderAddr.city} onChange={e => setEditingSenderAddr({ ...editingSenderAddr, city: e.target.value })} placeholder="Şehir" /></Field>
@@ -2300,7 +2301,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                           <button type="button" onClick={() => setShowNewSenderForm(false)} className="text-[12px] font-medium text-[#94A3B8] hover:text-[#475569]">İptal</button>
                         </div>
                         <div className="grid gap-3 sm:grid-cols-2">
-                          <Field label="Ad Soyad" icon={User}><Input value={draft.senderName} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); if (v.length <= 60) update("senderName", v); }} placeholder="Gönderici adı soyadı" maxLength={60} /></Field>
+                          <Field label="Ad Soyad" icon={User}><NameInput value={draft.senderName} onChange={v => update("senderName", v)} placeholder="Gönderici adı soyadı" maxLength={60} /></Field>
                           <Field label="Firma Adı" icon={Building}><Input value={draft.senderCompany} onChange={e => update("senderCompany", e.target.value)} placeholder="Firma adı (opsiyonel)" /></Field>
                           <Field label="Telefon" icon={Phone}><PhoneInput bare value={draft.senderPhone} onChange={raw => update("senderPhone", raw)} defaultDialCode="+90" placeholder="5XX XXX XX XX" /></Field>
                           <Field label="Şehir" icon={MapPin}>
@@ -2408,7 +2409,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                                     <button type="button" onClick={() => setEditingReceiverAddr(null)} className="text-[12px] font-medium text-[#94A3B8] hover:text-[#475569] transition-colors">İptal</button>
                                   </div>
                                   <div className="grid gap-3 sm:grid-cols-2">
-                                    <Field label="Ad Soyad" icon={User}><Input value={editingReceiverAddr.name} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); setEditingReceiverAddr({ ...editingReceiverAddr, name: v }); }} placeholder="Ad soyad" maxLength={60} /></Field>
+                                    <Field label="Ad Soyad" icon={User}><NameInput value={editingReceiverAddr.name} onChange={v => setEditingReceiverAddr({ ...editingReceiverAddr, name: v })} placeholder="Ad soyad" maxLength={60} /></Field>
                                     <Field label="Firma Adı" icon={Building}><Input value={editingReceiverAddr.company || ""} onChange={e => setEditingReceiverAddr({ ...editingReceiverAddr, company: e.target.value })} placeholder="Firma (opsiyonel)" /></Field>
                                     <Field label="Telefon" icon={Phone}><PhoneInput bare value={editingReceiverAddr.phone || ""} onChange={v => setEditingReceiverAddr({ ...editingReceiverAddr, phone: v })} defaultDialCode="+90" placeholder="Telefon numarası" /></Field>
                                     <Field label="Şehir" icon={MapPin}><Input value={editingReceiverAddr.city} onChange={e => setEditingReceiverAddr({ ...editingReceiverAddr, city: e.target.value })} placeholder="Şehir" /></Field>
@@ -2504,7 +2505,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                           <button type="button" onClick={() => setShowNewReceiverForm(false)} className="text-[12px] font-medium text-[#94A3B8] hover:text-[#475569]">İptal</button>
                         </div>
                         <div className="grid gap-3 sm:grid-cols-3">
-                          <Field label="Ad Soyad" icon={User} error={fieldErrors.receiverName}><Input value={draft.receiverName} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); if (v.length <= 60) update("receiverName", v); }} placeholder="Alıcı adı soyadı" maxLength={60} /></Field>
+                          <Field label="Ad Soyad" icon={User} error={fieldErrors.receiverName}><NameInput value={draft.receiverName} onChange={v => update("receiverName", v)} placeholder="Alıcı adı soyadı" maxLength={60} /></Field>
                           <Field label="Firma Adı" icon={Building}><Input value={draft.receiverCompany} onChange={e => update("receiverCompany", e.target.value)} placeholder="Firma adı (opsiyonel)" /></Field>
                           <Field label="Telefon" icon={Phone} error={fieldErrors.receiverPhone}>
                             <PhoneInput

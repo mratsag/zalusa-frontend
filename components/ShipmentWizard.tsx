@@ -15,6 +15,7 @@ import {
 import { CitySelect } from "@/components/ui/city-select";
 import { useToast } from "@/components/ui/toast";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { NameInput } from "@/components/ui/name-input";
 
 // ─── Config ────────────────────────────────────────────────────────────────────
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -599,8 +600,7 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                   {showNewSender && (
                     <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 space-y-3">
                       <p className="text-[13px] font-bold text-slate-800 mb-2">Yeni Gönderici Adresi</p>
-                      <input type="text" value={newSenderName} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); if (v.length <= 60) setNewSenderName(v); }}
-                        placeholder="Ad Soyad *" maxLength={60} className={inputCls} />
+                      <NameInput value={newSenderName} onChange={setNewSenderName} placeholder="Ad Soyad *" maxLength={60} className={inputCls} />
                       <input type="text" value={newSenderCompany} onChange={e => setNewSenderCompany(e.target.value)}
                         placeholder="Firma adı *" className={inputCls} />
                       <PhoneInput defaultDialCode="+90" value={newSenderPhone} onChange={setNewSenderPhone} placeholder="Telefon *" />
@@ -890,8 +890,7 @@ export default function ShipmentWizard({ onClose, onComplete }: ShipmentWizardPr
                           </button>
                         )}
                       </div>
-                      <input type="text" value={receiverName} onChange={e => { const v = e.target.value.replace(/[0-9]/g, ""); if (v.length <= 60) setReceiverName(v); }}
-                        placeholder="Alıcı adı soyadı *" maxLength={60} className={inputCls} />
+                      <NameInput value={receiverName} onChange={setReceiverName} placeholder="Alıcı adı soyadı *" maxLength={60} className={inputCls} />
                       <input type="text" value={receiverCompany} onChange={e => setReceiverCompany(e.target.value)}
                         placeholder="Firma adı (opsiyonel)" className={inputCls} />
                       <PhoneInput defaultDialCode="+90" value={receiverPhone} onChange={setReceiverPhone} placeholder="Telefon *" />

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { NameInput } from "@/components/ui/name-input";
 import { Textarea } from "@/components/ui/textarea";
 import { ApiProfile, profileService } from "@/lib/services/profileService";
 import { addressService, ApiAddress, ApiMeasurement, measurementService } from "@/lib/services/shipmentService";
@@ -604,13 +605,13 @@ export default function ProfilPage() {
                   <div className="mb-2 inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700">
                     <User className="h-4 w-4 text-slate-400" /> Ad
                   </div>
-                  <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
+                  <NameInput value={firstName} onChange={setFirstName} className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
                 </label>
                 <label className="block">
                   <div className="mb-2 inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700">
                     <User className="h-4 w-4 text-slate-400" /> Soyad
                   </div>
-                  <Input value={lastName} onChange={(e) => setLastName(e.target.value)} className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
+                  <NameInput value={lastName} onChange={setLastName} className="h-[44px] rounded-[12px] border-slate-200 bg-white font-medium text-[14px]" />
                 </label>
                 <label className="block">
                   <div className="mb-2 inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700">

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { adminService, type AdminUser } from "@/lib/services/adminService";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { NameInput } from "@/components/ui/name-input";
 
 // ── Toast notification ──────────────────────────────────────────────────────
 
@@ -262,11 +263,11 @@ export default function AdminManagementPage() {
           <div className="grid gap-4 grid-cols-2">
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1">Ad</label>
-              <input className={inputCls} value={createForm.firstName} onChange={(e) => setCreateForm((p) => ({ ...p, firstName: e.target.value }))} required />
+              <NameInput className={inputCls} value={createForm.firstName} onChange={(v) => setCreateForm((p) => ({ ...p, firstName: v }))} required />
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1">Soyad</label>
-              <input className={inputCls} value={createForm.lastName} onChange={(e) => setCreateForm((p) => ({ ...p, lastName: e.target.value }))} required />
+              <NameInput className={inputCls} value={createForm.lastName} onChange={(v) => setCreateForm((p) => ({ ...p, lastName: v }))} required />
             </div>
           </div>
           <div>
