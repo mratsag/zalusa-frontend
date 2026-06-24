@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import {
   DollarSign,
   Plus,
@@ -366,7 +367,7 @@ function MarginFormFields({ form, setForm, carriers }: {
         </div>
         <div>
           <label className="block text-xs font-medium text-slate-500 mb-1">Değer <span className="text-red-400">*</span></label>
-          <input className={inputCls} type="number" step="0.01" min="0" placeholder={form.marginType === "percentage" ? "Örn. 7" : "Örn. 80"} value={form.marginValue} onChange={(e) => setForm((p: any) => ({ ...p, marginValue: e.target.value }))} required />
+          <DecimalInput className={inputCls} placeholder={form.marginType === "percentage" ? "Örn. 7" : "Örn. 80"} value={form.marginValue} onChange={(v) => setForm((p: any) => ({ ...p, marginValue: v }))} required />
         </div>
       </div>
       <div>

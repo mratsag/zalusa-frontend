@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import {
   ArrowLeft,
   Crown,
@@ -573,7 +574,7 @@ export default function ResellerDetailPage() {
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-semibold text-slate-700">İndirim (%) *</label>
-                <input type="number" step="0.01" min="0.01" max="100" value={couponForm.discountPct} onChange={(e) => setCouponForm({ ...couponForm, discountPct: e.target.value })} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-purple-400 focus:bg-white focus:ring-2 focus:ring-purple-100" disabled={creatingCoupon} />
+                <DecimalInput value={couponForm.discountPct} onChange={(v) => setCouponForm({ ...couponForm, discountPct: v })} maxIntDigits={3} placeholder="Örn. 10" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-purple-400 focus:bg-white focus:ring-2 focus:ring-purple-100" disabled={creatingCoupon} />
                 <p className="mt-1 text-xs text-slate-400">Müşterilere uygulanacak indirim yüzdesi</p>
               </div>
               <div className="grid grid-cols-2 gap-3">

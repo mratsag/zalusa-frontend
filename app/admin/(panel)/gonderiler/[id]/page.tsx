@@ -15,6 +15,7 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { NumericInput } from "@/components/ui/numeric-input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { HSCodeCombobox } from "@/components/HSCodeCombobox";
 import { cn } from "@/lib/cn";
 import { Stepper } from "@/components/panel/stepper";
@@ -1053,7 +1054,7 @@ export default function ShipmentDetailPage() {
                           <div className="sm:col-span-12 lg:col-span-2 flex flex-col gap-2">
                              <label className="text-[12px] font-bold text-slate-700 mt-1">Birim Fiyat ({getCurrencySymbol(proformaCurrency)}) <span className="text-red-500 text-sm ml-0.5">*</span></label>
                              <div className={cn("flex items-center h-[52px] rounded-2xl border-[1.5px] px-4 focus-within:bg-white focus-within:ring-2 transition-all justify-between border-slate-300 bg-slate-50/50 focus-within:border-brand-500 focus-within:ring-brand-500/20")}>
-                              <Input inputMode="decimal" value={item.unitPrice} onChange={e => { const v = e.target.value; if (v === "" || /^\d{0,7}(\.\d{0,2})?$/.test(v)) updateProformaItem(item.id, "unitPrice", v); }} placeholder="0.00" maxLength={10} className="w-[60px] border-0 ring-0 shadow-none bg-transparent p-0 text-[15px] font-semibold text-slate-700 focus:ring-0" />
+                              <DecimalInput value={item.unitPrice} onChange={v => updateProformaItem(item.id, "unitPrice", v)} placeholder="0.00" className="w-[60px] border-0 ring-0 shadow-none bg-transparent p-0 text-[15px] font-semibold text-slate-700 focus:ring-0" />
                               <div className="flex flex-col gap-[2px] border-l border-slate-100 pl-2">
                                 <button type="button" onClick={() => updateProformaItem(item.id, "unitPrice", String(toNumber(item.unitPrice) + 1))} className="flex h-[18px] w-[24px] items-center justify-center rounded-[6px] bg-[#F1F5F9] hover:bg-[#E2E8F0] text-slate-500 transition-colors"><ChevronUp className="h-3 w-3" /></button>
                                 <button type="button" onClick={() => updateProformaItem(item.id, "unitPrice", String(Math.max(0, toNumber(item.unitPrice) - 1)))} className="flex h-[18px] w-[24px] items-center justify-center rounded-[6px] bg-[#F1F5F9] hover:bg-[#E2E8F0] text-slate-500 transition-colors"><ChevronDown className="h-3 w-3" /></button>
