@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Upload, FileSpreadsheet, AlertCircle, X, Check } from "lucide-react";
+import { Upload, FileSpreadsheet, AlertCircle, X, Check, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 
 export interface ParsedProformaRow {
@@ -19,12 +19,12 @@ interface ProformaExcelUploaderProps {
 }
 
 const EXPECTED_COLUMNS = [
-  { header: "productDescription", label: "Ürün Açıklaması", required: true },
-  { header: "hsCode", label: "HS Kodu (GTİP)", required: false },
-  { header: "sku", label: "SKU", required: false },
-  { header: "quantity", label: "Miktar", required: true },
-  { header: "unitPrice", label: "Birim Fiyat", required: true },
-  { header: "origin", label: "Menşei (ülke kodu)", required: false },
+  { header: "productDescription", label: "Ürün Açıklaması", required: true, aliases: ["ürün adı", "urun adi", "ürün", "urun", "açıklama", "aciklama", "product", "description"] },
+  { header: "hsCode", label: "HS Kodu (GTİP)", required: false, aliases: ["hs kodu", "hskodu", "gtip", "gtip kodu", "hs code", "hs"] },
+  { header: "sku", label: "SKU", required: false, aliases: ["stok kodu", "stok", "barkod"] },
+  { header: "quantity", label: "Miktar", required: true, aliases: ["adet", "miktar", "qty", "quantity"] },
+  { header: "unitPrice", label: "Birim Fiyat", required: true, aliases: ["fiyat", "birim fiyat", "price", "unit price", "tutar"] },
+  { header: "origin", label: "Menşei (ülke kodu)", required: false, aliases: ["menşei", "mensei", "menşe", "ülke", "ulke", "country", "origin"] },
 ];
 
 export default function ProformaExcelUploader({ onImport, onClose }: ProformaExcelUploaderProps) {
@@ -56,9 +56,10 @@ export default function ProformaExcelUploader({ onImport, onClose }: ProformaExc
         const headerMap = new Map<string, string>();
 
         for (const col of EXPECTED_COLUMNS) {
-          const found = excelHeaders.find(
-            (h) => h.trim().toLowerCase() === col.header.toLowerCase()
-          );
+          const found = excelHeaders.find((h) => {
+            const hl = h.trim().toLowerCase();
+            return hl === col.header.toLowerCase() || hl === col.label.toLowerCase() || (col.aliases ?? []).includes(hl);
+          });
           if (found) headerMap.set(col.header, found);
         }
 
@@ -108,10 +109,40 @@ export default function ProformaExcelUploader({ onImport, onClose }: ProformaExc
     onImport(rows);
   }
 
+  function downloadTemplate() {
+    const sample = [
+      { "Ürün Açıklaması": "Pamuklu Tişört", "HS Kodu (GTİP)": "6109.10.00", "SKU": "TS-001", "Miktar": 2, "Birim Fiyat": 12.5, "Menşei (ülke kodu)": "TR" },
+      { "Ürün Açıklaması": "Seramik Kupa", "HS Kodu (GTİP)": "6912.00.00", "SKU": "KP-014", "Miktar": 6, "Birim Fiyat": 4.9, "Menşei (ülke kodu)": "TR" },
+    ];
+    const ws = XLSX.utils.json_to_sheet(sample, { header: EXPECTED_COLUMNS.map((c) => c.label) });
+    ws["!cols"] = [{ wch: 24 }, { wch: 16 }, { wch: 10 }, { wch: 8 }, { wch: 12 }, { wch: 18 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Ürünler");
+    XLSX.writeFile(wb, "zalusa-urun-sablonu.xlsx");
+  }
+
   return (
     <div className="space-y-4">
       {!parsed ? (
         <>
+          {/* Onboarding + örnek şablon */}
+          <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 px-4 py-3">
+            <div className="flex items-start gap-2.5">
+              <FileSpreadsheet className="h-4 w-4 text-indigo-600 mt-0.5 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-semibold text-slate-800">Excel ile toplu ürün ekleyin</p>
+                <p className="text-[12px] text-slate-500 mt-0.5 leading-relaxed">Ürün adı, miktar ve fiyat alanlarını doldurarak ürünlerinizi tek seferde yükleyebilirsiniz. Aşağıdan örnek şablonu indirip doldurmanız yeterli.</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={downloadTemplate}
+              className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-indigo-700 transition-colors"
+            >
+              <Download className="h-3.5 w-3.5" /> Örnek Excel'i İndir
+            </button>
+          </div>
+
           {/* Upload Area */}
           <div
             onClick={() => fileRef.current?.click()}
@@ -157,13 +188,13 @@ export default function ProformaExcelUploader({ onImport, onClose }: ProformaExc
                       : "bg-white text-slate-600 ring-slate-200"
                   }`}
                 >
-                  {col.header}
+                  {col.label}
                   {col.required && <span className="text-red-400 ml-0.5">*</span>}
                 </span>
               ))}
             </div>
             <p className="text-[11px] text-slate-400 mt-2">
-              * işaretli kolonlar zorunludur. origin varsayılan olarak "TR" alınır.
+              * işaretli kolonlar zorunludur. Türkçe ya da İngilizce başlık kullanabilirsiniz. Menşei boş bırakılırsa "TR" (Türkiye) alınır.
             </p>
           </div>
         </>

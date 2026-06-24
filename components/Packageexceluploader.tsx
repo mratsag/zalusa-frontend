@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Upload, FileSpreadsheet, AlertCircle, X, Check } from "lucide-react";
+import { Upload, FileSpreadsheet, AlertCircle, X, Check, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 
 export interface ParsedPackageRow {
@@ -18,11 +18,11 @@ interface PackageExcelUploaderProps {
 }
 
 const EXPECTED_COLUMNS = [
-  { header: "widthCm", label: "En (cm)", required: true },
-  { header: "lengthCm", label: "Boy (cm)", required: true },
-  { header: "heightCm", label: "Yükseklik (cm)", required: true },
-  { header: "weightKg", label: "Ağırlık (kg)", required: true },
-  { header: "packageCount", label: "Koli Adedi", required: false },
+  { header: "widthCm", label: "En (cm)", required: true, aliases: ["en", "en (cm)", "genişlik", "genislik", "width"] },
+  { header: "lengthCm", label: "Boy (cm)", required: true, aliases: ["boy", "boy (cm)", "uzunluk", "length"] },
+  { header: "heightCm", label: "Yükseklik (cm)", required: true, aliases: ["yükseklik", "yukseklik", "yük", "yuk", "height"] },
+  { header: "weightKg", label: "Ağırlık (kg)", required: true, aliases: ["ağırlık", "agirlik", "kg", "weight"] },
+  { header: "packageCount", label: "Koli Adedi", required: false, aliases: ["koli adedi", "koli", "adet", "miktar", "count"] },
 ];
 
 export default function PackageExcelUploader({ onImport, onClose }: PackageExcelUploaderProps) {
@@ -54,9 +54,10 @@ export default function PackageExcelUploader({ onImport, onClose }: PackageExcel
         const headerMap = new Map<string, string>();
 
         for (const col of EXPECTED_COLUMNS) {
-          const found = excelHeaders.find(
-            (h) => h.trim().toLowerCase() === col.header.toLowerCase()
-          );
+          const found = excelHeaders.find((h) => {
+            const hl = h.trim().toLowerCase();
+            return hl === col.header.toLowerCase() || hl === col.label.toLowerCase() || (col.aliases ?? []).includes(hl);
+          });
           if (found) headerMap.set(col.header, found);
         }
 
@@ -109,6 +110,18 @@ export default function PackageExcelUploader({ onImport, onClose }: PackageExcel
     setRows((prev) => prev.filter((_, i) => i !== idx));
   }
 
+  function downloadTemplate() {
+    const sample = [
+      { "En (cm)": 30, "Boy (cm)": 20, "Yükseklik (cm)": 15, "Ağırlık (kg)": 2.5, "Koli Adedi": 1 },
+      { "En (cm)": 40, "Boy (cm)": 30, "Yükseklik (cm)": 25, "Ağırlık (kg)": 5, "Koli Adedi": 2 },
+    ];
+    const ws = XLSX.utils.json_to_sheet(sample, { header: EXPECTED_COLUMNS.map((c) => c.label) });
+    ws["!cols"] = [{ wch: 10 }, { wch: 10 }, { wch: 14 }, { wch: 12 }, { wch: 12 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Koliler");
+    XLSX.writeFile(wb, "zalusa-koli-sablonu.xlsx");
+  }
+
   // Özet hesaplamaları
   const totalPackages = rows.reduce((sum, r) => sum + Math.max(1, Math.round(Number(r.packageCount) || 1)), 0);
   const totalWeight = rows.reduce((sum, r) => sum + (Number(r.weightKg) || 0) * Math.max(1, Math.round(Number(r.packageCount) || 1)), 0);
@@ -122,6 +135,24 @@ export default function PackageExcelUploader({ onImport, onClose }: PackageExcel
     <div className="space-y-4">
       {!parsed ? (
         <>
+          {/* Onboarding + örnek şablon */}
+          <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 px-4 py-3">
+            <div className="flex items-start gap-2.5">
+              <FileSpreadsheet className="h-4 w-4 text-indigo-600 mt-0.5 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-semibold text-slate-800">Excel ile toplu koli ekleyin</p>
+                <p className="text-[12px] text-slate-500 mt-0.5 leading-relaxed">En, boy, yükseklik ve ağırlık bilgilerini doldurarak kolilerinizi tek seferde yükleyebilirsiniz. Aşağıdan örnek şablonu indirip doldurmanız yeterli.</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={downloadTemplate}
+              className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-indigo-700 transition-colors"
+            >
+              <Download className="h-3.5 w-3.5" /> Örnek Excel'i İndir
+            </button>
+          </div>
+
           {/* Upload Area */}
           <div
             onClick={() => fileRef.current?.click()}
@@ -167,13 +198,13 @@ export default function PackageExcelUploader({ onImport, onClose }: PackageExcel
                       : "bg-white text-slate-600 ring-slate-200"
                   }`}
                 >
-                  {col.header}
+                  {col.label}
                   {col.required && <span className="text-red-400 ml-0.5">*</span>}
                 </span>
               ))}
             </div>
             <p className="text-[11px] text-slate-400 mt-2">
-              * işaretli kolonlar zorunludur. packageCount belirtilmezse 1 olarak alınır.
+              * işaretli kolonlar zorunludur. Türkçe ya da İngilizce başlık kullanabilirsiniz. Koli Adedi belirtilmezse 1 alınır.
             </p>
           </div>
         </>
