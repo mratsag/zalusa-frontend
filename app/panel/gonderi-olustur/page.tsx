@@ -6,7 +6,7 @@ import {
   FileText, MapPin, Package, Ruler, BoxSelect, Star, Zap, BadgeDollarSign,
   Clock, Check, Info, Plane, Plus, Trash2, Search, User, Phone,
   MapPinned, Building, CheckCircle2, Tag, Receipt, ArrowRight,
-  Save, Printer, PlusCircle, Sparkles, Loader2, RotateCcw, X,
+  Save, Printer, Loader2, RotateCcw, X,
   FileSpreadsheet, ArrowLeft, AlertTriangle, Box, Globe, ChevronUp,
   ChevronDown, Barcode, UploadCloud, Calendar, Scale, PlusSquare, ArrowRightSquare, ArrowLeftSquare,
   FileUp, CheckCircle, File as FileIcon, Pencil
@@ -26,7 +26,7 @@ import Image from "next/image";
 import { ProformaItem, ShipmentDraft, PackageItem } from "@/lib/type";
 import {
   shipmentService, addressService, measurementService, documentService, domesticService,
-  type ApiCarrierQuote, type ApiAddress, type ApiMeasurement, type ShipmentAttachment, type DomesticCarrierQuote
+  type ApiCarrierQuote, type ApiAddress, type ApiMeasurement, type DomesticCarrierQuote
 } from "@/lib/services/shipmentService";
 import { CitySelect } from "@/components/ui/city-select";
 import { StateSelect } from "@/components/ui/state-select";
@@ -58,19 +58,6 @@ const DEFAULT_DRAFT: ShipmentDraft = {
   proformaFileName: "",
 };
 
-const COUNTRY_CITIES: Record<string, { label: string; value: string }[]> = {
-  DE: [{ label: "Berlin", value: "Berlin" }, { label: "Münih", value: "Münih" }, { label: "Hamburg", value: "Hamburg" }, { label: "Frankfurt", value: "Frankfurt" }, { label: "Köln", value: "Köln" }, { label: "Stuttgart", value: "Stuttgart" }, { label: "Düsseldorf", value: "Düsseldorf" }],
-  NL: [{ label: "Amsterdam", value: "Amsterdam" }, { label: "Rotterdam", value: "Rotterdam" }, { label: "Den Haag", value: "Den Haag" }, { label: "Utrecht", value: "Utrecht" }, { label: "Eindhoven", value: "Eindhoven" }, { label: "Groningen", value: "Groningen" }],
-  FR: [{ label: "Paris", value: "Paris" }, { label: "Lyon", value: "Lyon" }, { label: "Marsilya", value: "Marsilya" }, { label: "Nice", value: "Nice" }, { label: "Toulouse", value: "Toulouse" }, { label: "Bordeaux", value: "Bordeaux" }],
-  GB: [{ label: "Londra", value: "Londra" }, { label: "Manchester", value: "Manchester" }, { label: "Birmingham", value: "Birmingham" }, { label: "Liverpool", value: "Liverpool" }, { label: "Edinburgh", value: "Edinburgh" }],
-  US: [{ label: "New York", value: "New York" }, { label: "Los Angeles", value: "Los Angeles" }, { label: "Chicago", value: "Chicago" }, { label: "Houston", value: "Houston" }, { label: "Miami", value: "Miami" }, { label: "San Francisco", value: "San Francisco" }],
-  IT: [{ label: "Roma", value: "Roma" }, { label: "Milano", value: "Milano" }, { label: "Napoli", value: "Napoli" }, { label: "Torino", value: "Torino" }, { label: "Floransa", value: "Floransa" }],
-  ES: [{ label: "Madrid", value: "Madrid" }, { label: "Barcelona", value: "Barcelona" }, { label: "Sevilla", value: "Sevilla" }, { label: "Valencia", value: "Valencia" }],
-  AT: [{ label: "Viyana", value: "Viyana" }, { label: "Salzburg", value: "Salzburg" }, { label: "Graz", value: "Graz" }, { label: "Innsbruck", value: "Innsbruck" }],
-};
-
-type MeasurementPreset = { label: string; value: string; widthCm: string; lengthCm: string; heightCm: string; weightKg: string };
-
 const RECEIVER_COUNTRIES = [
   { label: "Almanya (DE)", value: "DE" }, { label: "Hollanda (NL)", value: "NL" },
   { label: "Fransa (FR)", value: "FR" }, { label: "İngiltere (GB)", value: "GB" },
@@ -78,16 +65,6 @@ const RECEIVER_COUNTRIES = [
   { label: "İspanya (ES)", value: "ES" }, { label: "Avusturya (AT)", value: "AT" },
 ];
 const COUNTRY_NAMES: Record<string, string> = { TR: "Türkiye", DE: "Almanya", NL: "Hollanda", FR: "Fransa", GB: "İngiltere", US: "Amerika", IT: "İtalya", ES: "İspanya", AT: "Avusturya" };
-
-const POSTAL_CODES: Record<string, { label: string; value: string }[]> = {
-  DE: [{ label: "10115 - Berlin", value: "10115" }, { label: "80331 - Münih", value: "80331" }, { label: "20095 - Hamburg", value: "20095" }],
-  NL: [{ label: "1011 - Amsterdam", value: "1011" }, { label: "3011 - Rotterdam", value: "3011" }],
-  FR: [{ label: "75001 - Paris", value: "75001" }, { label: "69001 - Lyon", value: "69001" }],
-  GB: [{ label: "SW1A 1AA - Londra", value: "SW1A 1AA" }, { label: "M1 1AE - Manchester", value: "M1 1AE" }],
-  US: [{ label: "10001 - New York", value: "10001" }, { label: "90001 - Los Angeles", value: "90001" }],
-  AT: [{ label: "1010 - Viyana", value: "1010" }, { label: "5020 - Salzburg", value: "5020" }],
-};
-function getPostalCodesForCountry(code: string) { return POSTAL_CODES[code] || []; }
 
 function FlagDE({ className }: { className?: string }) { return <svg viewBox="0 0 5 3" className={className}><rect width="5" height="1" y="0" fill="#000"/><rect width="5" height="1" y="1" fill="#D00"/><rect width="5" height="1" y="2" fill="#FFCE00"/></svg>; }
 function FlagFR({ className }: { className?: string }) { return <svg viewBox="0 0 3 2" className={className}><rect width="1" height="2" x="0" fill="#002395"/><rect width="1" height="2" x="1" fill="#FFF"/><rect width="1" height="2" x="2" fill="#ED2939"/></svg>; }
@@ -185,82 +162,6 @@ function Field({ label, icon: Icon, children, error }: { label: string; icon?: R
   );
 }
 
-function CarrierTag({ tag }: { tag: string }) {
-  const m: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; cls: string }> = {
-    recommended: { label: "Tavsiye Edilen", icon: Star, cls: "bg-amber-50/60 text-amber-500 ring-amber-100" },
-    fastest: { label: "En Hızlı", icon: Zap, cls: "bg-sky-50 text-sky-700 ring-sky-200" },
-    cheapest: { label: "En Uygun", icon: BadgeDollarSign, cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
-  };
-  const t = m[tag]; if (!t) return null; const I = t.icon;
-  return <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1", t.cls)}><I className="h-3 w-3" />{t.label}</span>;
-}
-
-function CarrierCard({ quote: q, selected, onSelect }: { quote: ApiCarrierQuote; selected: boolean; onSelect: () => void }) {
-  const logoColor = getLogoColor(q);
-  const sym = getCurrencySymbol(q.currency);
-  return (
-    <button type="button" onClick={onSelect} className={cn("group relative flex flex-col rounded-2xl p-5 text-left ring-1 transition-all", selected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : "bg-white ring-border hover:ring-brand-200 hover:shadow-sm", q.tags.includes("recommended") && !selected && "bg-amber-50/30")}>
-      {q.tags.length > 0 && <div className="mb-3 flex flex-wrap items-center gap-1.5">{q.tags.map((t: string) => <CarrierTag key={t} tag={t} />)}</div>}
-      <div className="flex items-center gap-3">
-        <CarrierLogo q={q} />
-        <div className="min-w-0 flex-1"><div className="text-sm font-semibold leading-tight">{q.carrierName}</div><div className="text-xs text-muted">{q.serviceName}</div></div>
-        <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1", selected ? "bg-brand-600 ring-brand-600 text-white" : "bg-white ring-border group-hover:ring-brand-300")}>{selected && <Check className="h-3.5 w-3.5" />}</div>
-      </div>
-      <div className="mt-3 flex items-center gap-1.5 text-xs text-muted"><Clock className="h-3.5 w-3.5" /><span>Teslimat: <span className="font-medium text-foreground">{q.deliveryLabel}</span></span></div>
-      <div className="mt-3 flex items-baseline gap-2"><span className="text-2xl font-bold tracking-tight">{sym}{q.price.toFixed(2)}</span><span className="text-sm text-muted">({q.priceTry.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺)</span></div>
-      <div className="mt-1.5 text-xs text-muted">İade Masrafı: {sym}{q.returnCost.toFixed(2)}</div>
-    </button>
-  );
-}
-
-function TopPickCard({ label, icon: Icon, carrier, price, currency, days, colorClass }: { label: string; icon: React.ComponentType<{ className?: string }>; carrier: string; price: number; currency: string; days: string; colorClass: string }) {
-  return (
-    <div className={cn("flex items-center gap-3 rounded-2xl p-4 ring-1", colorClass)}>
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/80 shadow-sm"><Icon className="h-5 w-5" /></div>
-      <div className="min-w-0 flex-1"><div className="text-[11px] font-semibold uppercase tracking-wide opacity-70">{label}</div><div className="mt-0.5 text-sm font-semibold leading-tight">{carrier}</div><div className="mt-0.5 text-xs opacity-80">{currency}{price.toFixed(2)} · {days}</div></div>
-    </div>
-  );
-}
-
-function CarrierListItem({ quote: q, selected, onSelect }: { quote: ApiCarrierQuote; selected: boolean; onSelect: () => void }) {
-  const logoColor = getLogoColor(q);
-  const sym = getCurrencySymbol(q.currency);
-  const hasTag = q.tags.length > 0;
-  const tagBg = !selected && hasTag
-    ? q.tags.includes("cheapest") ? "bg-emerald-50/40 ring-emerald-200"
-    : q.tags.includes("fastest") ? "bg-sky-50/40 ring-sky-200"
-    : q.tags.includes("recommended") ? "bg-amber-50/20 ring-amber-100/40"
-    : ""
-    : "";
-  return (
-    <button type="button" onClick={onSelect} className={cn("group flex w-full flex-col rounded-2xl p-4 text-left ring-1 transition-all", selected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : tagBg || "bg-white ring-border hover:ring-brand-200 hover:shadow-sm")}>
-      {hasTag && <div className="mb-2.5 flex flex-wrap items-center gap-1.5">{q.tags.map((t: string) => <CarrierTag key={t} tag={t} />)}</div>}
-      <div className="flex w-full items-center justify-between">
-        <div className="flex items-center gap-4">
-          <CarrierLogo q={q} size="h-10 w-10" textSize="text-xs" />
-          <div className="min-w-0 max-w-[150px] sm:max-w-[200px]">
-            <span className="text-sm font-semibold leading-tight">{q.carrierName}</span>
-            <div className="text-xs text-muted">{q.serviceName}</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-6 text-right">
-          <div className="hidden sm:block text-xs text-muted">
-            <div className="flex items-center gap-1.5 justify-end"><Clock className="h-3.5 w-3.5" /><span>Teslimat: <span className="font-medium text-foreground">{q.deliveryLabel}</span></span></div>
-          </div>
-          <div>
-            <div className="flex items-baseline gap-1.5 justify-end">
-              <span className="text-lg font-bold tracking-tight">{sym}{q.price.toFixed(2)}</span>
-              <span className="text-xs text-muted w-16 text-right">({q.priceTry.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺)</span>
-            </div>
-            <div className="mt-0.5 text-[10px] text-muted">İade Masrafı: {sym}{q.returnCost.toFixed(2)}</div>
-          </div>
-          <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1", selected ? "bg-brand-600 ring-brand-600 text-white" : "bg-white ring-border group-hover:ring-brand-300")}>{selected && <Check className="h-3.5 w-3.5" />}</div>
-        </div>
-      </div>
-    </button>
-  );
-}
-
 function RouteSummaryBar({ senderCountry, senderName, senderFlag, receiverCountry, receiverName, receiverFlag, chargeableWeight }: { senderCountry: string; senderName?: string; senderFlag?: string; receiverCountry: string; chargeableWeight: number; receiverName?: string; receiverFlag?: string }) {
   const flagImg = (src: string | undefined, code: string) => src
     ? <div className="shrink-0 overflow-hidden h-9 w-9 relative" style={{ borderRadius: 10 }}><img src={src} alt={code} className="w-full h-full object-cover" /></div>
@@ -271,22 +172,6 @@ function RouteSummaryBar({ senderCountry, senderName, senderFlag, receiverCountr
       <div className="flex items-center gap-1 sm:gap-2 shrink-0 px-1 sm:px-0"><div className="h-px w-3 sm:w-12 bg-white/20" /><div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[12px] text-white/50"><Plane className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" /><span className="hidden sm:inline">Kargo Ağırlığı </span><span className="font-semibold text-white/80">{chargeableWeight.toFixed(2)} kg</span></div><div className="h-px w-3 sm:w-12 bg-white/20" /></div>
       <div className="flex items-center gap-1.5 min-w-0 flex-1 justify-end"><div className="text-right min-w-0"><div className="text-[9px] sm:text-[10px] font-medium uppercase tracking-wider text-white/50">Varış</div><div className="text-[11px] sm:text-[14px] font-bold leading-tight truncate">{receiverName || COUNTRY_NAMES[receiverCountry] || receiverCountry}</div></div>{flagImg(receiverFlag, receiverCountry)}</div>
     </div>
-  );
-}
-
-function AddressCard({ addr, selected, onSelect, onDelete }: { addr: ApiAddress; selected: boolean; onSelect: () => void; onDelete?: () => void }) {
-  return (
-    <button type="button" onClick={onSelect} className={cn("group relative flex flex-col rounded-2xl p-4 text-left ring-1 transition-all", selected ? "bg-brand-50/60 ring-2 ring-brand-500 shadow-sm" : "bg-white ring-border hover:ring-brand-200 hover:shadow-sm")}>
-      <div className="absolute right-3 top-3"><div className={cn("flex h-6 w-6 items-center justify-center rounded-full ring-1", selected ? "bg-brand-600 ring-brand-600 text-white" : "bg-white ring-border group-hover:ring-brand-300")}>{selected && <Check className="h-3.5 w-3.5" />}</div></div>
-      <div className="text-sm font-semibold text-foreground pr-8">{addr.label}</div>
-      <div className="mt-2 space-y-1 text-xs text-muted">
-        <div className="flex items-center gap-1.5"><User className="h-3 w-3 shrink-0 text-brand-500" /><span>{addr.name}</span>{addr.company && <span className="text-muted">/ {addr.company}</span>}</div>
-        <div className="flex items-center gap-1.5"><MapPinned className="h-3 w-3 shrink-0 text-brand-500" /><span>{addr.address}</span></div>
-        <div className="flex items-center gap-1.5"><Building className="h-3 w-3 shrink-0 text-brand-500" /><span>{addr.postalCode} / {addr.city}</span></div>
-        <div className="flex items-center gap-1.5"><Phone className="h-3 w-3 shrink-0 text-brand-500" /><span>{addr.phone}</span></div>
-      </div>
-      {onDelete && <div className="absolute bottom-3 right-3"><div role="button" tabIndex={0} onClick={e => { e.stopPropagation(); onDelete(); }} onKeyDown={e => { if (e.key === "Enter") { e.stopPropagation(); onDelete(); } }} className="flex h-7 w-7 items-center justify-center rounded-full text-red-400 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"><Trash2 className="h-3.5 w-3.5" /></div></div>}
-    </button>
   );
 }
 
@@ -333,7 +218,7 @@ export interface ShipmentWizardProps {
   adminUserName?: string;
 }
 
-export function ShipmentWizardCore({ adminMode, adminUserId, adminUserName }: ShipmentWizardProps) {
+export function ShipmentWizardCore({ adminMode, adminUserId }: ShipmentWizardProps) {
   const { hydrated } = useAppState();
   const searchParams = useSearchParams();
   const urlDraftId = adminMode ? null : searchParams.get("draft");
@@ -512,7 +397,7 @@ const [showPackageExcel, setShowPackageExcel] = React.useState(false);
 
   // ── Gümrük Belgeleri Yükleme State'leri ──
   const [docFileType, setDocFileType] = React.useState("INVOICE");
-  const [docUploading, setDocUploading] = React.useState(false);
+  const [docUploading] = React.useState(false);
   const [docUploadedFiles, setDocUploadedFiles] = React.useState<any[]>([]);
   const [docDragOver, setDocDragOver] = React.useState(false);
   const [docError, setDocError] = React.useState<string | null>(null);
