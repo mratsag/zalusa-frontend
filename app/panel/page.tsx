@@ -111,6 +111,26 @@ const STATUS_MAP: Record<
     className: "bg-red-50 text-red-600",
     dotClass: "bg-red-500",
   },
+  awaiting_transfer_approval: {
+    label: "HAVALE ONAYI BEKLENİYOR",
+    className: "bg-violet-50 text-violet-600",
+    dotClass: "bg-violet-500",
+  },
+  label_created: {
+    label: "ETİKET OLUŞTURULDU",
+    className: "bg-cyan-50 text-cyan-600",
+    dotClass: "bg-cyan-500",
+  },
+  in_transit: {
+    label: "YOLDA",
+    className: "bg-sky-50 text-sky-600",
+    dotClass: "bg-sky-500",
+  },
+  returned: {
+    label: "İADE EDİLDİ",
+    className: "bg-rose-50 text-rose-600",
+    dotClass: "bg-rose-500",
+  },
 };
 
 function getStatus(status: string) {
@@ -399,7 +419,7 @@ export default function PanelHomePage() {
                   </thead>
                   <tbody>
                     {stats.recentOrders.map((order) => {
-                      const st = getStatus(order.status);
+                      const st = getStatus(order.paymentStage || order.status);
                       return (
                         <tr key={order.id} className="border-b border-[#F8FAFC] last:border-0 hover:bg-[#FAFBFF] transition-colors">
                           <td className="py-3">
@@ -462,13 +482,17 @@ export default function PanelHomePage() {
             ) : (
               <div className="divide-y divide-[#F1F5F9]">
                 {stats.recentOrders.map((order) => {
-                  const paid = ["paid", "processing", "shipped", "delivered"].includes(order.status);
-                  const cancelled = order.status === "cancelled";
+                  const eff = order.paymentStage || order.status;
+                  const paid = ["paid", "label_created", "shipped", "in_transit", "delivered", "processing"].includes(eff);
+                  const awaiting = eff === "awaiting_transfer_approval";
+                  const voided = eff === "cancelled" || eff === "returned";
                   const pay = paid
                     ? { label: "Ödeme Tamamlandı", badge: "bg-emerald-50 text-emerald-600", dot: "bg-emerald-500", Icon: PackageCheck, iconWrap: "bg-emerald-50 text-emerald-600", amountCls: "text-[#EF4444]", sign: "-", note: null }
-                    : cancelled
-                      ? { label: "İptal Edildi", badge: "bg-slate-100 text-slate-500", dot: "bg-slate-400", Icon: Ban, iconWrap: "bg-slate-100 text-slate-400", amountCls: "text-[#CBD5E1] line-through", sign: "", note: null }
-                      : { label: "Ödeme Bekleniyor", badge: "bg-orange-50 text-orange-600", dot: "bg-orange-500", Icon: Clock, iconWrap: "bg-orange-50 text-orange-500", amountCls: "text-[#F59E0B]", sign: "", note: "Henüz tahsil edilmedi" };
+                    : awaiting
+                      ? { label: "Havale Onayı Bekleniyor", badge: "bg-violet-50 text-violet-600", dot: "bg-violet-500", Icon: Clock, iconWrap: "bg-violet-50 text-violet-600", amountCls: "text-violet-600", sign: "", note: "Onay bekleniyor" }
+                      : voided
+                        ? { label: eff === "returned" ? "İade Edildi" : "İptal Edildi", badge: "bg-slate-100 text-slate-500", dot: "bg-slate-400", Icon: Ban, iconWrap: "bg-slate-100 text-slate-400", amountCls: "text-[#CBD5E1] line-through", sign: "", note: null }
+                        : { label: "Ödeme Bekleniyor", badge: "bg-orange-50 text-orange-600", dot: "bg-orange-500", Icon: Clock, iconWrap: "bg-orange-50 text-orange-500", amountCls: "text-[#F59E0B]", sign: "", note: "Henüz tahsil edilmedi" };
                   const PayIcon = pay.Icon;
                   return (
                     <div

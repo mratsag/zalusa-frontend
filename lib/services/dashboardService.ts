@@ -10,6 +10,8 @@ export interface DashboardRecentOrder {
   trackingCode: string;
   countryCode: string;
   status: string;
+  /** Ödeme aşaması (backend türetir): pending_payment + bekleyen havale -> awaiting_transfer_approval. Yoksa status. */
+  paymentStage?: string;
   priceTry: number;
   createdAt: string; // ISO date string
 }
