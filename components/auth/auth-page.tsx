@@ -12,6 +12,7 @@ import { authService } from "@/lib/services/authService";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { OTPInput, type OTPInputHandle } from "@/components/ui/otp-input";
 import { cn } from "@/lib/cn";
 import { profileService } from "@/lib/services/profileService";
 
@@ -104,7 +105,7 @@ export function AuthPage() {
   const [verifyError, setVerifyError] = React.useState<string | null>(null);
   const [verifySuccess, setVerifySuccess] = React.useState<string | null>(null);
   const [resending, setResending] = React.useState(false);
-  const verifyInputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
+  const verifyOtpRef = React.useRef<OTPInputHandle>(null);
 
   // Şifremi unuttum modal
   const [showForgotModal, setShowForgotModal] = React.useState(false);
@@ -118,7 +119,7 @@ export function AuthPage() {
   const [forgotConfirmPw, setForgotConfirmPw] = React.useState("");
   const [showForgotNewPw, setShowForgotNewPw] = React.useState(false);
   const [showForgotConfirmPw, setShowForgotConfirmPw] = React.useState(false);
-  const codeInputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
+  const forgotOtpRef = React.useRef<OTPInputHandle>(null);
 
   const pwRules = React.useMemo(() => ({
     length:  password.length >= 8 && password.length <= 15,
@@ -284,7 +285,7 @@ export function AuthPage() {
       setVerifyError(null);
       setVerifySuccess(null);
       setMessage(null);
-      setTimeout(() => verifyInputRefs.current[0]?.focus(), 200);
+      setTimeout(() => verifyOtpRef.current?.focus(), 200);
     } catch (err: any) {
       setMessage(err.message || "Kayıt başarısız.");
     } finally {
@@ -293,28 +294,6 @@ export function AuthPage() {
   }
 
   // ── E-posta doğrulama (kayıt sonrası) ──────────────────────────────────
-  function handleVerifyInput(index: number, value: string) {
-    if (value.length > 1) {
-      const digits = value.replace(/[^0-9]/g, "").slice(0, 6).split("");
-      const newCode = [...verifyCode];
-      digits.forEach((d, i) => { if (index + i < 6) newCode[index + i] = d; });
-      setVerifyCode(newCode);
-      const nextIdx = Math.min(index + digits.length, 5);
-      verifyInputRefs.current[nextIdx]?.focus();
-      return;
-    }
-    const digit = value.replace(/[^0-9]/g, "");
-    const newCode = [...verifyCode];
-    newCode[index] = digit;
-    setVerifyCode(newCode);
-    if (digit && index < 5) verifyInputRefs.current[index + 1]?.focus();
-  }
-
-  function handleVerifyKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Backspace" && !verifyCode[index] && index > 0) {
-      verifyInputRefs.current[index - 1]?.focus();
-    }
-  }
 
   async function handleVerifyEmail() {
     const code = verifyCode.join("");
@@ -352,7 +331,7 @@ export function AuthPage() {
       setVerifyCode(["", "", "", "", "", ""]);
       setMessage("Doğrulama kodu tekrar gönderildi.");
       setTimeout(() => setMessage(null), 3000);
-      setTimeout(() => verifyInputRefs.current[0]?.focus(), 200);
+      setTimeout(() => verifyOtpRef.current?.focus(), 200);
     } catch (err: any) {
       setVerifyError(err.message || "Kod gönderilemedi.");
     } finally {
@@ -384,7 +363,7 @@ export function AuthPage() {
     try {
       await profileService.forgotPassword(forgotEmail);
       setForgotStep(2);
-      setTimeout(() => codeInputRefs.current[0]?.focus(), 100);
+      setTimeout(() => forgotOtpRef.current?.focus(), 100);
     } catch (err: any) {
       setForgotError(err.message || "Kod gönderilemedi.");
     } finally {
@@ -392,28 +371,6 @@ export function AuthPage() {
     }
   }
 
-  function handleCodeInput(index: number, value: string) {
-    if (value.length > 1) {
-      const digits = value.replace(/[^0-9]/g, "").slice(0, 6).split("");
-      const newCode = [...forgotCode];
-      digits.forEach((d, i) => { if (index + i < 6) newCode[index + i] = d; });
-      setForgotCode(newCode);
-      const nextIdx = Math.min(index + digits.length, 5);
-      codeInputRefs.current[nextIdx]?.focus();
-      return;
-    }
-    const digit = value.replace(/[^0-9]/g, "");
-    const newCode = [...forgotCode];
-    newCode[index] = digit;
-    setForgotCode(newCode);
-    if (digit && index < 5) codeInputRefs.current[index + 1]?.focus();
-  }
-
-  function handleCodeKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Backspace" && !forgotCode[index] && index > 0) {
-      codeInputRefs.current[index - 1]?.focus();
-    }
-  }
 
   async function handleForgotVerifyCode() {
     const code = forgotCode.join("");
@@ -555,30 +512,15 @@ export function AuthPage() {
                   <>
                     <div className="text-center">
                       <div className="text-sm font-medium mb-3">Doğrulama Kodunu Girin</div>
-                      <div className="flex items-center justify-center gap-2">
-                        {verifyCode.map((digit, idx) => (
-                          <input
-                            key={idx}
-                            ref={el => { verifyInputRefs.current[idx] = el; }}
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={6}
-                            value={digit}
-                            onChange={e => handleVerifyInput(idx, e.target.value)}
-                            onKeyDown={e => handleVerifyKeyDown(idx, e)}
-                            onPaste={e => {
-                              e.preventDefault();
-                              const pasted = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 6);
-                              if (pasted) handleVerifyInput(0, pasted);
-                            }}
-                            className={cn(
-                              "h-12 w-11 rounded-xl border-2 bg-white text-center text-lg font-bold transition-all outline-none",
-                              "focus:border-brand-500 focus:ring-2 focus:ring-brand-100",
-                              digit ? "border-brand-300 text-brand-700" : "border-[#E2E8F0] text-[#14141F]"
-                            )}
-                          />
-                        ))}
-                      </div>
+                      <OTPInput
+                        ref={verifyOtpRef}
+                        value={verifyCode}
+                        onChange={setVerifyCode}
+                        className="flex items-center justify-center gap-2"
+                        boxClassName="h-12 w-11 rounded-xl border-2 bg-white text-center text-lg font-bold transition-all outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                        filledClassName="border-brand-300 text-brand-700"
+                        emptyClassName="border-[#E2E8F0] text-[#14141F]"
+                      />
                       <div className="mt-2 text-xs text-[#94A3B8]">Kodu yapıştırarak da girebilirsiniz. Kodun süresi 15 dakikadır.</div>
                     </div>
 
@@ -972,30 +914,15 @@ export function AuthPage() {
                   <div className="text-sm font-semibold mb-1">Doğrulama Kodu</div>
                   <div className="text-xs text-[#94A3B8]"><span className="font-semibold text-[#4F46E5]">{forgotEmail}</span> adresine gönderildi</div>
                 </div>
-                <div className="flex items-center justify-center gap-2">
-                  {forgotCode.map((digit, idx) => (
-                    <input
-                      key={idx}
-                      ref={el => { codeInputRefs.current[idx] = el; }}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={6}
-                      value={digit}
-                      onChange={e => handleCodeInput(idx, e.target.value)}
-                      onKeyDown={e => handleCodeKeyDown(idx, e)}
-                      onPaste={e => {
-                        e.preventDefault();
-                        const pasted = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 6);
-                        if (pasted) handleCodeInput(0, pasted);
-                      }}
-                      className={cn(
-                        "h-12 w-11 rounded-xl border-2 bg-white text-center text-lg font-bold transition-all outline-none",
-                        "focus:border-[#4F46E5] focus:ring-2 focus:ring-[#EEF2FF]",
-                        digit ? "border-[#4F46E5]/40 text-[#4F46E5]" : "border-[#E2E8F0] text-[#14141F]"
-                      )}
-                    />
-                  ))}
-                </div>
+                <OTPInput
+                  ref={forgotOtpRef}
+                  value={forgotCode}
+                  onChange={setForgotCode}
+                  className="flex items-center justify-center gap-2"
+                  boxClassName="h-12 w-11 rounded-xl border-2 bg-white text-center text-lg font-bold transition-all outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#EEF2FF]"
+                  filledClassName="border-[#4F46E5]/40 text-[#4F46E5]"
+                  emptyClassName="border-[#E2E8F0] text-[#14141F]"
+                />
                 <div className="text-center text-xs text-[#94A3B8]">Kod 10 dakika içinde geçerlidir. Kodu yapıştırarak da girebilirsiniz.</div>
                 <button type="button" onClick={handleForgotVerifyCode} disabled={forgotLoading || forgotCode.join("").length !== 6} className="flex h-[44px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#4F46E5] text-white text-[14px] font-semibold transition-all hover:bg-[#4338CA] disabled:opacity-50">
                   {forgotLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
