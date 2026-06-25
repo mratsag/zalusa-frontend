@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft, Package, Truck, User, Mail, Phone, MapPin, Globe, Weight,
   CreditCard, CheckCircle2, Clock, FileText, Box, Hash, Building2,
-  Banknote, Shield, Tag, Calendar, ChevronRight, Loader2, AlertTriangle, Rocket, ChevronDown, ChevronUp, Barcode, Plus, Trash2, ArrowRight, ArrowLeftIcon, Plane, Info, Check, FileUp, UploadCloud, CheckCircle, Copy
+  Banknote, Shield, Tag, Calendar, ChevronRight, Loader2, AlertTriangle, Rocket, ChevronDown, ChevronUp, Barcode, Plus, Trash2, ArrowRight, ArrowLeftIcon, Plane, Info, Check, FileUp, UploadCloud, CheckCircle, Copy, FileCheck, ShieldAlert, Receipt, File as FileIcon
 } from "lucide-react";
 import { adminService } from "@/lib/services/adminService";
 import { domesticService } from "@/lib/services/shipmentService";
@@ -1078,21 +1078,25 @@ export default function ShipmentDetailPage() {
                     <div className="mb-3">
                       <label className="text-[12px] font-medium text-slate-500 mb-1.5 block">Belge Türü</label>
                       <div className="flex gap-2 flex-wrap">
-                        {[{ value: "ETGB", label: "ETGB Belgesi" }, { value: "MSDS", label: "MSDS Belgesi" }, { value: "INVOICE", label: "Fatura" }, { value: "OTHER", label: "Diğer" }].map(t => (
+                        {[{ value: "ETGB", label: "ETGB Belgesi", icon: FileCheck }, { value: "MSDS", label: "MSDS Belgesi", icon: ShieldAlert }, { value: "INVOICE", label: "Fatura", icon: Receipt }, { value: "OTHER", label: "Diğer", icon: FileIcon }].map(t => {
+                          const Icon = t.icon;
+                          return (
                           <button
                             key={t.value}
                             type="button"
                             onClick={() => setDocFileType(t.value)}
                             className={cn(
-                              "px-3 py-1.5 rounded-lg text-[12px] font-medium border transition-all",
+                              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium border transition-all",
                               docFileType === t.value
                                 ? "bg-[#3959F2] text-white border-[#3959F2] shadow-sm shadow-[#3959F2]/20"
                                 : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                             )}
                           >
+                            <Icon className="w-3.5 h-3.5" />
                             {t.label}
                           </button>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
 

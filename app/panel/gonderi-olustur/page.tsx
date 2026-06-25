@@ -9,7 +9,7 @@ import {
   Save, Printer, Loader2, RotateCcw, X,
   FileSpreadsheet, ArrowLeft, AlertTriangle, Box, Globe, ChevronUp,
   ChevronDown, Barcode, UploadCloud, Calendar, Scale, PlusSquare, ArrowRightSquare, ArrowLeftSquare,
-  FileUp, CheckCircle, File as FileIcon, Pencil
+  FileUp, CheckCircle, File as FileIcon, Pencil, FileCheck, ShieldAlert
 } from "lucide-react";
 import { HSCodeCombobox } from "@/components/HSCodeCombobox";
 import { Stepper, STEP_IMAGES } from "@/components/panel/stepper";
@@ -3065,21 +3065,25 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                 <div className="mb-3">
                   <label className="text-[12px] font-medium text-slate-500 mb-1.5 block">Belge Türü</label>
                   <div className="flex gap-2 flex-wrap">
-                    {[{ value: "ETGB", label: "ETGB Belgesi" }, { value: "MSDS", label: "MSDS Belgesi" }, { value: "INVOICE", label: "Fatura" }, { value: "OTHER", label: "Diğer" }].map(t => (
+                    {[{ value: "ETGB", label: "ETGB Belgesi", icon: FileCheck }, { value: "MSDS", label: "MSDS Belgesi", icon: ShieldAlert }, { value: "INVOICE", label: "Fatura", icon: Receipt }, { value: "OTHER", label: "Diğer", icon: FileIcon }].map(t => {
+                      const Icon = t.icon;
+                      return (
                       <button
                         key={t.value}
                         type="button"
                         onClick={() => setDocFileType(t.value)}
                         className={cn(
-                          "px-3 py-1.5 rounded-lg text-[12px] font-medium border transition-all",
+                          "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium border transition-all",
                           docFileType === t.value
                             ? "bg-[#3959F2] text-white border-[#3959F2] shadow-sm shadow-[#3959F2]/20"
                             : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                         )}
                       >
+                        <Icon className="w-3.5 h-3.5" />
                         {t.label}
                       </button>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
