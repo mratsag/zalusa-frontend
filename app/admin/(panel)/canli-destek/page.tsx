@@ -372,8 +372,15 @@ export default function LiveSupportPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-[13px] font-semibold text-slate-800 truncate">
-                              {chat.userName}
+                            <span className="flex items-center gap-1.5 min-w-0">
+                              {chat.channel === "whatsapp" ? (
+                                <span className="shrink-0 inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 px-1.5 py-0.5 text-[9px] font-bold">WhatsApp</span>
+                              ) : (
+                                <span className="shrink-0 inline-flex items-center rounded-full bg-slate-100 text-slate-500 px-1.5 py-0.5 text-[9px] font-bold">Web</span>
+                              )}
+                              <span className="text-[13px] font-semibold text-slate-800 truncate">
+                                {chat.userName}
+                              </span>
                             </span>
                             <span
                               className={`shrink-0 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${config.color}`}

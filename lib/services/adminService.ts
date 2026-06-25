@@ -225,9 +225,10 @@ export interface DomesticMargin {
 
 export interface LiveChat {
   id: number;
-  userId: number;
+  userId: number | null;
   adminId: number | null;
   status: "waiting" | "active" | "closed";
+  channel?: "web" | "whatsapp";
   createdAt: string;
   closedAt: string | null;
   userName: string;
