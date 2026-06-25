@@ -55,12 +55,28 @@ export default function OdemePage() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState("");
 
-  // "Geri": sihirbazdan gelindiyse taslak finalize olup sihirbaz boş açılacağı için
-  // doğrudan Gönderilerim'e (gönderi orada, ödenebilir); sepet/liste gibi yerlerden
+  // "Geri": sihirbazdan gelindiyse gönderiyi taslağa geri al (onay adımı) ve sihirbaza dön —
+  // böylece kullanıcı bir önceki adıma (Gönderi Onayı → Gümrük → Adres) step-based dönebilir.
+  // Aktif ödeme varsa geri alınamaz; o durumda Gönderilerim'e gidilir. Liste vb. yerden
   // gelindiyse tarayıcı geçmişine (geldiği ekrana) dön.
-  const goBack = () => {
+  const goBack = async () => {
     const ref = typeof document !== "undefined" ? document.referrer : "";
-    if (!ref || ref.includes("/panel/gonderi-olustur")) {
+    const fromWizard = !ref || ref.includes("/panel/gonderi-olustur");
+    if (fromWizard && shipmentId) {
+      try {
+        const token = localStorage.getItem("zalusa.token");
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/shipments/${shipmentId}/revert-to-draft`,
+          { method: "PUT", headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (res.ok) {
+          router.push(`/panel/gonderi-olustur?draft=${shipmentId}`);
+          return;
+        }
+      } catch {
+        /* ağ hatası → aşağıdaki fallback */
+      }
+      // Geri alınamadı (ör. bekleyen ödeme) → gönderi Gönderilerim'de ödenebilir
       router.push("/panel/gonderilerim");
     } else {
       router.back();
