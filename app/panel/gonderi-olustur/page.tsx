@@ -3811,7 +3811,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowPackageExcel(false)} />
     <div className="relative z-10 w-full max-w-3xl max-h-[85vh] overflow-auto rounded-2xl bg-white p-6 shadow-xl ring-1 ring-slate-100">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-lg font-bold text-slate-900">Excel'den Paket Yükle</h3>
+        <h3 className="text-lg font-bold text-slate-900">Excel&apos;den {draft.shipmentType === "Paket" ? "Paket" : "Koli"} Yükle</h3>
         <button onClick={() => setShowPackageExcel(false)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-slate-100">
           <X className="h-4 w-4 text-slate-500" />
         </button>
@@ -3819,6 +3819,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
       <PackageExcelUploader
         onImport={importPackagesFromExcel}
         onClose={() => setShowPackageExcel(false)}
+        shipmentType={draft.shipmentType}
       />
     </div>
   </div>

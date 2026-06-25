@@ -15,21 +15,26 @@ export interface ParsedPackageRow {
 interface PackageExcelUploaderProps {
   onImport: (rows: ParsedPackageRow[]) => void;
   onClose: () => void;
+  shipmentType?: string;
 }
 
-const EXPECTED_COLUMNS = [
-  { header: "widthCm", label: "En (cm)", required: true, aliases: ["en", "en (cm)", "genişlik", "genislik", "width"] },
-  { header: "lengthCm", label: "Boy (cm)", required: true, aliases: ["boy", "boy (cm)", "uzunluk", "length"] },
-  { header: "heightCm", label: "Yükseklik (cm)", required: true, aliases: ["yükseklik", "yukseklik", "yük", "yuk", "height"] },
-  { header: "weightKg", label: "Ağırlık (kg)", required: true, aliases: ["ağırlık", "agirlik", "kg", "weight"] },
-  { header: "packageCount", label: "Koli Adedi", required: false, aliases: ["koli adedi", "koli", "adet", "miktar", "count"] },
-];
-
-export default function PackageExcelUploader({ onImport, onClose }: PackageExcelUploaderProps) {
+export default function PackageExcelUploader({ onImport, onClose, shipmentType }: PackageExcelUploaderProps) {
   const [rows, setRows] = React.useState<ParsedPackageRow[]>([]);
   const [parseError, setParseError] = React.useState<string | null>(null);
   const [parsed, setParsed] = React.useState(false);
   const fileRef = React.useRef<HTMLInputElement>(null);
+
+  // Terminoloji gönderi tipine göre: Paket → "Paket", Koli → "Koli"
+  const isPaket = shipmentType === "Paket";
+  const unit = isPaket ? "Paket" : "Koli";
+  const unitLower = isPaket ? "paket" : "koli";
+  const EXPECTED_COLUMNS = [
+    { header: "widthCm", label: "En (cm)", required: true, aliases: ["en", "en (cm)", "genişlik", "genislik", "width"] },
+    { header: "lengthCm", label: "Boy (cm)", required: true, aliases: ["boy", "boy (cm)", "uzunluk", "length"] },
+    { header: "heightCm", label: "Yükseklik (cm)", required: true, aliases: ["yükseklik", "yukseklik", "yük", "yuk", "height"] },
+    { header: "weightKg", label: "Ağırlık (kg)", required: true, aliases: ["ağırlık", "agirlik", "kg", "weight"] },
+    { header: "packageCount", label: `${unit} Adedi`, required: false, aliases: ["koli adedi", "koli", "paket adedi", "paket", "adet", "miktar", "count"] },
+  ];
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -112,14 +117,14 @@ export default function PackageExcelUploader({ onImport, onClose }: PackageExcel
 
   function downloadTemplate() {
     const sample = [
-      { "En (cm)": 30, "Boy (cm)": 20, "Yükseklik (cm)": 15, "Ağırlık (kg)": 2.5, "Koli Adedi": 1 },
-      { "En (cm)": 40, "Boy (cm)": 30, "Yükseklik (cm)": 25, "Ağırlık (kg)": 5, "Koli Adedi": 2 },
+      { "En (cm)": 30, "Boy (cm)": 20, "Yükseklik (cm)": 15, "Ağırlık (kg)": 2.5, [`${unit} Adedi`]: 1 },
+      { "En (cm)": 40, "Boy (cm)": 30, "Yükseklik (cm)": 25, "Ağırlık (kg)": 5, [`${unit} Adedi`]: 2 },
     ];
     const ws = XLSX.utils.json_to_sheet(sample, { header: EXPECTED_COLUMNS.map((c) => c.label) });
     ws["!cols"] = [{ wch: 10 }, { wch: 10 }, { wch: 14 }, { wch: 12 }, { wch: 12 }];
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Koliler");
-    XLSX.writeFile(wb, "zalusa-koli-sablonu.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, `${unit}ler`);
+    XLSX.writeFile(wb, `zalusa-${unitLower}-sablonu.xlsx`);
   }
 
   // Özet hesaplamaları
@@ -140,8 +145,8 @@ export default function PackageExcelUploader({ onImport, onClose }: PackageExcel
             <div className="flex items-start gap-2.5">
               <FileSpreadsheet className="h-4 w-4 text-indigo-600 mt-0.5 shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-slate-800">Excel ile toplu koli ekleyin</p>
-                <p className="text-[12px] text-slate-500 mt-0.5 leading-relaxed">En, boy, yükseklik ve ağırlık bilgilerini doldurarak kolilerinizi tek seferde yükleyebilirsiniz. Aşağıdan örnek şablonu indirip doldurmanız yeterli.</p>
+                <p className="text-[13px] font-semibold text-slate-800">Excel ile toplu {unitLower} ekleyin</p>
+                <p className="text-[12px] text-slate-500 mt-0.5 leading-relaxed">En, boy, yükseklik ve ağırlık bilgilerini doldurarak {unitLower}lerinizi tek seferde yükleyebilirsiniz. Aşağıdan örnek şablonu indirip doldurmanız yeterli.</p>
               </div>
             </div>
             <button
@@ -204,7 +209,7 @@ export default function PackageExcelUploader({ onImport, onClose }: PackageExcel
               ))}
             </div>
             <p className="text-[11px] text-slate-400 mt-2">
-              * işaretli kolonlar zorunludur. Türkçe ya da İngilizce başlık kullanabilirsiniz. Koli Adedi belirtilmezse 1 alınır.
+              * işaretli kolonlar zorunludur. Türkçe ya da İngilizce başlık kullanabilirsiniz. {unit} Adedi belirtilmezse 1 alınır.
             </p>
           </div>
         </>
@@ -213,7 +218,7 @@ export default function PackageExcelUploader({ onImport, onClose }: PackageExcel
           {/* Preview Header */}
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-slate-700">
-              {rows.length} paket türü bulundu
+              {rows.length} {unitLower} türü bulundu
             </p>
             <button
               onClick={() => { setParsed(false); setRows([]); }}
@@ -226,7 +231,7 @@ export default function PackageExcelUploader({ onImport, onClose }: PackageExcel
           {/* Özet Kartları */}
           <div className="grid grid-cols-3 gap-3">
             <div className="rounded-xl bg-indigo-50 px-4 py-3 text-center ring-1 ring-indigo-100">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-indigo-500">Toplam Koli</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-indigo-500">Toplam {unit}</div>
               <div className="mt-1 text-xl font-extrabold text-indigo-700">{totalPackages}</div>
             </div>
             <div className="rounded-xl bg-emerald-50 px-4 py-3 text-center ring-1 ring-emerald-100">
@@ -249,7 +254,7 @@ export default function PackageExcelUploader({ onImport, onClose }: PackageExcel
                   <th className="px-3 py-2 text-left font-semibold text-slate-500">Boy (cm)</th>
                   <th className="px-3 py-2 text-left font-semibold text-slate-500">Yükseklik (cm)</th>
                   <th className="px-3 py-2 text-left font-semibold text-slate-500">Ağırlık (kg)</th>
-                  <th className="px-3 py-2 text-left font-semibold text-slate-500">Koli Adedi</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-500">{unit} Adedi</th>
                   <th className="px-3 py-2 text-left font-semibold text-slate-500">Desi</th>
                   <th className="px-3 py-2 w-8"></th>
                 </tr>
