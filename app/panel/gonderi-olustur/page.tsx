@@ -183,8 +183,8 @@ function RouteSummaryBar({ senderCountry, senderName, senderFlag, receiverCountr
 /* ── Shipment type descriptions for Step 0 ── */
 const SHIPMENT_TYPE_META: Record<string, { icon: React.ComponentType<{ className?: string }>; description: string; badge?: string; emoji: string }> = {
   Belge: { icon: FileText,  description: "Evrak / sözleşme / fatura", emoji: "📄" },
-  Paket: { icon: Package, description: "Küçük ürün gönderileri", badge: "En çok tercih edilen", emoji: "📦" },
-  Koli:  { icon: BoxSelect,  description: "Büyük hacimli gönderiler", emoji: "📦" },
+  Paket: { icon: Package, description: "Tekli veya küçük hacimli gönderiler", badge: "En çok tercih edilen", emoji: "📦" },
+  Koli:  { icon: BoxSelect,  description: "Çoklu veya büyük hacimli gönderiler", emoji: "📦" },
 };
 
 /* ── Pending draft info type (for the resume banner) ── */

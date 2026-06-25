@@ -34,9 +34,9 @@ const WIZARD_STEPS = [
 ];
 
 const SHIPMENT_TYPES = [
-  { value: "Paket", label: "📦 Paket", desc: "Küçük ürün gönderileri" },
+  { value: "Paket", label: "📦 Paket", desc: "Tekli veya küçük hacimli gönderiler" },
   { value: "Belge", label: "📄 Belge", desc: "Evrak / sözleşme / fatura" },
-  { value: "Koli", label: "📦 Koli", desc: "Büyük hacimli gönderiler" },
+  { value: "Koli", label: "📦 Koli", desc: "Çoklu veya büyük hacimli gönderiler" },
 ];
 
 interface ShipmentWizardProps {
