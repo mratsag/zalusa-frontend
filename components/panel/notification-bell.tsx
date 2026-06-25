@@ -59,7 +59,7 @@ function timeAgo(dateStr: string): string {
   if (hours < 24) return `${hours} saat önce`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days} gün önce`;
-  return new Date(dateStr).toLocaleDateString("tr-TR", { day: "2-digit", month: "short" });
+  return new Date(dateStr).toLocaleDateString("tr-TR", { timeZone: "Europe/Istanbul", day: "2-digit", month: "short" });
 }
 
 export function NotificationBell() {

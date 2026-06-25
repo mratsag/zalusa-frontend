@@ -163,7 +163,7 @@ export default function PTSExcelExportPage() {
   const exportToExcel = () => {
     const sheetData = [
       ["ZALUSA PTS BÖLGESEL FİYAT LİSTESİ"],
-      ["Oluşturulma Tarihi:", new Date().toLocaleDateString("tr-TR")],
+      ["Oluşturulma Tarihi:", new Date().toLocaleDateString("tr-TR", { timeZone: "Europe/Istanbul" })],
       ["Kargo Firması:", companyCode],
       [],
       ["Bölge", "Ülkeler", ...desis.map(d => `${d} Desi`)]

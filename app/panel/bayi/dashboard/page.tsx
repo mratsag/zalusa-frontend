@@ -30,6 +30,7 @@ import {
 function formatDate(iso: string): string {
   const d = new Date(iso);
   return d.toLocaleDateString("tr-TR", {
+    timeZone: "Europe/Istanbul",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -41,6 +42,7 @@ function formatDate(iso: string): string {
 function formatDateShort(iso: string): string {
   const d = new Date(iso);
   return d.toLocaleDateString("tr-TR", {
+    timeZone: "Europe/Istanbul",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

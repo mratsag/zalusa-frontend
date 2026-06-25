@@ -190,6 +190,7 @@ export default function HavaleOnaylariPage() {
                       </div>
                       <div className="text-xs text-slate-500">
                         {new Date(t.createdAt).toLocaleDateString("tr-TR", {
+                          timeZone: "Europe/Istanbul",
                           day: "2-digit",
                           month: "long",
                           year: "numeric",

@@ -103,7 +103,7 @@ export default function CourierPickupsPage() {
                       {p.pickupCode}
                     </div>
                     <div className="text-xs text-slate-500">
-                      {new Date(p.pickupDate).toLocaleDateString("tr-TR")} • {p.carrierId}
+                      {new Date(p.pickupDate).toLocaleDateString("tr-TR", { timeZone: "Europe/Istanbul" })} • {p.carrierId}
                     </div>
                   </div>
                 </div>

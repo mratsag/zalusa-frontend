@@ -250,7 +250,7 @@ export default function TumGonderilerPage() {
 
                 {/* Actions & Date */}
                 <div className="flex flex-col items-end gap-1.5">
-                  <span className="text-[11px] text-slate-400">{new Date(s.createdAt).toLocaleDateString("tr-TR")}</span>
+                  <span className="text-[11px] text-slate-400">{new Date(s.createdAt).toLocaleDateString("tr-TR", { timeZone: "Europe/Istanbul" })}</span>
                   {s.trackingCode && (
                     <button
                       onClick={(e) => handleOpenTracking(e, s.trackingCode)}

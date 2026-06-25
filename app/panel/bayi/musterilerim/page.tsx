@@ -34,6 +34,7 @@ import {
 function formatDate(iso: string): string {
   const d = new Date(iso);
   return d.toLocaleDateString("tr-TR", {
+    timeZone: "Europe/Istanbul",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -472,7 +473,7 @@ export default function ResellerCustomersPage() {
                                           {s.carrierPriceTry?.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
                                         </td>
                                         <td className="px-3 py-2 text-xs text-slate-500">
-                                          {new Date(s.createdAt).toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                                          {new Date(s.createdAt).toLocaleDateString("tr-TR", { timeZone: "Europe/Istanbul", day: "2-digit", month: "2-digit", year: "numeric" })}
                                         </td>
                                       </tr>
                                     );

@@ -24,6 +24,7 @@ import {
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("tr-TR", {
+    timeZone: "Europe/Istanbul",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

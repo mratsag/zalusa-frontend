@@ -522,7 +522,7 @@ export default function LiveSupportPage() {
                         >
                           {new Date(msg.createdAt).toLocaleTimeString(
                             "tr-TR",
-                            { hour: "2-digit", minute: "2-digit" }
+                            { timeZone: "Europe/Istanbul", hour: "2-digit", minute: "2-digit" }
                           )}
                         </span>
                       </div>

@@ -32,7 +32,7 @@ function formatCurrency(val: number): string {
   return val.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  return new Date(iso).toLocaleDateString("tr-TR", { timeZone: "Europe/Istanbul", day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
 function generateCouponCode(): string {
@@ -519,7 +519,7 @@ export default function ResellerDetailPage() {
                           const expired = d < new Date();
                           return (
                             <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${expired ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"}`}>
-                              {expired ? "Süresi Doldu — " : ""}{d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
+                              {expired ? "Süresi Doldu — " : ""}{d.toLocaleDateString("tr-TR", { timeZone: "Europe/Istanbul", day: "numeric", month: "long", year: "numeric" })}
                             </span>
                           );
                         })()}

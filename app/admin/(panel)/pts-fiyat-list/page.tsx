@@ -222,7 +222,7 @@ export default function PTSFiyatListPage() {
   const exportToExcel = () => {
     const sheetData = [
       ["ZALUSA DİNAMİK PTS FİYAT LİSTESİ"],
-      ["Oluşturulma Tarihi:", new Date().toLocaleDateString("tr-TR")],
+      ["Oluşturulma Tarihi:", new Date().toLocaleDateString("tr-TR", { timeZone: "Europe/Istanbul" })],
       ["Hedef Ülke:", countryCode],
       ["Paket Sayısı:", packages.length],
       ["Aktif Çarpanlar:"],

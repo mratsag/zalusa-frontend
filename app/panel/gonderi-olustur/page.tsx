@@ -3580,13 +3580,13 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                           <div className="flex items-center gap-2 text-[12px] font-medium text-slate-400">
                             <Calendar className="w-4 h-4" strokeWidth={1.5} /> Tarih
                           </div>
-                          <div className="text-[14px] font-bold text-slate-800 tracking-wide mt-0.5">{new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}</div>
+                          <div className="text-[14px] font-bold text-slate-800 tracking-wide mt-0.5">{new Date().toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul', day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}</div>
                         </div>
                         <div className="bg-white rounded-[12px] p-4 flex flex-col gap-1 border border-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
                           <div className="flex items-center gap-2 text-[12px] font-medium text-slate-400">
                             <Clock className="w-4 h-4" strokeWidth={1.5} /> Saat
                           </div>
-                          <div className="text-[14px] font-bold text-slate-800 tracking-wide mt-0.5">{new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</div>
+                          <div className="text-[14px] font-bold text-slate-800 tracking-wide mt-0.5">{new Date().toLocaleTimeString('tr-TR', { timeZone: 'Europe/Istanbul', hour: '2-digit', minute: '2-digit' })}</div>
                         </div>
                         <div className="bg-white rounded-[12px] p-4 flex flex-col gap-1 border border-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
                           <div className="flex items-center gap-2 text-[12px] font-medium text-slate-400">

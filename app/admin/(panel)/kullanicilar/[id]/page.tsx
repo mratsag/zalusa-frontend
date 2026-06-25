@@ -32,6 +32,7 @@ import { adminService } from "@/lib/services/adminService";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("tr-TR", {
+    timeZone: "Europe/Istanbul",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -42,6 +43,7 @@ function formatDate(iso: string) {
 
 function formatShortDate(iso: string) {
   return new Date(iso).toLocaleDateString("tr-TR", {
+    timeZone: "Europe/Istanbul",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

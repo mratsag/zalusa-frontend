@@ -162,6 +162,7 @@ function StatusBadge({ status }: { status: string }) {
 function formatDate(iso: string): string {
   const date = new Date(iso);
   return date.toLocaleDateString("tr-TR", {
+    timeZone: "Europe/Istanbul",
     day: "numeric",
     month: "short",
     hour: "2-digit",

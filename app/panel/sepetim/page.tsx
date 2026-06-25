@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShipmentListItem, shipmentService } from "@/lib/services/shipmentService";
+import { formatTrDate } from "@/lib/date";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 function getLogoSrc(url: string): string {
@@ -68,9 +69,9 @@ function WeightIcon({ className }: { className?: string }) {
 // ─── Tarih Formatlama ─────────────────────────────────────────────────────────
 
 function formatDate(iso: string): string {
-  const date = new Date(iso);
-  const trMonth = date.toLocaleString('tr-TR', { month: 'short' }).replace('.', '').toUpperCase();
-  return `${date.getDate().toString().padStart(2, '0')} ${trMonth} ${date.getFullYear()}`;
+  return formatTrDate(iso, { day: "2-digit", month: "short", year: "numeric" })
+    .replace(/\./g, "")
+    .toUpperCase();
 }
 
 // ─── Sepetim Sayfası ─────────────────────────────────────────────────────────

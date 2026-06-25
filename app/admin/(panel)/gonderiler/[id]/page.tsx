@@ -28,7 +28,7 @@ const WIZARD_STEPS = ["Kargo Bilgileri", "Paket Ölçüleri", "Fiyatlandırma", 
 
 function fmt(iso: string) {
   if (!iso) return "-";
-  return new Date(iso).toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleDateString("tr-TR", { timeZone: "Europe/Istanbul", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
 function getCurrencySymbol(c: string) { return c === "EUR" ? "€" : c === "USD" ? "$" : "£"; }
