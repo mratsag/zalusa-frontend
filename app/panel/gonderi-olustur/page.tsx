@@ -9,7 +9,7 @@ import {
   Save, Printer, Loader2, RotateCcw, X,
   FileSpreadsheet, ArrowLeft, AlertTriangle, Box, Globe, ChevronUp,
   ChevronDown, Barcode, UploadCloud, Calendar, Scale, PlusSquare, ArrowRightSquare, ArrowLeftSquare,
-  FileUp, CheckCircle, File as FileIcon, Pencil, FileCheck, ShieldAlert
+  FileUp, CheckCircle, File as FileIcon, Pencil, FileCheck, ShieldAlert, HelpCircle
 } from "lucide-react";
 import { HSCodeCombobox } from "@/components/HSCodeCombobox";
 import { Stepper, STEP_IMAGES } from "@/components/panel/stepper";
@@ -3063,7 +3063,12 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
 
                 {/* Belge Türü Seçici */}
                 <div className="mb-3">
-                  <label className="text-[12px] font-medium text-slate-500 mb-1.5 block">Belge Türü</label>
+                  <label className="text-[12px] font-medium text-slate-500 mb-1.5 block">Belge Türü <InfoTip icon={HelpCircle} placement="bottom" width="w-80" text={<span>
+                    <b>ETGB Belgesi:</b> Mikro ihracat (ETGB&apos;li) gönderilerde gerekir; e-arşiv/e-fatura ile yapılan elektronik gümrük beyanıdır.<br />
+                    <b>MSDS Belgesi:</b> Sıvı, kozmetik, parfüm, pil, kimyasal vb. ürünlerde gerekir — Malzeme Güvenlik Bilgi Formu (taşıma güvenliği).<br />
+                    <b>Fatura:</b> Ticari gönderilerde ürünün ticari/proforma faturası (içerik ve değer beyanı).<br />
+                    <b>Diğer:</b> Yukarıdakiler dışında talep edilen ek belgeler.
+                  </span>} /></label>
                   <div className="flex gap-2 flex-wrap">
                     {[{ value: "ETGB", label: "ETGB Belgesi", icon: FileCheck }, { value: "MSDS", label: "MSDS Belgesi", icon: ShieldAlert }, { value: "INVOICE", label: "Fatura", icon: Receipt }, { value: "OTHER", label: "Diğer", icon: FileIcon }].map(t => {
                       const Icon = t.icon;

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Info } from "lucide-react";
+import { Info, type LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/cn";
 
@@ -12,16 +12,18 @@ export interface InfoTipProps {
   width?: string;
   /** Balon konumu: üstte mi altta mı. Varsayılan "top". Üst kenara yakın etiketlerde "bottom" kullanın. */
   placement?: "top" | "bottom";
+  /** İkon (lucide). Varsayılan Info (ⓘ); soru işareti için HelpCircle geçilebilir. */
+  icon?: LucideIcon;
 }
 
 /**
  * Etiketlerin yanına konan küçük (ⓘ) bilgi ikonu. Üzerine gelince (veya odaklanınca)
  * açıklama balonu gösterir. GTİP, IOSS gibi teknik terimleri açıklamak için kullanılır.
  */
-export function InfoTip({ text, className, width = "w-64", placement = "top" }: InfoTipProps) {
+export function InfoTip({ text, className, width = "w-64", placement = "top", icon: Icon = Info }: InfoTipProps) {
   return (
     <span className={cn("group relative inline-flex items-center align-middle", className)}>
-      <Info
+      <Icon
         tabIndex={0}
         aria-label="Bilgi"
         className="h-3.5 w-3.5 cursor-help text-[#94A3B8] outline-none transition-colors hover:text-[#475569] focus-visible:text-[#475569]"
