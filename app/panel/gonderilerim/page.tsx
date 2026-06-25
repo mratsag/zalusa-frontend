@@ -165,6 +165,7 @@ function StatusBadge({ status }: { status: string }) {
 function formatDate(iso: string): string {
   const date = new Date(iso);
   return date.toLocaleDateString("tr-TR", {
+    timeZone: "Europe/Istanbul",
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -667,9 +668,10 @@ export default function GonderilerimPage() {
         /* â”€â”€ Shipment Cards â”€â”€ */
         <div className="grid gap-4">
           {filtered.map((s) => {
-            const rawDate = new Date(s.createdAt || Date.now());
-            const trMonth = rawDate.toLocaleString('tr-TR', { month: 'short' }).replace('.', '').toUpperCase();
-            const cardDate = `${rawDate.getDate().toString().padStart(2, '0')} ${trMonth} ${rawDate.getFullYear()}`;
+            // Tarih her zaman Türkiye saatinde (Europe/Istanbul) — tarayıcı TZ'sine bağlı gün kayması olmasın
+            const cardDate = new Date(s.createdAt || Date.now())
+              .toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul', day: '2-digit', month: 'short', year: 'numeric' })
+              .replace(/\./g, '').toUpperCase();
 
             const isDelivered = s.status === "delivered";
             const showMenu = canCancel(s.status);
