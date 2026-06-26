@@ -1651,7 +1651,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-6 py-4 border-b border-[#F1F5F9] gap-3">
                         <div className="flex items-center gap-3">
                           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#F1F5F9] text-[12px] font-bold text-[#475569]">{idx + 1}</span>
-                          <span className="text-[14px] font-bold text-[#0F172A]">Paket/Koli {idx + 1}</span>
+                          <span className="text-[14px] font-bold text-[#0F172A]">{draft.shipmentType === "Koli" ? "Koli" : "Paket"} {idx + 1}</span>
                           {pkgChargeable > 0 && (
                             <span className="text-[12px] text-[#94A3B8]">{pkgChargeable.toFixed(1)} kg</span>
                           )}
@@ -1897,7 +1897,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                   onClick={addPackageItem}
                   className="flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-semibold text-white bg-[#3959F2] hover:bg-[#4338CA] transition-colors"
                 >
-                  <Plus className="h-4 w-4" /> Farklı Ölçüde Koli Ekle
+                  <Plus className="h-4 w-4" /> Farklı Ölçüde {draft.shipmentType === "Koli" ? "Koli" : "Paket"} Ekle
                 </button>
               </div>
 
@@ -1909,7 +1909,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
                     <div className="flex items-center justify-between sm:block">
                       <div className="text-[13px] sm:text-[14px] font-bold">Genel Toplam</div>
                       <div className="text-[11px] sm:text-[12px] text-[#94A3B8]">
-                        {totalPackageCount} koli • {chargeableWeight.toFixed(1)} kg
+                        {totalPackageCount} {draft.shipmentType === "Koli" ? "koli" : "paket"} • {chargeableWeight.toFixed(1)} kg
                       </div>
                     </div>
                     <div className="flex items-center justify-between gap-3 sm:gap-6">
@@ -2697,7 +2697,7 @@ function importPackagesFromExcel(rows: ParsedPackageRow[]) {
               </div>
               <div>
                 <h2 className="text-[22px] font-bold text-slate-900 tracking-tight">Gümrük (Proforma) Beyanı <InfoTip placement="bottom" width="w-72" text="Proforma fatura, gönderdiğiniz ürünlerin gümrük beyanı için içerik, adet ve değer dökümüdür. Gümrük vergilendirmesi bu bilgilere göre yapılır; eksik veya yanlış beyan gümrükte gecikmeye yol açabilir." /></h2>
-                <p className="mt-1 text-sm text-slate-500">Her kolinin boyut ve ağırlık bilgilerini girin.</p>
+                <p className="mt-1 text-sm text-slate-500">Her {draft.shipmentType === "Koli" ? "koli" : "paket"} için boyut ve ağırlık bilgilerini girin.</p>
               </div>
 
               <div className="flex items-start gap-3 rounded-2xl bg-[#F8FAFC] p-4 text-sm text-slate-600">
