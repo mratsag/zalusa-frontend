@@ -2,6 +2,7 @@ import { Outfit, Inter, Montserrat } from "next/font/google";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { OfferModalProvider } from "@/components/marketing/offer-modal";
+import { getSiteMenu } from "@/lib/marketing/menu";
 // Phosphor ikonları (PHP head.php'de unpkg'den yüklenen regular/bold/fill).
 // <i class="ph ph-*" | "ph-bold ph-*" | "ph-fill ph-*"> markup'ı birebir çalışır.
 import "@phosphor-icons/web/regular";
@@ -30,17 +31,19 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
-export default function MarketingLayout({
+export default async function MarketingLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const menu = await getSiteMenu();
+
   return (
     <div
       className={`${inter.variable} ${outfit.variable} ${montserrat.variable} zal-marketing bg-white text-slate-800`}
     >
       <OfferModalProvider>
-        <SiteHeader />
+        <SiteHeader menu={menu} />
         {children}
         <SiteFooter />
       </OfferModalProvider>

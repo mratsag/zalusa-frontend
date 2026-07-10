@@ -2,14 +2,18 @@
 
 import { useState } from "react";
 
+import type { NavItem, NavChild } from "@/lib/marketing/menu";
+import { useOfferModal } from "./offer-modal";
+
 // PHP includes/header.php birebir portu.
 // - Üst iletişim bandı (#top-contactbar)
 // - Sticky nav (#site-header): logo + desktop mega-menü (CSS group-hover) + CTA
 // - Mobil menü: hamburger toggle + <details> accordion (native)
-// E-posta Cloudflare obfuscation'dan çözüldü: destek@zalusa.com
-// CTA'lar app.zalusa.com'a gider (canlı ile aynı).
-export function SiteHeader() {
+// Menü admin'den (menu_items) gelir; layout server-side çeker, prop geçer.
+// "Kurumsal" etiketli üst öğe → link yerine modal (openKurumsal).
+export function SiteHeader({ menu }: { menu: NavItem[] }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { openKurumsal } = useOfferModal();
 
   return (
     <>
@@ -107,86 +111,9 @@ export function SiteHeader() {
 
             {/* Desktop menü */}
             <div className="hidden md:flex flex-1 items-center justify-center space-x-8">
-              {/* Nasıl Çalışır dropdown */}
-              <div className="relative group">
-                <a
-                  href="/nasil-calisir#nasil-calisir-bolumu"
-                  className="flex items-center space-x-1 text-slate-700 hover:text-slate-900 font-medium text-[14px] transition py-2"
-                >
-                  <span>Nasıl Çalışır</span>
-                  <Chevron className="w-4 h-4 transition-transform group-hover:rotate-180" />
-                </a>
-                <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
-                  <a
-                    href="/nasil-calisir#nasil-calisir-bolumu"
-                    className="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium rounded-t-xl"
-                  >
-                    İşleyiş
-                  </a>
-                  <a
-                    href="/nasil-calisir#akilli-fiyat-motoru"
-                    className="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium"
-                  >
-                    Teknoloji
-                  </a>
-                </div>
-              </div>
-
-              {/* Entegrasyonlar dropdown */}
-              <div className="relative group">
-                <a
-                  href="/entegrasyonlar"
-                  className="flex items-center space-x-1 text-slate-700 hover:text-slate-900 font-medium text-[14px] transition py-2"
-                >
-                  <span>Entegrasyonlar</span>
-                  <Chevron className="w-4 h-4 transition-transform group-hover:rotate-180" />
-                </a>
-                <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
-                  <a
-                    href="/entegrasyonlar#pazaryerleri"
-                    className="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium rounded-t-xl"
-                  >
-                    Pazaryerleri
-                  </a>
-                  <a
-                    href="/entegrasyonlar#e-ticaret"
-                    className="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium"
-                  >
-                    E-Ticaret
-                  </a>
-                  <a
-                    href="/entegrasyonlar#muhasebe"
-                    className="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium"
-                  >
-                    Muhasebe
-                  </a>
-                </div>
-              </div>
-
-              <a
-                href="/yurtdisi-kargo-fiyat-hesaplama"
-                className="text-slate-700 hover:text-slate-900 font-medium text-[14px] transition"
-              >
-                Fiyatlandırma
-              </a>
-              <a
-                href="/blog"
-                className="text-slate-700 hover:text-slate-900 font-medium text-[14px] transition"
-              >
-                Blog
-              </a>
-              <a
-                href="/sss"
-                className="text-slate-700 hover:text-slate-900 font-medium text-[14px] transition"
-              >
-                SSS
-              </a>
-              <a
-                href="/iletisim"
-                className="text-slate-700 hover:text-slate-900 font-medium text-[14px] transition"
-              >
-                İletişim
-              </a>
+              {menu.map((item, i) => (
+                <DesktopItem key={i} item={item} onKurumsal={openKurumsal} />
+              ))}
             </div>
 
             {/* Desktop CTA */}
@@ -244,34 +171,8 @@ export function SiteHeader() {
           >
             <nav className="w-full pb-0 text-left" aria-label="Mobil menü">
               <div className="border-t border-slate-100/90 divide-y divide-slate-100/90 text-left pl-8 pr-6 sm:pl-10 sm:pr-8">
-                <MobileAcc
-                  label="Nasıl Çalışır"
-                  items={[
-                    { href: "/nasil-calisir#nasil-calisir-bolumu", label: "İşleyiş" },
-                    { href: "/nasil-calisir#akilli-fiyat-motoru", label: "Teknoloji" },
-                  ]}
-                />
-                <MobileAcc
-                  label="Entegrasyonlar"
-                  items={[
-                    { href: "/entegrasyonlar#pazaryerleri", label: "Pazaryerleri" },
-                    { href: "/entegrasyonlar#e-ticaret", label: "E-Ticaret" },
-                    { href: "/entegrasyonlar#muhasebe", label: "Muhasebe" },
-                  ]}
-                />
-                {[
-                  { href: "/yurtdisi-kargo-fiyat-hesaplama", label: "Fiyatlandırma" },
-                  { href: "/blog", label: "Blog" },
-                  { href: "/sss", label: "SSS" },
-                  { href: "/iletisim", label: "İletişim" },
-                ].map((l) => (
-                  <a
-                    key={l.href}
-                    href={l.href}
-                    className="zalusa-mobile-nav-row flex w-full min-h-[44px] items-center py-1 text-left text-base font-medium leading-snug text-[#0000BE] hover:bg-slate-50 active:bg-slate-100/80 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0000BE]/25 rounded-lg"
-                  >
-                    {l.label}
-                  </a>
+                {menu.map((item, i) => (
+                  <MobileItem key={i} item={item} onKurumsal={openKurumsal} />
                 ))}
               </div>
             </nav>
@@ -315,6 +216,109 @@ export function SiteHeader() {
         </div>
       </nav>
     </>
+  );
+}
+
+function isExternal(href: string) {
+  return href.startsWith("http");
+}
+
+// Desktop üst öğe — PHP header.php desktop foreach birebir.
+function DesktopItem({ item, onKurumsal }: { item: NavItem; onKurumsal: () => void }) {
+  const ext = isExternal(item.href);
+  const hasDropdown = item.children.length > 0;
+
+  if (item.kurumsal && !hasDropdown) {
+    return (
+      <button
+        type="button"
+        onClick={onKurumsal}
+        className="text-slate-700 hover:text-slate-900 font-medium text-[14px] cursor-pointer transition"
+      >
+        {item.label}
+      </button>
+    );
+  }
+
+  if (hasDropdown) {
+    return (
+      <div className="relative group">
+        {item.href !== "#" ? (
+          <a
+            href={item.href}
+            {...(ext ? { target: "_blank", rel: "noopener" } : {})}
+            className="flex items-center space-x-1 text-slate-700 hover:text-slate-900 font-medium text-[14px] transition py-2"
+          >
+            <span>{item.label}</span>
+            <Chevron className="w-4 h-4 transition-transform group-hover:rotate-180" />
+          </a>
+        ) : (
+          <button
+            type="button"
+            className="flex items-center space-x-1 text-slate-700 hover:text-slate-900 font-medium text-[14px] cursor-pointer transition py-2"
+          >
+            <span>{item.label}</span>
+            <Chevron className="w-4 h-4 transition-transform group-hover:rotate-180" />
+          </button>
+        )}
+        <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
+          {item.children.map((c: NavChild, idx: number) => (
+            <a
+              key={idx}
+              href={c.href}
+              className={`block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium ${idx === 0 ? "rounded-t-xl" : ""}`}
+            >
+              {c.label}
+            </a>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <a
+      href={item.href}
+      {...(ext ? { target: "_blank", rel: "noopener" } : {})}
+      className="text-slate-700 hover:text-slate-900 font-medium text-[14px] transition"
+    >
+      {item.label}
+    </a>
+  );
+}
+
+// Mobil üst öğe — PHP header.php mobile foreach birebir.
+function MobileItem({ item, onKurumsal }: { item: NavItem; onKurumsal: () => void }) {
+  const ext = isExternal(item.href);
+  const hasDropdown = item.children.length > 0;
+
+  if (item.kurumsal && !hasDropdown) {
+    return (
+      <button
+        type="button"
+        onClick={onKurumsal}
+        className="zalusa-mobile-nav-row w-full min-h-[44px] flex items-center justify-between gap-2 py-1 text-left text-base font-medium leading-snug text-[#0000BE] hover:bg-slate-50 active:bg-slate-100/80 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0000BE]/25 rounded-lg"
+      >
+        <span className="min-w-0 flex-1 text-left">{item.label}</span>
+        <svg className="w-5 h-5 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    );
+  }
+
+  if (hasDropdown) {
+    return <MobileAcc label={item.label} items={item.children} />;
+  }
+
+  return (
+    <a
+      href={item.href}
+      {...(ext ? { target: "_blank", rel: "noopener" } : {})}
+      className="zalusa-mobile-nav-row flex w-full min-h-[44px] items-center py-1 text-left text-base font-medium leading-snug text-[#0000BE] hover:bg-slate-50 active:bg-slate-100/80 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0000BE]/25 rounded-lg"
+    >
+      {item.label}
+    </a>
   );
 }
 
