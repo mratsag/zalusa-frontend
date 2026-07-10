@@ -2,8 +2,80 @@
 import type { ReactNode } from "react";
 
 // homepage-v2.php REFERANSLAR bölümü (satır 142 / live 751-819) portu.
-// Marka kartları admin'den yönetilene kadar stilize fallback (PHP ile birebir).
+// Admin'de referans varsa dinamik marquee (logolar), yoksa stilize fallback (PHP ile birebir).
 // Marquee: animate-scroll (translateX -50%), kartlar 2 kez basılır (seamless loop).
+
+type ApiReference = { name: string; logo_path: string; link_url: string };
+
+const API = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "";
+
+// Aktif referanslar — hata durumunda boş (fallback devreye girer). ISR: 5 dk.
+async function getReferences(): Promise<ApiReference[]> {
+  if (!API) return [];
+  try {
+    const res = await fetch(`${API}/api/references`, {
+      next: { revalidate: 300 },
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!res.ok) return [];
+    const data = (await res.json()) as ApiReference[];
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+// Dinamik referans logoları — PHP array_chunk + yön alternasyonu birebir.
+function DynamicMarquee({ refs }: { refs: ApiReference[] }) {
+  const count = refs.length;
+  const rows = count >= 15 ? 3 : count >= 8 ? 2 : 1;
+  const perRow = Math.max(1, Math.ceil(count / rows));
+  const chunks = chunk(refs, perRow);
+
+  const Card = ({ r, dup }: { r: ApiReference; dup?: boolean }) => (
+    <div className="ref-card flex h-16 md:h-20 shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-white px-6 md:px-8 shadow-sm" {...(dup ? { "aria-hidden": true } : {})}>
+      <img
+        src={r.logo_path}
+        alt={dup ? "" : r.name}
+        className="max-h-9 md:max-h-11 w-auto max-w-[150px] object-contain opacity-70 transition hover:opacity-100"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+  );
+
+  return (
+    <div className="space-y-4 md:space-y-5">
+      {chunks.map((row, ri) => (
+        <div key={ri} className="relative overflow-hidden ref-marquee">
+          <div className={`flex ${ri % 2 === 1 ? "animate-scroll-rev" : "animate-scroll"} gap-4 md:gap-5 w-max items-center`}>
+            {row.map((r, i) =>
+              r.link_url ? (
+                <a key={`a-${i}`} href={r.link_url} target="_blank" rel="noopener" className="ref-card flex h-16 md:h-20 shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-white px-6 md:px-8 shadow-sm">
+                  <img src={r.logo_path} alt={r.name} className="max-h-9 md:max-h-11 w-auto max-w-[150px] object-contain opacity-70 transition hover:opacity-100" loading="lazy" decoding="async" />
+                </a>
+              ) : (
+                <Card key={`c-${i}`} r={r} />
+              ),
+            )}
+            {/* ikinci kopya = kesintisiz döngü */}
+            {row.map((r, i) => (
+              <Card key={`d-${i}`} r={r} dup />
+            ))}
+          </div>
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 md:w-24 bg-gradient-to-r from-slate-50 to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 md:w-24 bg-gradient-to-l from-slate-50 to-transparent z-10" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 type Brand = { gap?: boolean; node: ReactNode };
 
@@ -131,7 +203,27 @@ const GLOBAL_PARTNERS = [
   { src: "/assets/ikas-color.svg", alt: "ikas", cls: "h-5 md:h-6" },
 ];
 
-export function Referanslar() {
+function FallbackMarquee() {
+  return (
+    <div className="relative overflow-hidden ref-marquee">
+      <div className="flex animate-scroll gap-4 md:gap-5 w-max items-center">
+        {BRANDS.map((b, i) => (
+          <BrandCard key={`b-${i}`} brand={b} />
+        ))}
+        {/* DUPLICATE for seamless loop */}
+        {BRANDS.map((b, i) => (
+          <BrandCard key={`d-${i}`} brand={b} dup />
+        ))}
+      </div>
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-16 md:w-24 bg-gradient-to-r from-slate-50 to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-16 md:w-24 bg-gradient-to-l from-slate-50 to-transparent z-10" />
+    </div>
+  );
+}
+
+export async function Referanslar() {
+  const refs = await getReferences();
+
   return (
     <section className="py-12 md:py-16 bg-slate-50/60 border-y border-slate-200/40 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -139,20 +231,8 @@ export function Referanslar() {
           Yüzlerce markanın tercihi
         </p>
 
-        {/* Marquee */}
-        <div className="relative overflow-hidden ref-marquee">
-          <div className="flex animate-scroll gap-4 md:gap-5 w-max items-center">
-            {BRANDS.map((b, i) => (
-              <BrandCard key={`b-${i}`} brand={b} />
-            ))}
-            {/* DUPLICATE for seamless loop */}
-            {BRANDS.map((b, i) => (
-              <BrandCard key={`d-${i}`} brand={b} dup />
-            ))}
-          </div>
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 md:w-24 bg-gradient-to-r from-slate-50 to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 md:w-24 bg-gradient-to-l from-slate-50 to-transparent z-10" />
-        </div>
+        {/* Marquee — admin'de referans varsa dinamik, yoksa stilize fallback */}
+        {refs.length > 0 ? <DynamicMarquee refs={refs} /> : <FallbackMarquee />}
 
         {/* Anlaşmalı Partnerler */}
         <div className="mt-10 md:mt-14 pt-8 md:pt-10 border-t border-slate-200/60">

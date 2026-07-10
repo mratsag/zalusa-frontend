@@ -28,6 +28,7 @@ import {
   FileText,
   Settings,
   ArrowRightLeft,
+  Images,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
@@ -53,6 +54,7 @@ const adminNavItems = [
   { href: "/admin/yardim-ogeleri", label: "Yardım Öğeleri", icon: HelpCircle },
   { href: "/admin/mesajlar", label: "Mesajlar", icon: Mail },
   { href: "/admin/blog", label: "Blog Yönetimi", icon: FileText },
+  { href: "/admin/referanslar", label: "Referanslar", icon: Images },
   { href: "/admin/sss", label: "SSS Yönetimi", icon: HelpCircle },
   { href: "/admin/yonlendirmeler", label: "Yönlendirmeler", icon: ArrowRightLeft },
   { href: "/admin/ayarlar", label: "Site Ayarları", icon: Settings },
