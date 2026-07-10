@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Save, Trash2, Plus, CheckCircle2, AlertCircle } from "lucide-react";
 
 import { SeoFieldsForm } from "@/components/admin/seo-fields-form";
+import { AiGenerateButton } from "@/components/admin/ai-generate-button";
 import { getCity, updateCity, deleteCity, listCityDistricts, createCityDistrict, deleteCityDistrict, type SeoCity, type CityDistrict } from "@/lib/services/seoGeoService";
 
 function Toast({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) {
@@ -81,7 +82,10 @@ export default function SehirEditPage({ params }: { params: Promise<{ id: string
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold text-slate-800">{form.name}</h1>
-          <button onClick={removeCity} className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-600 hover:text-white"><Trash2 className="h-4 w-4" /> Şehri Sil</button>
+          <div className="flex items-center gap-2">
+            <AiGenerateButton type="city" id={cityId} modes={["content", "seo", "faqs"]} onDone={async () => { await load(); setToast({ message: "AI içeriği üretildi", type: "success" }); }} onError={(msg) => setToast({ message: msg, type: "error" })} />
+            <button onClick={removeCity} className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-600 hover:text-white"><Trash2 className="h-4 w-4" /> Şehri Sil</button>
+          </div>
         </div>
       </div>
 

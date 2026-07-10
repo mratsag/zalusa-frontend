@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Trash2, AlignLeft, Search, HelpCircle, Plus, Pencil, ExternalLink, CheckCircle2, AlertCircle, X } from "lucide-react";
 
+import { AiGenerateButton } from "@/components/admin/ai-generate-button";
 import { getPage, updatePage, deletePage, type Page } from "@/lib/services/pagesService";
 import { listFAQsByPage, createFAQ, updateFAQ, deleteFAQ, type FAQ } from "@/lib/services/faqService";
 
@@ -179,11 +180,14 @@ export default function SayfaEditPage({ params }: { params: Promise<{ id: string
               </a>
             </p>
           </div>
-          {!page.undeletable && (
-            <button onClick={removePage} className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-600 hover:text-white">
-              <Trash2 className="h-4 w-4" /> Sayfayı Sil
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            <AiGenerateButton type="page" id={pageId} modes={["content", "seo", "faqs"]} onDone={async () => { await load(); setToast({ message: "AI içeriği üretildi", type: "success" }); }} onError={(msg) => setToast({ message: msg, type: "error" })} />
+            {!page.undeletable && (
+              <button onClick={removePage} className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-600 hover:text-white">
+                <Trash2 className="h-4 w-4" /> Sayfayı Sil
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
