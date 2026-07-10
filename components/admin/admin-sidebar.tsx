@@ -32,6 +32,8 @@ import {
   Menu as MenuIcon,
   FileCode,
   Globe2,
+  Building,
+  MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
@@ -61,6 +63,8 @@ const adminNavItems = [
   { href: "/admin/menu", label: "Header Menü", icon: MenuIcon },
   { href: "/admin/sayfalar", label: "Sayfa & SEO", icon: FileCode },
   { href: "/admin/ulkeler", label: "Ülke SEO", icon: Globe2 },
+  { href: "/admin/sehirler", label: "Şehir SEO", icon: Building },
+  { href: "/admin/tr-iller", label: "TR İl SEO", icon: MapPin },
   { href: "/admin/sss", label: "SSS Yönetimi", icon: HelpCircle },
   { href: "/admin/yonlendirmeler", label: "Yönlendirmeler", icon: ArrowRightLeft },
   { href: "/admin/ayarlar", label: "Site Ayarları", icon: Settings },
