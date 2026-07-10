@@ -1,0 +1,394 @@
+"use client";
+
+import { useState } from "react";
+
+// PHP includes/header.php birebir portu.
+// - Üst iletişim bandı (#top-contactbar)
+// - Sticky nav (#site-header): logo + desktop mega-menü (CSS group-hover) + CTA
+// - Mobil menü: hamburger toggle + <details> accordion (native)
+// E-posta Cloudflare obfuscation'dan çözüldü: destek@zalusa.com
+// CTA'lar app.zalusa.com'a gider (canlı ile aynı).
+export function SiteHeader() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <>
+      {/* Üst iletişim bandı */}
+      <div
+        id="top-contactbar"
+        dir="ltr"
+        className="bg-[#0000BE] text-white text-[11px] md:text-xs relative z-50"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 h-9">
+          <span className="hidden sm:inline-flex items-center gap-2 text-white/90 font-medium whitespace-nowrap">
+            <span className="relative flex w-2 h-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#BFFF00] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#BFFF00]" />
+            </span>
+            7/24 Canlı Operasyon Desteği
+          </span>
+          <div className="flex items-center gap-4 md:gap-6 ml-auto">
+            <a
+              href="mailto:destek@zalusa.com"
+              className="inline-flex items-center gap-1.5 font-medium hover:text-[#BFFF00] transition whitespace-nowrap"
+            >
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+              destek@zalusa.com
+            </a>
+            <span className="w-px h-3.5 bg-white/25" aria-hidden="true" />
+            <a
+              href="tel:08502551840"
+              className="inline-flex items-center gap-1.5 font-semibold hover:text-[#BFFF00] transition whitespace-nowrap"
+            >
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                strokeWidth="2.2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                />
+              </svg>
+              0850 255 18 40
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky nav */}
+      <nav
+        id="site-header"
+        dir="ltr"
+        className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm transition-all duration-300"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            {/* Logo */}
+            <div className="flex-shrink-0 flex items-center gap-2">
+              <a
+                href="/"
+                className="site-logo-link flex items-center gap-2 text-[#0000BE] hover:opacity-90 transition"
+                title="Zalusa Ana Sayfa"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/assets/logo-ikon.png"
+                  alt="Zalusa Logo İkonu"
+                  title="Zalusa Logo İkonu"
+                  className="site-logo-icon flex-shrink-0 w-8 h-8 rounded-lg object-contain"
+                  width={48}
+                  height={48}
+                />
+                <span className="text-2xl font-bold tracking-tighter font-montserrat">
+                  Zalusa
+                </span>
+              </a>
+            </div>
+
+            {/* Desktop menü */}
+            <div className="hidden md:flex flex-1 items-center justify-center space-x-8">
+              {/* Nasıl Çalışır dropdown */}
+              <div className="relative group">
+                <a
+                  href="/nasil-calisir#nasil-calisir-bolumu"
+                  className="flex items-center space-x-1 text-slate-700 hover:text-slate-900 font-medium text-[14px] transition py-2"
+                >
+                  <span>Nasıl Çalışır</span>
+                  <Chevron className="w-4 h-4 transition-transform group-hover:rotate-180" />
+                </a>
+                <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
+                  <a
+                    href="/nasil-calisir#nasil-calisir-bolumu"
+                    className="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium rounded-t-xl"
+                  >
+                    İşleyiş
+                  </a>
+                  <a
+                    href="/nasil-calisir#akilli-fiyat-motoru"
+                    className="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium"
+                  >
+                    Teknoloji
+                  </a>
+                </div>
+              </div>
+
+              {/* Entegrasyonlar dropdown */}
+              <div className="relative group">
+                <a
+                  href="/entegrasyonlar"
+                  className="flex items-center space-x-1 text-slate-700 hover:text-slate-900 font-medium text-[14px] transition py-2"
+                >
+                  <span>Entegrasyonlar</span>
+                  <Chevron className="w-4 h-4 transition-transform group-hover:rotate-180" />
+                </a>
+                <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
+                  <a
+                    href="/entegrasyonlar#pazaryerleri"
+                    className="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium rounded-t-xl"
+                  >
+                    Pazaryerleri
+                  </a>
+                  <a
+                    href="/entegrasyonlar#e-ticaret"
+                    className="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium"
+                  >
+                    E-Ticaret
+                  </a>
+                  <a
+                    href="/entegrasyonlar#muhasebe"
+                    className="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium"
+                  >
+                    Muhasebe
+                  </a>
+                </div>
+              </div>
+
+              <a
+                href="/yurtdisi-kargo-fiyat-hesaplama"
+                className="text-slate-700 hover:text-slate-900 font-medium text-[14px] transition"
+              >
+                Fiyatlandırma
+              </a>
+              <a
+                href="/blog"
+                className="text-slate-700 hover:text-slate-900 font-medium text-[14px] transition"
+              >
+                Blog
+              </a>
+              <a
+                href="/sss"
+                className="text-slate-700 hover:text-slate-900 font-medium text-[14px] transition"
+              >
+                SSS
+              </a>
+              <a
+                href="/iletisim"
+                className="text-slate-700 hover:text-slate-900 font-medium text-[14px] transition"
+              >
+                İletişim
+              </a>
+            </div>
+
+            {/* Desktop CTA */}
+            <div className="hidden md:flex items-center gap-5">
+              <a
+                href="https://app.zalusa.com"
+                className="text-slate-700 hover:text-slate-900 font-medium text-[14px] transition whitespace-nowrap"
+              >
+                Giriş Yap
+              </a>
+              <a
+                href="https://app.zalusa.com"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-sm font-semibold rounded-lg shadow-sm cursor-pointer transition-all whitespace-nowrap"
+              >
+                Ücretsiz Teklif Al
+                <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+
+            {/* Mobil hamburger */}
+            <div className="flex md:hidden items-center ml-4">
+              <button
+                type="button"
+                id="mobile-menu-btn"
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-menu"
+                aria-label="Menüyü aç/kapat"
+                onClick={() => setMobileOpen((v) => !v)}
+                className="text-slate-900 p-2 -mr-2 rounded-xl hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0000BE]/40 transition-colors"
+              >
+                <svg
+                  className="w-7 h-7"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  width="28"
+                  height="28"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Mobil menü */}
+          <div
+            id="mobile-menu"
+            className={`zalusa-mobile-nav ${mobileOpen ? "" : "hidden"} md:hidden absolute z-40 -mx-4 sm:-mx-6 lg:-mx-8 left-0 right-0 top-full border-t border-slate-200/90 bg-white shadow-[0_14px_40px_-12px_rgba(15,23,42,0.14)] rounded-b-2xl overflow-hidden text-left`}
+          >
+            <nav className="w-full pb-0 text-left" aria-label="Mobil menü">
+              <div className="border-t border-slate-100/90 divide-y divide-slate-100/90 text-left pl-8 pr-6 sm:pl-10 sm:pr-8">
+                <MobileAcc
+                  label="Nasıl Çalışır"
+                  items={[
+                    { href: "/nasil-calisir#nasil-calisir-bolumu", label: "İşleyiş" },
+                    { href: "/nasil-calisir#akilli-fiyat-motoru", label: "Teknoloji" },
+                  ]}
+                />
+                <MobileAcc
+                  label="Entegrasyonlar"
+                  items={[
+                    { href: "/entegrasyonlar#pazaryerleri", label: "Pazaryerleri" },
+                    { href: "/entegrasyonlar#e-ticaret", label: "E-Ticaret" },
+                    { href: "/entegrasyonlar#muhasebe", label: "Muhasebe" },
+                  ]}
+                />
+                {[
+                  { href: "/yurtdisi-kargo-fiyat-hesaplama", label: "Fiyatlandırma" },
+                  { href: "/blog", label: "Blog" },
+                  { href: "/sss", label: "SSS" },
+                  { href: "/iletisim", label: "İletişim" },
+                ].map((l) => (
+                  <a
+                    key={l.href}
+                    href={l.href}
+                    className="zalusa-mobile-nav-row flex w-full min-h-[44px] items-center py-1 text-left text-base font-medium leading-snug text-[#0000BE] hover:bg-slate-50 active:bg-slate-100/80 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0000BE]/25 rounded-lg"
+                  >
+                    {l.label}
+                  </a>
+                ))}
+              </div>
+            </nav>
+            <div className="shrink-0 border-t border-slate-200/80 bg-slate-50/95 px-5 sm:px-7 py-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] space-y-2.5">
+              <a
+                href="https://app.zalusa.com"
+                className="inline-flex w-full min-h-[44px] items-center justify-center gap-2 px-2 py-2 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-sm font-bold rounded-lg shadow-sm cursor-pointer transition-all text-center leading-snug"
+              >
+                Ücretsiz Teklif Al
+                <ArrowRight className="w-4 h-4 shrink-0" />
+              </a>
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <a
+                  href="https://app.zalusa.com"
+                  className="inline-flex items-center text-[13.5px] font-semibold text-slate-700 hover:text-[#0000BE] transition"
+                >
+                  Giriş Yap
+                </a>
+                <a
+                  href="tel:08502551840"
+                  className="inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-slate-700 hover:text-[#0000BE] transition"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2.2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                    />
+                  </svg>
+                  0850 255 18 40
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </>
+  );
+}
+
+function Chevron({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M19 9l-7 7-7-7"
+      />
+    </svg>
+  );
+}
+
+function ArrowRight({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      strokeWidth="2.5"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+    </svg>
+  );
+}
+
+function MobileAcc({
+  label,
+  items,
+}: {
+  label: string;
+  items: { href: string; label: string }[];
+}) {
+  return (
+    <details className="zalusa-nav-acc group">
+      <summary className="zalusa-mobile-nav-row zalusa-mobile-nav-summary flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-2 py-1 text-left text-base font-medium leading-snug text-[#0000BE] hover:bg-slate-50 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0000BE]/25 rounded-lg [&::-webkit-details-marker]:hidden">
+        <span className="min-w-0 flex-1 text-left">{label}</span>
+        <svg
+          className="zalusa-nav-acc-chevron w-5 h-5 shrink-0 text-[#0000BE]/40 transition-transform duration-200"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </summary>
+      <div className="pb-2 pt-0.5 pl-3 ml-2 border-l-2 border-slate-200/80 space-y-0.5 text-left">
+        {items.map((it) => (
+          <a
+            key={it.href}
+            href={it.href}
+            className="flex min-h-[40px] items-center text-left text-[15px] font-medium leading-snug text-slate-700 hover:text-[#0000BE]"
+          >
+            {it.label}
+          </a>
+        ))}
+      </div>
+    </details>
+  );
+}

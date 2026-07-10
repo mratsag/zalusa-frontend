@@ -11,7 +11,7 @@ export function PanelGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem("zalusa.token");
     if (!token) {
-      router.replace("/");
+      router.replace("/giris");
     }
   }, [router, pathname]);
 

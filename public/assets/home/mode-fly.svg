@@ -1,0 +1,21 @@
+                        <svg class="w-full h-full max-w-[200px] drop-shadow-[0_6px_20px_rgba(34,211,238,0.22)]" viewBox="0 0 200 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g opacity="0.5" fill="#CFFAFE"><ellipse cx="34" cy="36" rx="16" ry="6"/><ellipse cx="42" cy="32" rx="11" ry="5"/><ellipse cx="168" cy="106" rx="16" ry="6"/><ellipse cx="176" cy="102" rx="11" ry="5"/></g>
+                            <circle cx="172" cy="34" r="13" fill="#FEF9C3" opacity="0.85"/>
+                            <path d="M26 116 Q90 64 182 48" stroke="#22D3EE" stroke-width="2" stroke-dasharray="5 5" fill="none" stroke-linecap="round" opacity="0.7"/>
+                            <circle cx="26" cy="116" r="4" fill="#fff" stroke="#0891B2" stroke-width="2"/>
+                            <circle cx="182" cy="48" r="4" fill="#0891B2"/>
+                            <circle cx="60" cy="92" r="2.4" fill="#22D3EE" opacity="0.5"/>
+                            <circle cx="100" cy="72" r="3" fill="#22D3EE" opacity="0.7"/>
+                            <circle cx="138" cy="58" r="2.4" fill="#22D3EE" opacity="0.6"/>
+                            <g transform="translate(76,56) rotate(-20)">
+                                <path d="M0 13 L64 7 L80 13 L64 19 Z" fill="#fff" stroke="#0891B2" stroke-width="2"/>
+                                <path d="M24 13 L34 -2 L48 -2 L40 13 Z" fill="#22D3EE" stroke="#0891B2" stroke-width="1.6"/>
+                                <path d="M24 13 L34 28 L48 28 L40 13 Z" fill="#06B6D4" stroke="#0891B2" stroke-width="1.6"/>
+                                <path d="M2 13 L9 3 L16 13 Z" fill="#67E8F9" stroke="#0891B2" stroke-width="1.5"/>
+                                <path d="M2 13 L9 23 L16 13 Z" fill="#67E8F9" stroke="#0891B2" stroke-width="1.5"/>
+                                <circle cx="46" cy="13" r="1.5" fill="#0891B2"/><circle cx="53" cy="13" r="1.5" fill="#0891B2"/><circle cx="60" cy="13" r="1.5" fill="#0891B2"/>
+                            </g>
+                            <path d="M58 118 H74" stroke="#22D3EE" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+                            <path d="M52 126 H68" stroke="#22D3EE" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+                            <g transform="translate(20,126)"><rect x="0" y="0" width="58" height="18" rx="9" fill="#fff" stroke="#22D3EE" stroke-width="1.4"/><circle cx="10" cy="9" r="3.2" fill="#22D3EE"/><path d="M8.4 9 L9.8 10.4 L11.6 7.6" stroke="#fff" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/><text x="17" y="12.4" font-family="sans-serif" font-size="7.5" font-weight="700" fill="#0891B2">EXPRESS</text></g>
+                        </svg>

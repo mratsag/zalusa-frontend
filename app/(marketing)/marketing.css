@@ -1,0 +1,402 @@
+/* ============================================================
+   Zalusa PAZARLAMA (marketing) tema katmanı
+   PHP sitesindeki style.css + head.php kritik CSS portu.
+   TAMAMI .zal-marketing altında izole edilir; app'in
+   globals.css temasıyla (Geist font, 5px radius, brand paleti)
+   çakışmaz. Fontlar next/font ile --font-inter / --font-outfit /
+   --font-montserrat CSS değişkenleri üzerinden gelir.
+   ============================================================ */
+
+/* ---- Marka değişkenleri (PHP :root portu) ---- */
+.zal-marketing {
+  --primary-blue: #0000be;
+  --stroke-color: #e1e8f1;
+  --icon-color: #5147ef;
+  --icon-bg: #edf2ff;
+  --text-slate: #1e293b;
+  --text-gray: #64748b;
+
+  /* Gövde fontu Inter, arka plan/renk (head.php body class'ı) */
+  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
+  color: #1e293b;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Başlıklar Outfit (style.css h1..h6 + .font-outfit portu) */
+.zal-marketing :is(h1, h2, h3, h4, h5, h6),
+.zal-marketing .font-outfit {
+  font-family: var(--font-outfit), "Outfit", system-ui, sans-serif;
+}
+.zal-marketing .font-montserrat {
+  font-family: var(--font-montserrat), "Montserrat", system-ui, sans-serif;
+}
+/* head.php kritik CSS: butonlar/linkler Inter */
+.zal-marketing button,
+.zal-marketing a,
+.zal-marketing .btn {
+  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
+}
+
+/* ---- Heading defaults (style.css) ---- */
+.zal-marketing :is(h1, h2, h3) {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.zal-marketing :is(h4, h5, h6) {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ---- App globals.css radius override'ını (5px) geri al ----
+   PHP sitesi Tailwind v4 varsayılan radius'larına dayanıyor.
+   Yüksek specificity ile .zal-marketing altında geri yükleniyor. */
+.zal-marketing .rounded-sm { border-radius: 0.25rem; }
+.zal-marketing .rounded-md { border-radius: 0.375rem; }
+.zal-marketing .rounded-lg { border-radius: 0.5rem; }
+
+/* ============================================================
+   head.php — kritik inline CSS portu (CLS/FOUC + responsive)
+   ============================================================ */
+.zal-marketing #top-banner {
+  min-height: 4.5rem;
+  background: linear-gradient(90deg, #0000be, #7c7ce3, #4d4df2);
+}
+.zal-marketing #countdown {
+  min-height: 2.5rem;
+  min-width: 11rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  contain: layout;
+}
+.zal-marketing main { background-color: #fff; }
+.zal-marketing main h1 { line-height: 1.1; }
+.zal-marketing #site-header { direction: ltr; }
+.zal-marketing #site-header .site-logo-link {
+  direction: ltr;
+  flex-direction: row !important;
+}
+.zal-marketing #site-header .site-logo-icon,
+.zal-marketing footer .site-logo-icon { transform: none !important; }
+
+/* Marquee (referans logoları + hero şeritleri) */
+@keyframes zal-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.zal-marketing .animate-scroll { animation: zal-scroll 40s linear infinite; }
+.zal-marketing .pause-on-hover:hover { animation-play-state: paused; }
+
+/* Hero illustration görünürlük kuralları (head.php) */
+.zal-marketing main img[alt="Zalusa Logistics Illustration"] {
+  max-width: min(100%, 672px);
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+@media (max-width: 1023px) {
+  .zal-marketing main img[alt="Zalusa Logistics Illustration"] { display: none; }
+  .zal-marketing main div:has(> img[alt="Zalusa Logistics Illustration"]) { display: none !important; }
+}
+@media (min-width: 1024px) {
+  .zal-marketing main div:has(> img[alt="Zalusa Logistics Illustration"]) {
+    display: flex !important;
+    justify-content: center;
+    align-items: flex-end;
+  }
+}
+
+/* Anasayfa responsive tipografi override (head.php .home-page) */
+@media (max-width: 767px) {
+  .zal-marketing.home-page section,
+  .zal-marketing .home-page section { padding-top: 2.5rem !important; padding-bottom: 2.5rem !important; }
+  .zal-marketing .text-6xl { font-size: 2.35rem !important; line-height: 1.15 !important; }
+  .zal-marketing .text-5xl { font-size: 2rem !important; line-height: 1.2 !important; }
+  .zal-marketing .text-4xl { font-size: 1.75rem !important; line-height: 1.25 !important; }
+  .zal-marketing .text-3xl { font-size: 1.45rem !important; line-height: 1.3 !important; }
+  .zal-marketing .text-2xl { font-size: 1.25rem !important; line-height: 1.35 !important; }
+  .zal-marketing .text-xl  { font-size: 1rem !important; line-height: 1.6 !important; }
+  .zal-marketing .text-lg  { font-size: 0.95rem !important; line-height: 1.55 !important; }
+  .zal-marketing .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem !important; }
+  .zal-marketing .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.25rem !important; }
+}
+
+/* head.php @layer utilities portu */
+.zal-marketing .scrollbar-hide::-webkit-scrollbar { display: none; }
+.zal-marketing .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* head.php custom keyframes */
+@keyframes zal-blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+.zal-marketing .animate-blob { animation: zal-blob 7s infinite; }
+.zal-marketing .animation-delay-2000 { animation-delay: 2s; }
+.zal-marketing .animation-delay-4000 { animation-delay: 4s; }
+@keyframes zal-float-hd {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+.zal-marketing .animate-float { animation: zal-float-hd 6s ease-in-out infinite; }
+.zal-marketing .animate-spin-slow { animation: spin 12s linear infinite; }
+.zal-marketing .animate-bounce-slow { animation: bounce 3s infinite; }
+
+/* ============================================================
+   style.css — bileşen sistemleri (class tabanlı, .zal-marketing
+   altında tutuldu; PHP ile birebir)
+   ============================================================ */
+
+/* Rich content typography (SEO / legal / ülke-şehir sayfaları) */
+.zal-marketing .zalusa-rich-content {
+  color: #475569;
+  font-size: 0.92rem;
+  line-height: 1.68;
+  text-align: left;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 768px) {
+  .zal-marketing .zalusa-rich-content { font-size: 0.97rem; line-height: 1.74; }
+}
+.zal-marketing .zalusa-rich-content > :first-child { margin-top: 0 !important; }
+.zal-marketing .zalusa-rich-content > :last-child { margin-bottom: 0 !important; }
+.zal-marketing .zalusa-rich-content :where(h1, h2, h3, h4, h5, h6) {
+  color: #0f172a; font-weight: 800; letter-spacing: -0.01em; line-height: 1.3; margin: 1.02em 0 0.34em;
+}
+.zal-marketing .zalusa-rich-content h1 { font-size: clamp(1.6rem, 1.25rem + 1.25vw, 2.1rem); }
+.zal-marketing .zalusa-rich-content h2 { font-size: 1.36rem !important; font-weight: 800 !important; color: #0b1329 !important; margin-top: 0.95em !important; margin-bottom: 0.3em !important; }
+.zal-marketing .zalusa-rich-content h3 { font-size: 1.14rem !important; font-weight: 700 !important; color: #1a2741 !important; margin-top: 0.78em !important; margin-bottom: 0.22em !important; }
+.zal-marketing .zalusa-rich-content h4 { font-size: 1.03rem !important; font-weight: 700 !important; color: #253553 !important; }
+@media (min-width: 768px) {
+  .zal-marketing .zalusa-rich-content h2 { font-size: 1.58rem !important; }
+  .zal-marketing .zalusa-rich-content h3 { font-size: 1.25rem !important; }
+  .zal-marketing .zalusa-rich-content h4 { font-size: 1.08rem !important; }
+}
+.zal-marketing .zalusa-rich-content h5, .zal-marketing .zalusa-rich-content h6 { font-size: 1rem; }
+.zal-marketing .zalusa-rich-content :where(p, ul, ol, table, blockquote, pre, figure) { margin: 0.45rem 0; }
+.zal-marketing .zalusa-rich-content p { color: #475569; }
+.zal-marketing .zalusa-rich-content ul, .zal-marketing .zalusa-rich-content ol { padding-left: 1.2rem; color: #243650; list-style-position: outside; }
+.zal-marketing .zalusa-rich-content ul { list-style: disc; }
+.zal-marketing .zalusa-rich-content ol { list-style: decimal; }
+.zal-marketing .zalusa-rich-content li { margin: 0.16rem 0; padding-left: 0.12rem; color: #1f2f4a; }
+.zal-marketing .zalusa-rich-content li::marker { color: #243650; font-weight: 700; }
+.zal-marketing .zalusa-rich-content li > ul, .zal-marketing .zalusa-rich-content li > ol { margin-top: 0.22rem; margin-bottom: 0.22rem; }
+.zal-marketing .zalusa-rich-content a { color: #0000be; font-weight: 600; text-decoration: none; }
+.zal-marketing .zalusa-rich-content a:hover { color: #00009c; }
+.zal-marketing .zalusa-rich-content strong { color: #1e293b; }
+.zal-marketing .zalusa-rich-content :where(img, video, iframe) { max-width: 100%; height: auto; border-radius: 0.75rem; }
+.zal-marketing .zalusa-rich-content table { width: 100% !important; max-width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; border: 1px solid #b9c7da; border-radius: 0.75rem; overflow: hidden; background: #fff; margin: 0.66rem 0 0.82rem; box-shadow: 0 2px 6px rgba(15,23,42,0.07); }
+.zal-marketing .zalusa-rich-content thead { background: #dbe5f1; }
+.zal-marketing .zalusa-rich-content th, .zal-marketing .zalusa-rich-content td { padding: 0.42rem 0.5rem; border-bottom: 1px solid #d8e1ec; text-align: left; vertical-align: top; font-size: 0.82rem; line-height: 1.45; white-space: normal; word-break: break-word; overflow-wrap: anywhere; border-right: 1px solid #ced9e6; }
+.zal-marketing .zalusa-rich-content th { color: #0f172a; font-weight: 700; border-bottom: 1px solid #b9c7da; }
+.zal-marketing .zalusa-rich-content td { color: #1f2f4a; }
+.zal-marketing .zalusa-rich-content tr > *:last-child { border-right: 0; }
+.zal-marketing .zalusa-rich-content tbody tr:nth-child(even) { background: #f8fafc; }
+.zal-marketing .zalusa-rich-content tbody tr:last-child td { border-bottom: 0; }
+.zal-marketing .zalusa-rich-content blockquote { border-left: 3px solid #cbd5e1; padding-left: 0.9rem; color: #475569; font-style: italic; }
+@media (min-width: 768px) {
+  .zal-marketing .zalusa-rich-content th, .zal-marketing .zalusa-rich-content td { padding: 0.58rem 0.68rem; font-size: 0.9rem; }
+}
+@media (min-width: 1024px) {
+  .zal-marketing .zalusa-rich-content table { display: inline-table; width: auto !important; min-width: 26rem; max-width: 100%; table-layout: auto; }
+  .zal-marketing .zalusa-rich-content th, .zal-marketing .zalusa-rich-content td { padding: 0.48rem 0.58rem; font-size: 0.84rem; line-height: 1.35; }
+}
+
+/* Kart + gölge sistemi */
+.zal-marketing .zalusa-card { border: 1px solid var(--stroke-color); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05); background: white; border-radius: 1rem; transition: all 0.3s ease; position: relative; }
+.zal-marketing .zalusa-card:hover { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+.zal-marketing .zal-shadow-xs   { box-shadow: 0 1px 2px rgba(15,23,42,0.04); }
+.zal-marketing .zal-shadow-soft { box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 8px 24px -14px rgba(15,23,42,0.10); }
+.zal-marketing .zal-shadow-card { box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 12px 32px -16px rgba(15,23,42,0.12); }
+.zal-marketing .zal-shadow-lift { box-shadow: 0 2px 4px rgba(15,23,42,0.05), 0 24px 60px -24px rgba(15,23,42,0.18); }
+.zal-marketing .zal-shadow-cta  { box-shadow: 0 1px 2px rgba(15,23,42,0.06), 0 10px 24px -10px rgba(0,0,190,0.35); }
+.zal-marketing .zal-hover-card  { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.zal-marketing .zal-hover-card:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(15,23,42,0.05), 0 18px 44px -20px rgba(15,23,42,0.16); }
+
+@keyframes zal-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.zal-marketing .zal-rise    { animation: zal-rise .55s ease-out both; }
+.zal-marketing .zal-rise-d1 { animation: zal-rise .55s ease-out .08s both; }
+.zal-marketing .zal-rise-d2 { animation: zal-rise .55s ease-out .16s both; }
+.zal-marketing .zal-rise-d3 { animation: zal-rise .55s ease-out .24s both; }
+
+/* Eyebrow + italic accent */
+.zal-marketing .zal-eyebrow { display: inline-block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.18em; color: #4d4df2; margin-bottom: 0.75rem; }
+.zal-marketing .zal-italic-accent { font-family: ui-serif, Georgia, "Times New Roman", serif; font-style: italic; font-weight: 400; color: #64748b; }
+
+/* Butonlar */
+.zal-marketing .zal-btn, .zal-marketing .zal-btn-primary, .zal-marketing .zal-btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; height: 3rem; padding: 0 1.5rem;
+  border-radius: 0.75rem; font-size: 14px; font-weight: 600; line-height: 1; white-space: nowrap; cursor: pointer;
+  transition: transform .25s ease, box-shadow .25s ease, background-image .25s ease, border-color .25s ease, background-color .25s ease; text-decoration: none;
+}
+.zal-marketing .zal-btn-primary { background-image: linear-gradient(135deg, #4d4df2, #0000be) !important; background-color: #0000be !important; color: #fff !important; border: 0 !important; box-shadow: 0 1px 2px rgba(15,23,42,0.06), 0 10px 24px -10px rgba(0,0,190,0.35) !important; }
+.zal-marketing .zal-btn-primary:hover { transform: translateY(-2px); background-image: linear-gradient(135deg, #4d4df2, #00009c) !important; box-shadow: 0 2px 6px rgba(15,23,42,0.08), 0 18px 32px -14px rgba(0,0,190,0.45) !important; }
+.zal-marketing .zal-btn-primary:focus-visible { outline: 2px solid #4d4df2; outline-offset: 2px; }
+.zal-marketing .zal-btn-secondary { background-color: #fff !important; color: #0f172a !important; border: 1px solid #e2e8f0 !important; box-shadow: 0 1px 2px rgba(15,23,42,0.04) !important; }
+.zal-marketing .zal-btn-secondary:hover { border-color: #cbd5e1 !important; background-color: #f8fafc !important; transform: translateY(-1px); box-shadow: 0 2px 6px rgba(15,23,42,0.06) !important; }
+.zal-marketing .zal-btn-sm { height: 2.5rem; padding: 0 1.1rem; font-size: 13px; border-radius: 0.625rem; }
+.zal-marketing .zal-btn-lg { height: 3.5rem; padding: 0 2rem; font-size: 15px; border-radius: 0.875rem; }
+.zal-marketing .zal-btn-block { width: 100%; }
+@media (min-width: 640px) { .zal-marketing .zal-btn-block { width: auto; } }
+
+/* İkon konteyner + label + subtext */
+.zal-marketing .zalusa-icon-container { display: inline-flex; align-items: center; justify-content: center; width: 3rem; height: 3rem; background-color: var(--icon-bg); color: var(--icon-color); border-radius: 9999px; padding: 0.75rem; }
+.zal-marketing .zalusa-icon-container svg { width: 1.5rem; height: 1.5rem; }
+.zal-marketing .btn-zalusa-primary { background-color: var(--primary-blue); color: white; font-weight: 700; border-radius: 0.75rem; padding: 0.75rem 1.5rem; transition: background-color 0.2s; }
+.zal-marketing .btn-zalusa-primary:hover { background-color: #00009c; }
+.zal-marketing .zalusa-subtext { color: var(--text-gray); font-size: 0.875rem; line-height: 1.5; }
+.zal-marketing .zalusa-label { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.75rem; border-radius: 9999px; background-color: var(--icon-bg); color: var(--icon-color); font-size: 0.75rem; font-weight: 600; }
+
+/* Birleşik frontend buton sistemi (attribute-seçici, PHP birebir) */
+.zal-marketing :where(a, button).btn-ui,
+.zal-marketing :where(a, button)[class*="bg-[#0000BE]"][class*="font-bold"],
+.zal-marketing :where(a, button)[class*="bg-white"][class*="border"][class*="font-bold"] {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 700; line-height: 1.2;
+  border-radius: 0.75rem; min-height: 2.875rem; padding: 0.75rem 1rem; text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.zal-marketing :where(a, button).btn-ui-primary,
+.zal-marketing :where(a, button)[class*="bg-[#0000BE]"][class*="font-bold"] { background-color: #0000be; color: #fff; border: 1px solid transparent; box-shadow: 0 10px 18px -10px rgba(0,0,190,0.45); }
+.zal-marketing :where(a, button).btn-ui-primary:hover,
+.zal-marketing :where(a, button)[class*="bg-[#0000BE]"][class*="font-bold"]:hover { background-color: #00009c; box-shadow: 0 14px 22px -12px rgba(0,0,190,0.5); }
+.zal-marketing :where(a, button).btn-ui-secondary,
+.zal-marketing :where(a, button)[class*="bg-white"][class*="border"][class*="font-bold"] { background-color: #fff; color: #334155; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(15,23,42,0.08); }
+.zal-marketing :where(a, button).btn-ui-secondary:hover,
+.zal-marketing :where(a, button)[class*="bg-white"][class*="border"][class*="font-bold"]:hover { background-color: #f8fafc; border-color: #dbe3ef; }
+.zal-marketing :where(a, button).btn-ui:focus-visible,
+.zal-marketing :where(a, button)[class*="bg-[#0000BE]"][class*="font-bold"]:focus-visible,
+.zal-marketing :where(a, button)[class*="bg-white"][class*="border"][class*="font-bold"]:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,0,190,0.18); }
+@media (min-width: 768px) {
+  .zal-marketing :where(a, button).btn-ui,
+  .zal-marketing :where(a, button)[class*="bg-[#0000BE]"][class*="font-bold"],
+  .zal-marketing :where(a, button)[class*="bg-white"][class*="border"][class*="font-bold"] { min-height: 3rem; padding: 0.875rem 1.5rem; font-size: 1rem; }
+}
+
+/* Ek animasyonlar (style.css) */
+@keyframes zalusa-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.zal-marketing .animate-zalusa-float { animation: zalusa-float 3s ease-in-out infinite; }
+@keyframes zalusa-pulse-soft { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.95; } }
+.zal-marketing .animate-zalusa-pulse { animation: zalusa-pulse-soft 2s ease-in-out infinite; }
+@keyframes zal-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.zal-marketing .animate-shimmer { animation: zal-shimmer 3s infinite; }
+@keyframes zal-headline-shimmer { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+.zal-marketing .headline-shimmer { background-size: 200% 100%; animation: zal-headline-shimmer 6s linear infinite; }
+
+/* Masaüstü spacing normalizasyonu (style.css) */
+@media (min-width: 1024px) {
+  .zal-marketing section[class*="md:py-24"] { padding-top: 4.5rem !important; padding-bottom: 4.5rem !important; }
+  .zal-marketing section[class*="md:py-20"] { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+  .zal-marketing section[class*="md:pt-24"] { padding-top: 4.5rem !important; }
+  .zal-marketing section[class*="md:pb-24"] { padding-bottom: 4.5rem !important; }
+  .zal-marketing .md\:mb-20 { margin-bottom: 3.5rem !important; }
+  .zal-marketing .md\:gap-16, .zal-marketing .lg\:gap-16 { gap: 3rem !important; }
+  .zal-marketing .md\:gap-20, .zal-marketing .lg\:gap-20 { gap: 4rem !important; }
+}
+
+/* Mobil nav accordion (style.css) */
+.zal-marketing .zalusa-mobile-nav { -webkit-tap-highlight-color: transparent; }
+.zal-marketing .zalusa-mobile-nav a, .zal-marketing .zalusa-mobile-nav button, .zal-marketing .zalusa-mobile-nav summary { touch-action: manipulation; }
+.zal-marketing details.zalusa-nav-acc > summary { list-style: none; }
+.zal-marketing details.zalusa-nav-acc > summary::-webkit-details-marker { display: none; }
+.zal-marketing details.zalusa-nav-acc[open] > summary .zalusa-nav-acc-chevron { transform: rotate(180deg); }
+.zal-marketing details.zalusa-nav-acc[open] > summary.zalusa-mobile-nav-summary { background-color: rgb(248 250 252 / 0.92); }
+
+@media (prefers-reduced-motion: reduce) {
+  .zal-marketing .zal-rise, .zal-marketing .zal-rise-d1, .zal-marketing .zal-rise-d2, .zal-marketing .zal-rise-d3,
+  .zal-marketing .headline-shimmer { animation: none; }
+}
+
+/* ============================================================
+   homepage-v2 bölüm-içi <style> portları
+   ============================================================ */
+/* Referanslar marquee (brand/partner kartları) */
+.zal-marketing .brand-card, .zal-marketing .ref-card {
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.zal-marketing .ref-card:hover, .zal-marketing .brand-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -8px rgba(15, 23, 42, .12);
+  border-color: #cbd5e1;
+}
+.zal-marketing .animate-scroll-rev { animation: zal-scroll 40s linear infinite reverse; }
+.zal-marketing .ref-marquee:hover .animate-scroll,
+.zal-marketing .ref-marquee:hover .animate-scroll-rev,
+.zal-marketing .brand-marquee:hover .animate-scroll { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .zal-marketing .animate-scroll, .zal-marketing .animate-scroll-rev { animation: none !important; }
+}
+/* content-visibility (PageSpeed) */
+.zal-marketing .cv-auto { content-visibility: auto; contain-intrinsic-size: auto 600px; }
+
+/* Footer trust/stat bandı (footer.php <style> portu) */
+.zal-marketing .footer-section-title { line-height: 1.5; min-height: 1.5rem; }
+.zal-marketing .trust-card { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 0.875rem; background: #fff; border-radius: 1rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: box-shadow 0.2s, border-color 0.2s; min-width: 0; }
+@media (min-width: 1024px) { .zal-marketing .trust-card, .zal-marketing .stat-frame { min-height: 4.25rem; } .zal-marketing .stat-frame { align-items: center; } }
+.zal-marketing .trust-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.zal-marketing .trust-card-100 { padding: 0.65rem 0.75rem; }
+.zal-marketing .trust-card-100 .trust-card-score { font-size: 1rem; }
+.zal-marketing .trust-card-100 .trust-card-max { font-size: 0.6875rem; }
+@media (min-width: 640px) { .zal-marketing .trust-card-100 .trust-card-score { font-size: 1.0625rem; } .zal-marketing .trust-card-100 .trust-card-max { font-size: 0.75rem; } }
+.zal-marketing .trust-card-icon { display: flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; flex-shrink: 0; min-width: 2.75rem; }
+.zal-marketing .trust-icon-purple { background: rgba(34, 197, 94, 0.16); color: #16a34a; border-radius: 0.75rem; border: 1px solid rgba(34, 197, 94, 0.25); }
+.zal-marketing .trust-score-wrap { display: inline-flex; align-items: baseline; gap: 0.1rem; flex-shrink: 0; white-space: nowrap; }
+.zal-marketing .trust-card-score { font-weight: 800; font-size: 1.125rem; line-height: 1.2; }
+@media (min-width: 640px) { .zal-marketing .trust-card-score { font-size: 1.25rem; } }
+.zal-marketing .trust-score-high, .zal-marketing .trust-score-full { color: #059669; }
+.zal-marketing .trust-card-max { color: #94a3b8; font-weight: 500; font-size: 0.75rem; }
+@media (min-width: 640px) { .zal-marketing .trust-card-max { font-size: 0.8125rem; } }
+.zal-marketing .stat-frame { padding: 0.5rem 0.625rem; background: #fff; border-radius: 0.75rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); align-items: center; }
+@media (min-width: 640px) { .zal-marketing .stat-frame { padding: 0.65rem 0.75rem; border-radius: 0.875rem; } }
+@media (min-width: 1024px) { .zal-marketing .stat-frame { padding: 0.65rem 0.875rem; border-radius: 1rem; display: inline-flex; max-width: 100%; } }
+.zal-marketing .stat-icon { display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; min-width: 2rem; min-height: 2rem; border-radius: 0.5rem; flex-shrink: 0; }
+@media (min-width: 640px) { .zal-marketing .stat-icon { width: 2.5rem; height: 2.5rem; min-width: 2.5rem; min-height: 2.5rem; border-radius: 0.625rem; } }
+@media (min-width: 1024px) { .zal-marketing .stat-icon { border-radius: 0.75rem; } }
+.zal-marketing .stat-icon-svg { width: 1rem; height: 1rem; }
+@media (min-width: 640px) { .zal-marketing .stat-icon-svg { width: 1.375rem; height: 1.375rem; } }
+@media (min-width: 1024px) { .zal-marketing .stat-icon-svg { width: 1.25rem; height: 1.25rem; } }
+.zal-marketing .stat-text { font-weight: 800; color: #334155; font-size: 0.75rem; line-height: 1.2; white-space: nowrap; }
+@media (min-width: 640px) { .zal-marketing .stat-text { font-size: 1.125rem; } }
+@media (min-width: 1024px) { .zal-marketing .stat-text { font-size: 1rem; } }
+.zal-marketing .stat-item { flex-shrink: 0; }
+@media (max-width: 639px) { .zal-marketing .stat-item { gap: 0.375rem !important; } }
+.zal-marketing .stat-icon-blue { background: rgba(245, 158, 11, 0.18); color: #d97706; }
+.zal-marketing .stat-icon-green { background: rgba(34, 197, 94, 0.16); color: #16a34a; }
+.zal-marketing .stat-icon-amber { background: rgba(239, 68, 68, 0.16); color: #dc2626; }
+
+/* nasil-calisir animasyonları (heartbeat rows/icons, bars, chat mesaj döngüsü) */
+@keyframes zalusa-heartbeat { 0%,55%,100%{transform:scale(1)} 10%{transform:scale(1.22)} 20%{transform:scale(.96)} 30%{transform:scale(1.12)} 40%{transform:scale(1)} }
+@keyframes zalusa-row-wave { 0%,65%,100%{box-shadow:0 1px 2px rgba(15,23,42,.04);border-color:rgba(226,232,240,.8)} 15%{box-shadow:0 0 0 4px rgba(16,185,129,.1),0 8px 22px -6px rgba(16,185,129,.28);border-color:#a7f3d0} 35%{box-shadow:0 1px 4px rgba(15,23,42,.05);border-color:#e2e8f0} }
+.zal-marketing .zal-beat-icon { animation: zalusa-heartbeat 4s ease-in-out infinite; transform-origin: center; }
+.zal-marketing .zal-beat-row { animation: zalusa-row-wave 4s ease-in-out infinite; }
+.zal-marketing .zal-beat-row:hover, .zal-marketing .zal-beat-icon:hover { animation-play-state: paused; }
+@keyframes zal-bar-grow { from{width:0} to{width:var(--zal-bar-target,50%)} }
+.zal-marketing .zal-bar-fill { width: var(--zal-bar-target,50%); animation: zal-bar-grow 1.4s cubic-bezier(.22,.85,.3,1) both; }
+.zal-marketing .zal-bar-fill.delay-1 { animation-delay:.15s } .zal-marketing .zal-bar-fill.delay-2 { animation-delay:.35s } .zal-marketing .zal-bar-fill.delay-3 { animation-delay:.55s }
+@keyframes zal-glow-pulse { 0%,100%{box-shadow:0 0 0 0 transparent,0 1px 2px rgba(15,23,42,.04),0 12px 32px -16px rgba(15,23,42,.1)} 50%{box-shadow:0 0 0 6px rgba(16,185,129,.1),0 1px 2px rgba(15,23,42,.04),0 12px 32px -16px rgba(16,185,129,.18)} }
+.zal-marketing .zal-glow-savings { animation: zal-glow-pulse 3.2s ease-in-out infinite; }
+@keyframes zal-ring-breathe { 0%,100%{box-shadow:0 0 0 0 transparent,inset 0 0 0 1.5px rgba(0,0,190,.45)} 50%{box-shadow:0 0 0 5px rgba(0,0,190,.08),inset 0 0 0 1.5px rgba(0,0,190,.65)} }
+.zal-marketing .zal-ring-best { animation: zal-ring-breathe 3.6s ease-in-out infinite; }
+@keyframes zal-count-rise { 0%{opacity:0;transform:translateY(8px) scale(.96)} to{opacity:1;transform:none} }
+.zal-marketing .zal-count-rise { animation: zal-count-rise .8s .6s cubic-bezier(.2,.8,.3,1) both; }
+@keyframes zal-msg-1 { 0%,1%{opacity:0;transform:translateY(8px) scale(.96)} 3%,90%{opacity:1;transform:none} 95%,100%{opacity:0;transform:translateY(-4px) scale(.98)} }
+@keyframes zal-typing-1 { 0%,11%{opacity:0;transform:translateY(4px)} 13%,19%{opacity:1;transform:none} 21%,100%{opacity:0} }
+@keyframes zal-msg-2 { 0%,20%{opacity:0;transform:translateY(8px) scale(.96)} 22%,90%{opacity:1;transform:none} 95%,100%{opacity:0} }
+@keyframes zal-msg-3 { 0%,27%{opacity:0;transform:translateY(6px)} 29%,90%{opacity:1;transform:none} 95%,100%{opacity:0} }
+@keyframes zal-typing-2 { 0%,32%{opacity:0} 34%,40%{opacity:1} 42%,100%{opacity:0} }
+@keyframes zal-msg-4 { 0%,41%{opacity:0;transform:translateY(10px) scale(.95)} 44%,90%{opacity:1;transform:none} 95%,100%{opacity:0} }
+@keyframes zal-track-fill { 0%,41%{width:0} 55%,100%{width:58%} }
+.zal-marketing .zal-anim-1 { animation: zal-msg-1 14s cubic-bezier(.2,.8,.3,1) infinite; opacity:0 }
+.zal-marketing .zal-anim-typing-1 { animation: zal-typing-1 14s ease-in-out infinite; opacity:0 }
+.zal-marketing .zal-anim-2 { animation: zal-msg-2 14s cubic-bezier(.2,.8,.3,1) infinite; opacity:0 }
+.zal-marketing .zal-anim-3 { animation: zal-msg-3 14s cubic-bezier(.2,.8,.3,1) infinite; opacity:0 }
+.zal-marketing .zal-anim-typing-2 { animation: zal-typing-2 14s ease-in-out infinite; opacity:0 }
+.zal-marketing .zal-anim-4 { animation: zal-msg-4 14s cubic-bezier(.2,.8,.3,1) infinite; opacity:0 }
+.zal-marketing .zal-anim-track-fill { animation: zal-track-fill 14s cubic-bezier(.4,.7,.3,1) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .zal-marketing .zal-beat-icon, .zal-marketing .zal-beat-row, .zal-marketing .zal-bar-fill, .zal-marketing .zal-glow-savings, .zal-marketing .zal-ring-best, .zal-marketing .zal-count-rise, .zal-marketing .zal-anim-1, .zal-marketing .zal-anim-2, .zal-marketing .zal-anim-3, .zal-marketing .zal-anim-4, .zal-marketing .zal-anim-typing-1, .zal-marketing .zal-anim-typing-2, .zal-marketing .zal-anim-track-fill { animation: none !important; opacity: 1 !important; }
+}

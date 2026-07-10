@@ -1,0 +1,36 @@
+import type { Metadata } from "next";
+
+import { Hero } from "@/components/marketing/home/hero";
+import { Referanslar } from "@/components/marketing/home/referanslar";
+import { Istatistik } from "@/components/marketing/home/istatistik";
+import { UcAdimda } from "@/components/marketing/home/uc-adimda";
+import { KimlerIcin } from "@/components/marketing/home/kimler-icin";
+import { NedenZalusa } from "@/components/marketing/home/neden-zalusa";
+import { TasimaModlari } from "@/components/marketing/home/tasima-modlari";
+import { Testimonials } from "@/components/marketing/home/testimonials";
+import { BlogOneCikan } from "@/components/marketing/home/blog-onecikan";
+import { StickyCalculator } from "@/components/marketing/home/sticky-calculator";
+
+// PHP homepage-v2.php / index.php portu — zalusa.com anasayfası.
+export const metadata: Metadata = {
+  title: "Zalusa - E-ihracat Lojistik ve Kargo Çözümleri",
+  description:
+    "E-ihracat yapan işletmeler için uçtan uca lojistik. Uluslararası kargo fiyat hesaplama, tek panelden gönderi takibi, DHL, FedEx, UPS entegrasyonu. Ücretsiz deneyin.",
+};
+
+export default function HomePage() {
+  return (
+    <>
+      <Hero />
+      <Referanslar />
+      <Istatistik />
+      <UcAdimda />
+      <KimlerIcin />
+      <NedenZalusa />
+      <TasimaModlari />
+      <Testimonials />
+      <BlogOneCikan />
+      <StickyCalculator />
+    </>
+  );
+}

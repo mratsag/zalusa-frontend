@@ -18,7 +18,7 @@ export default function CikisPage() {
     // Eski auth sistemi artıkları (varsa)
     localStorage.removeItem("zalusa.auth.currentUserEmail");
 
-    router.replace("/");
+    router.replace("/giris");
   }, [router]);
 
   return null;

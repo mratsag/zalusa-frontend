@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 70" width="320" height="70">
+  <text x="4" y="32" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-weight="800" font-size="32" fill="#7F54B3" letter-spacing="0.5">Woo</text>
+  <text x="87" y="32" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-weight="400" font-size="32" fill="#7F54B3" letter-spacing="0.5">Commerce</text>
+  <rect x="4" y="42" width="310" height="2" rx="1" fill="#7F54B3" opacity="0.2"/>
+</svg>

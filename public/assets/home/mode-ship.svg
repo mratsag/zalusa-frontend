@@ -1,0 +1,23 @@
+                        <svg class="w-full h-full max-w-[210px] drop-shadow-[0_6px_20px_rgba(16,185,129,0.18)]" viewBox="0 0 210 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="176" cy="36" r="14" fill="#FEF9C3" opacity="0.75"/>
+                            <path d="M148 30 q4 -4 8 0 q4 -4 8 0" stroke="#10B981" stroke-width="1.4" fill="none" opacity="0.5" stroke-linecap="round"/>
+                            <line x1="10" y1="86" x2="200" y2="86" stroke="#A7F3D0" stroke-width="1" stroke-dasharray="2 3"/>
+                            <g transform="translate(38,44)">
+                                <rect x="28" y="6" width="22" height="15" fill="#A7F3D0" stroke="#059669" stroke-width="1.4"/>
+                                <rect x="52" y="6" width="22" height="15" fill="#34D399" stroke="#059669" stroke-width="1.4"/>
+                                <rect x="76" y="6" width="22" height="15" fill="#10B981" stroke="#059669" stroke-width="1.4"/>
+                                <rect x="102" y="4" width="16" height="18" rx="1.5" fill="#fff" stroke="#059669" stroke-width="1.6"/>
+                                <rect x="105" y="8" width="3.5" height="3.5" fill="#0F172A"/><rect x="111" y="8" width="3.5" height="3.5" fill="#0F172A"/>
+                                <line x1="110" y1="4" x2="110" y2="-3" stroke="#059669" stroke-width="1.4"/><circle cx="110" cy="-3" r="1.6" fill="#EF4444"/>
+                                <rect x="14" y="22" width="22" height="16" fill="#10B981" stroke="#059669" stroke-width="1.4"/>
+                                <rect x="38" y="22" width="22" height="16" fill="#34D399" stroke="#059669" stroke-width="1.4"/>
+                                <rect x="62" y="22" width="22" height="16" fill="#10B981" stroke="#059669" stroke-width="1.4"/>
+                                <rect x="86" y="22" width="22" height="16" fill="#34D399" stroke="#059669" stroke-width="1.4"/>
+                                <g stroke="#065F46" stroke-width="0.6" opacity="0.6"><line x1="18" y1="25" x2="18" y2="35"/><line x1="22" y1="25" x2="22" y2="35"/><line x1="26" y1="25" x2="26" y2="35"/><line x1="66" y1="25" x2="66" y2="35"/><line x1="70" y1="25" x2="70" y2="35"/><line x1="74" y1="25" x2="74" y2="35"/></g>
+                                <path d="M0 38 L10 60 L120 60 L130 38 Z" fill="#fff" stroke="#059669" stroke-width="2.2"/>
+                                <line x1="4" y1="48" x2="126" y2="48" stroke="#059669" stroke-width="0.9" opacity="0.5"/>
+                            </g>
+                            <path d="M10 112 Q30 107 50 112 T90 112 T130 112 T170 112 T210 112" stroke="#10B981" stroke-width="1.6" fill="none" opacity="0.4"/>
+                            <path d="M10 122 Q30 117 50 122 T90 122 T130 122 T170 122 T210 122" stroke="#10B981" stroke-width="1.6" fill="none" opacity="0.55"/>
+                            <path d="M10 132 Q30 127 50 132 T90 132 T130 132 T170 132 T210 132" stroke="#10B981" stroke-width="1.6" fill="none" opacity="0.7"/>
+                        </svg>
