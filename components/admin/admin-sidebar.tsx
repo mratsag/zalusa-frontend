@@ -27,6 +27,7 @@ import {
   Mail,
   FileText,
   Settings,
+  ArrowRightLeft,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
@@ -53,6 +54,7 @@ const adminNavItems = [
   { href: "/admin/mesajlar", label: "Mesajlar", icon: Mail },
   { href: "/admin/blog", label: "Blog Yönetimi", icon: FileText },
   { href: "/admin/sss", label: "SSS Yönetimi", icon: HelpCircle },
+  { href: "/admin/yonlendirmeler", label: "Yönlendirmeler", icon: ArrowRightLeft },
   { href: "/admin/ayarlar", label: "Site Ayarları", icon: Settings },
   { href: "/admin/kullanicilar", label: "Kullanıcılar", icon: UsersRound },
   { href: "/admin/bayiler", label: "Bayiler", icon: Crown },
