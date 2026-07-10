@@ -1,14 +1,17 @@
 import { Fragment } from "react";
 import type { Metadata } from "next";
+import { getPageMetadata } from "@/lib/marketing/pageSeo";
 
 import { PageHeader } from "@/components/marketing/page-header";
 
 // PHP hakkimizda.php portu.
-export const metadata: Metadata = {
+export async function generateMetadata(): Promise<Metadata> {
+  return getPageMetadata("hakkimizda", {
   title: "Hakkımızda - Zalusa",
   description:
     "Zalusa, yurt içi ve yurt dışı gönderileri tek bir panelden yönetmenizi sağlayan şeffaf, hızlı ve ölçeklenebilir bir lojistik platformudur.",
-};
+  });
+}
 
 const DOTS28 = {
   backgroundImage: "radial-gradient(#E1E8F1 1px, transparent 1px)",
