@@ -49,6 +49,7 @@ const adminNavItems = [
   { href: "/admin/gonderi-aciklama-tipleri", label: "Gönderi Açıklama Tipleri", icon: Tag },
   { href: "/admin/yardim-ogeleri", label: "Yardım Öğeleri", icon: HelpCircle },
   { href: "/admin/mesajlar", label: "Mesajlar", icon: Mail },
+  { href: "/admin/sss", label: "SSS Yönetimi", icon: HelpCircle },
   { href: "/admin/kullanicilar", label: "Kullanıcılar", icon: UsersRound },
   { href: "/admin/bayiler", label: "Bayiler", icon: Crown },
   { href: "/admin/admin-yonetimi", label: "Admin Yönetimi", icon: Users },
