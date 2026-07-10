@@ -1,20 +1,30 @@
-// SSS / FAQ yönetimi (faqs, country_id NULL = genel) — admin.
+// Sayfa içerikleri & SEO (pages) — admin.
 const API = process.env.NEXT_PUBLIC_API_URL;
 const ADMIN_TOKEN_KEY = "zalusa.admin.token";
 
-export type FAQ = {
+export type Page = {
   id: number;
-  pageSlug: string;
-  question: string;
-  answer: string;
-  displayOrder: number;
+  slug: string;
+  name: string;
+  seo_title: string;
+  seo_description: string;
+  meta_keywords: string;
+  og_title: string;
+  og_description: string;
+  seo_content: string;
+  undeletable: boolean;
+  faq_count?: number;
 };
 
-export type FAQInput = {
-  pageSlug: string;
-  question: string;
-  answer: string;
-  displayOrder: number;
+export type PageUpdate = {
+  name: string;
+  slug: string;
+  seo_title: string;
+  seo_description: string;
+  meta_keywords: string;
+  og_title: string;
+  og_description: string;
+  seo_content: string;
 };
 
 async function request<T = unknown>(method: string, path: string, body?: object): Promise<T> {
@@ -41,9 +51,8 @@ async function request<T = unknown>(method: string, path: string, body?: object)
   return data as T;
 }
 
-export const listFAQs = () => request<FAQ[]>("GET", "/api/admin/faqs");
-export const listFAQsByPage = (pageSlug: string) =>
-  request<FAQ[]>("GET", `/api/admin/faqs?page_slug=${encodeURIComponent(pageSlug)}`);
-export const createFAQ = (input: FAQInput) => request("POST", "/api/admin/faqs", input);
-export const updateFAQ = (id: number, input: FAQInput) => request("PUT", `/api/admin/faqs/${id}`, input);
-export const deleteFAQ = (id: number) => request("DELETE", `/api/admin/faqs/${id}`);
+export const listPages = () => request<Page[]>("GET", "/api/admin/pages");
+export const getPage = (id: number) => request<Page>("GET", `/api/admin/pages/${id}`);
+export const createPage = (name: string) => request<{ id: number; slug: string }>("POST", "/api/admin/pages", { name });
+export const updatePage = (id: number, input: PageUpdate) => request("PUT", `/api/admin/pages/${id}`, input);
+export const deletePage = (id: number) => request("DELETE", `/api/admin/pages/${id}`);
