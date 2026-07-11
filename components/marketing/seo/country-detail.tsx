@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 
 import { QuickCalculatorForm } from "@/components/marketing/quick-calculator";
 import type { SeoPayload, SeoStory, SeoFaq } from "@/lib/marketing/seo";
+import { getCountrySections } from "@/lib/marketing/country-sections";
+import { AddressFormat, DeliveryTimes, Restrictions, TopCategories, RelatedCountries } from "@/components/marketing/seo/country-sections";
 
 // templates/country-detail.php portu — ülke / şehir / TR il / TR ilçe (tek şablon, PHP gibi).
 // Bölümler: hero (+hesaplayıcı), şehir/ilçe grid, hikayeler, SSS, SEO içerik, CTA'lar, destek.
@@ -69,6 +71,8 @@ export function CountryDetail({ data }: { data: SeoPayload }) {
   const iso2 = primary.iso2 || "";
   const h1 = (primary.h1_override || "").trim() || `${name} Kargo ve Lojistik Hizmetleri`;
   const priceLine = priceSentence(name, primary.price_min, primary.price_max, primary.price_currency);
+  // Curated bölümler (data.php) — sadece verisi olan ülkede (bugün BE). TR'de iso2 boş → null.
+  const sections = getCountrySections(iso2);
 
   const stories = data.stories.length ? data.stories : fallbackStories(name);
   const faqs = data.faqs.length ? data.faqs : fallbackFaqs(name);
@@ -200,6 +204,12 @@ export function CountryDetail({ data }: { data: SeoPayload }) {
         </section>
       )}
 
+      {/* ===== CURATED BÖLÜMLER (data.php — sadece BE) ===== */}
+      {sections?.address_format && <AddressFormat data={sections.address_format} />}
+      {sections?.delivery_times && <DeliveryTimes data={sections.delivery_times} />}
+      {sections?.restrictions && <Restrictions data={sections.restrictions} />}
+      {sections?.top_categories && <TopCategories data={sections.top_categories} />}
+
       {/* ===== MID CTA ===== */}
       <section className="bg-[#070B1A] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-16 text-center">
@@ -267,6 +277,9 @@ export function CountryDetail({ data }: { data: SeoPayload }) {
           </div>
         </section>
       )}
+
+      {/* ===== İLGİLİ ÜLKELER (data.php — sadece BE) ===== */}
+      {sections?.related_countries && <RelatedCountries data={sections.related_countries} currentIso2={iso2} />}
 
       {/* ===== DESTEK ===== */}
       <section className="py-12 bg-slate-50/60 border-t border-slate-200/50">
