@@ -791,7 +791,7 @@ export function AuthPage() {
                       <span className="text-[13px] text-[#14141F]/85 leading-relaxed">
                         <a href="/gizlilik-politikasi" target="_blank" className="font-semibold text-[#4F46E5] hover:underline underline-offset-2">Gizlilik Politikası</a>
                         {", "}
-                        <a href="/kullanim-kosullari" target="_blank" className="font-semibold text-[#4F46E5] hover:underline underline-offset-2">Kullanım Koşulları</a>
+                        <a href="/kullanim-sozlesmesi" target="_blank" className="font-semibold text-[#4F46E5] hover:underline underline-offset-2">Kullanım Koşulları</a>
                         {" ve KVKK Aydınlatma Metni'ni okudum, kabul ediyorum. E-posta ile iletişim kurulmasına onay veriyorum."}
                       </span>
                     }

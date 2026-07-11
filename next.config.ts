@@ -41,6 +41,9 @@ const nextConfig: NextConfig = {
       { source: "/kargo", destination: "/yurtdisi-kargo", statusCode: 301 },
       { source: "/kargo/:path*", destination: "/yurtdisi-kargo/:path*", statusCode: 301 },
 
+      // Yasal: eski app slug → marketing CMS slug'ı
+      { source: "/kullanim-kosullari", destination: "/kullanim-sozlesmesi", statusCode: 301 },
+
       // Diğer landing .php → temiz URL
       { source: "/nasil-calisir.php", destination: "/nasil-calisir", statusCode: 301 },
       { source: "/hakkimizda.php", destination: "/hakkimizda", statusCode: 301 },
