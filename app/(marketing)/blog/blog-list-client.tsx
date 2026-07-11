@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/marketing/page-header";
 
-type Post = {
+export type Post = {
   slug: string;
   title: string;
   category: string;
@@ -14,7 +14,7 @@ type Post = {
   excerpt: string;
 };
 
-const POSTS: Post[] = [
+export const STATIC_POSTS: Post[] = [
   {
     slug: "e-ihracat-bilinmesi-gereken-tarihler-guncel-takvim",
     title: "E-İhracat Bilinmesi Gereken Tarihler (2026 Güncel Takvim)",
@@ -41,20 +41,21 @@ const POSTS: Post[] = [
   },
 ];
 
-const CATEGORIES = ["Tümü", ...Array.from(new Set(POSTS.map((p) => p.category)))];
+export function BlogListContent({ posts }: { posts?: Post[] }) {
+  const list = posts && posts.length ? posts : STATIC_POSTS;
+  const CATEGORIES = ["Tümü", ...Array.from(new Set(list.map((p) => p.category)))];
 
-export function BlogListContent() {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("Tümü");
 
   const filtered = useMemo(
     () =>
-      POSTS.filter((p) => {
+      list.filter((p) => {
         const matchCat = cat === "Tümü" || p.category === cat;
         const matchQ = !q.trim() || p.title.toLowerCase().includes(q.toLowerCase().trim());
         return matchCat && matchQ;
       }),
-    [q, cat],
+    [q, cat, list],
   );
 
   return (
