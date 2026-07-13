@@ -120,7 +120,7 @@ export default async function YurtdisiKargoHubPage() {
           <p className="mt-3 text-white/70 max-w-2xl mx-auto">Z-Fly, Z-Truck, Z-Ship ve Z-Cargo çözümleriyle her gönderiye en uygun taşıma modu.</p>
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <a href="#calculator-form" className="inline-flex items-center gap-2 px-6 py-3 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 font-semibold rounded-xl transition">Ücretsiz Fiyat Al</a>
-            <a href="https://app.zalusa.com" className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/15 text-white font-semibold rounded-xl border border-white/15 transition">Hemen Başla</a>
+            <a href="/giris" className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/15 text-white font-semibold rounded-xl border border-white/15 transition">Hemen Başla</a>
           </div>
         </div>
       </section>

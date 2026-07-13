@@ -184,7 +184,7 @@ export default function HakkimizdaPage() {
           <h2 className="text-4xl font-semibold text-slate-900 mb-6">Lojistikte Yeni Bir Döneme Hazır mısın?</h2>
           <p className="text-slate-500 mb-10 text-lg">Zalusa ile e-ihracatta sınırları kaldırın, işinizi büyütmeye odaklanın.</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="https://app.zalusa.com" className="px-10 py-4 bg-[#0000BE] text-white font-bold rounded-xl shadow-xl hover:bg-[#00009c] transition">
+            <a href="/giris" className="px-10 py-4 bg-[#0000BE] text-white font-bold rounded-xl shadow-xl hover:bg-[#00009c] transition">
               Hemen Üye Ol
             </a>
             <a href="/iletisim" className="px-10 py-4 border border-gray-200 text-slate-700 font-bold rounded-xl hover:bg-gray-50 transition">

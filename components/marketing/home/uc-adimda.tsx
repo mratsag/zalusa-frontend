@@ -92,7 +92,7 @@ export function UcAdimda() {
 
         <div className="flex flex-wrap items-center justify-center gap-3 mt-12 md:mt-14">
           <a
-            href="https://app.zalusa.com"
+            href="/giris"
             className="inline-flex items-center justify-center gap-2 px-6 h-11 md:h-12 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-sm font-semibold rounded-lg shadow-sm cursor-pointer transition-all whitespace-nowrap"
           >
             Ücretsiz Teklif Al

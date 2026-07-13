@@ -103,7 +103,7 @@ export const NASIL_CALISIR_HTML = `    <header class="py-8 md:py-10 bg-gradient-
                         </ul>
 
                         <div class="mt-7 flex flex-col sm:flex-row gap-3">
-                            <a href="https://app.zalusa.com" class="group inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 h-11 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-[14px] font-semibold rounded-lg shadow-sm transition-all">
+                            <a href="/giris" class="group inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 h-11 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-[14px] font-semibold rounded-lg shadow-sm transition-all">
                                 Ücretsiz Teklif Al
                                 <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                             </a>
@@ -393,7 +393,7 @@ export const NASIL_CALISIR_HTML = `    <header class="py-8 md:py-10 bg-gradient-
 
                             <!-- CTAs -->
                             <div class="flex flex-col sm:flex-row gap-3">
-                                <a href="https://app.zalusa.com"
+                                <a href="/giris"
                                     class="group inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 h-12 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-[14px] font-semibold rounded-lg shadow-sm transition-all whitespace-nowrap">
                                     Ücretsiz Teklif Al
                                     <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
@@ -468,7 +468,7 @@ export const NASIL_CALISIR_HTML = `    <header class="py-8 md:py-10 bg-gradient-
 
                             <!-- CTAs -->
                             <div class="flex flex-col sm:flex-row gap-3">
-                                <a href="https://app.zalusa.com"
+                                <a href="/giris"
                                     class="group inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 h-12 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-[14px] font-semibold rounded-lg shadow-sm transition-all whitespace-nowrap">
                                     Ücretsiz Teklif Al
                                     <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>

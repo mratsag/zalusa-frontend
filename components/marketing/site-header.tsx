@@ -119,13 +119,13 @@ export function SiteHeader({ menu }: { menu: NavItem[] }) {
             {/* Desktop CTA */}
             <div className="hidden md:flex items-center gap-5">
               <a
-                href="https://app.zalusa.com"
+                href="/giris"
                 className="text-slate-700 hover:text-slate-900 font-medium text-[14px] transition whitespace-nowrap"
               >
                 Giriş Yap
               </a>
               <a
-                href="https://app.zalusa.com"
+                href="/giris"
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-sm font-semibold rounded-lg shadow-sm cursor-pointer transition-all whitespace-nowrap"
               >
                 Ücretsiz Teklif Al
@@ -178,7 +178,7 @@ export function SiteHeader({ menu }: { menu: NavItem[] }) {
             </nav>
             <div className="shrink-0 border-t border-slate-200/80 bg-slate-50/95 px-5 sm:px-7 py-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] space-y-2.5">
               <a
-                href="https://app.zalusa.com"
+                href="/giris"
                 className="inline-flex w-full min-h-[44px] items-center justify-center gap-2 px-2 py-2 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-sm font-bold rounded-lg shadow-sm cursor-pointer transition-all text-center leading-snug"
               >
                 Ücretsiz Teklif Al
@@ -186,7 +186,7 @@ export function SiteHeader({ menu }: { menu: NavItem[] }) {
               </a>
               <div className="flex items-center justify-between gap-3 pt-1">
                 <a
-                  href="https://app.zalusa.com"
+                  href="/giris"
                   className="inline-flex items-center text-[13.5px] font-semibold text-slate-700 hover:text-[#0000BE] transition"
                 >
                   Giriş Yap

@@ -162,7 +162,7 @@ export function TasimaModlari() {
         <div className="mt-10 md:mt-12 flex flex-col items-center gap-4">
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <a
-              href="https://app.zalusa.com"
+              href="/giris"
               className="group inline-flex items-center justify-center gap-2 w-full sm:w-auto px-7 h-12 rounded-lg bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-[14px] font-semibold shadow-sm transition-all"
             >
               Ücretsiz Teklif Al
