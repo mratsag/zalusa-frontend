@@ -130,16 +130,20 @@ export function AuthPage() {
 
   const pwValid = Object.values(pwRules).every(Boolean);
 
+  // Giriş sonrası hedef: ?next= (güvenli iç yol) > draftId > /panel
+  const postLoginDest = React.useCallback(() => {
+    const next = sp.get("next");
+    if (next && next.startsWith("/") && !next.startsWith("//")) return next;
+    const draftId = sp.get("draftId");
+    return draftId ? `/panel/gonderi-olustur?draft=${draftId}&quick=1` : "/panel";
+  }, [sp]);
+
   React.useEffect(() => {
     const token = localStorage.getItem("zalusa.token");
     const draftId = sp.get("draftId");
     
     if (token) {
-      if (draftId) {
-        router.replace(`/panel/gonderi-olustur?draft=${draftId}&quick=1`);
-      } else {
-        router.replace("/panel");
-      }
+      router.replace(postLoginDest());
       return;
     }
 
@@ -155,7 +159,7 @@ export function AuthPage() {
 
     const view = sp.get("view");
     if (view === "register") setTab("register");
-  }, [router, sp]);
+  }, [router, sp, postLoginDest]);
 
   function buildInvoice() {
     if (kind === "corporate") return { taxNo, taxOffice, address };
@@ -171,12 +175,7 @@ export function AuthPage() {
       const data = await authService.googleSignIn({ idToken });
       localStorage.setItem("zalusa.token", data.token);
       localStorage.setItem("zalusa.customerId", data.customerId);
-      const draftId = sp.get("draftId");
-      if (draftId) {
-        router.push(`/panel/gonderi-olustur?draft=${draftId}&quick=1`);
-      } else {
-        router.push("/panel");
-      }
+      router.push(postLoginDest());
     } catch (err: any) {
       if (err.code === "auth/popup-closed-by-user") {
         setMessage("Giriş penceresi kapatıldı.");
@@ -196,12 +195,7 @@ export function AuthPage() {
       const data = await authService.login({ identifier: email, password });
       localStorage.setItem("zalusa.token", data.token);
       localStorage.setItem("zalusa.customerId", data.customerId);
-      const draftId = sp.get("draftId");
-      if (draftId) {
-        router.push(`/panel/gonderi-olustur?draft=${draftId}&quick=1`);
-      } else {
-        router.push("/panel");
-      }
+      router.push(postLoginDest());
     } catch (err: any) {
       setMessage(err.message || "Giriş başarısız.");
     } finally {
@@ -306,12 +300,7 @@ export function AuthPage() {
         const loginRes = await authService.login({ identifier: email, password });
         localStorage.setItem("zalusa.token", loginRes.token);
         localStorage.setItem("zalusa.customerId", loginRes.customerId);
-        const draftId = sp.get("draftId");
-        if (draftId) {
-          router.push(`/panel/gonderi-olustur?draft=${draftId}&quick=1`);
-        } else {
-          router.push("/panel");
-        }
+        router.push(postLoginDest());
       } catch {
         setVerifySuccess("E-posta doğrulandı! Giriş yapabilirsiniz.");
         setTimeout(() => { setShowVerify(false); setTab("login"); }, 1500);
