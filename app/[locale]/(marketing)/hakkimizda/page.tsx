@@ -1,5 +1,7 @@
 import { Fragment } from "react";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+
 import { getPageMetadata } from "@/lib/marketing/pageSeo";
 
 import { PageHeader } from "@/components/marketing/page-header";
@@ -7,11 +9,8 @@ import { PageHeader } from "@/components/marketing/page-header";
 // PHP hakkimizda.php portu.
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  return getPageMetadata("hakkimizda", {
-  title: "Hakkımızda - Zalusa",
-  description:
-    "Zalusa, yurt içi ve yurt dışı gönderileri tek bir panelden yönetmenizi sağlayan şeffaf, hızlı ve ölçeklenebilir bir lojistik platformudur.",
-  }, locale);
+  const t = await getTranslations({ locale, namespace: "about" });
+  return getPageMetadata("hakkimizda", { title: t("metaTitle"), description: t("metaDesc") }, locale);
 }
 
 const DOTS28 = {
@@ -23,27 +22,31 @@ const DOTS24 = {
   backgroundSize: "24px 24px",
 };
 
-const FEATURES = [
-  { title: "Tek Panelden Yönetim", desc: "Tüm gönderi, teklif ve ödeme süreçlerinizi tek bir ekrandan yönetin.", icon: "M4 6h16M4 12h16M4 18h16" },
-  { title: "Anlık Fiyat Karşılaştırma", desc: "Farklı taşıyıcı seçeneklerini saniyeler içinde karşılaştırın.", icon: "M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" },
-  { title: "Gerçek Zamanlı Takip", desc: "Gönderilerinizin durumunu anlık olarak izleyin.", icon: "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" },
-  { title: "Güvenli Ödeme Altyapısı", desc: "Ödemelerinizi hızlı ve güvenli bir şekilde tamamlayın.", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
-  { title: "Operasyon Kontrolü", desc: "Süreçlerinizi daha planlı ve ölçülebilir hale getirin.", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" },
+const FEATURE_ICONS = [
+  "M4 6h16M4 12h16M4 18h16",
+  "M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z",
+  "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z",
+  "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
+  "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
 ];
 
-const STATS = [
-  { value: "220+", label: "Ülkeye Teslimat" },
-  { value: "2.4M+", label: "Başarılı Gönderi" },
-  { value: "65K+", label: "Aktif İşletme" },
+const STAT_KEYS = [
+  { key: "countries", value: "220+" },
+  { key: "shipments", value: "2.4M+" },
+  { key: "businesses", value: "65K+" },
 ];
 
-export default function HakkimizdaPage() {
+export default async function HakkimizdaPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "about" });
+  const features = t.raw("features") as { title: string; desc: string }[];
+
   return (
     <>
       <PageHeader
-        current="Hakkımızda"
-        title="Hakkımızda"
-        subtitle="Zalusa, yurt içi ve yurt dışı gönderileri tek bir panelden yönetmenizi sağlayan, şeffaf, hızlı ve ölçeklenebilir bir lojistik platformudur."
+        current={t("title")}
+        title={t("title")}
+        subtitle={t("subtitle")}
       />
 
       {/* Biz Kimiz */}
@@ -91,9 +94,9 @@ export default function HakkimizdaPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-slate-900 mb-2 sm:mb-3">Şeffaflık</h3>
+                <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-slate-900 mb-2 sm:mb-3">{t("transparency")}</h3>
                 <p className="text-slate-500 text-[13px] sm:text-sm md:text-base leading-relaxed mb-4 sm:mb-5">
-                  Her adımı görebilir, her kararı anlık takip edebilirsiniz. Sürpriz yok, karmaşa yok — sadece tam görünürlük.
+                  {t("transparencyDesc")}
                 </p>
                 <div className="flex items-center gap-2.5 sm:gap-3 pt-3 sm:pt-4 border-t border-slate-100">
                   <div className="flex -space-x-2">
@@ -105,7 +108,7 @@ export default function HakkimizdaPage() {
                       </div>
                     ))}
                   </div>
-                  <span className="text-[11px] sm:text-xs text-slate-400">Anlık durum &amp; maliyet takibi</span>
+                  <span className="text-[11px] sm:text-xs text-slate-400">{t("transparencyNote")}</span>
                 </div>
               </div>
             </div>
@@ -119,7 +122,7 @@ export default function HakkimizdaPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                     </svg>
                   </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-1.5 sm:mb-2">Hız</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-1.5 sm:mb-2">{t("speed")}</h3>
                   <p className="text-slate-500 text-[13px] sm:text-sm leading-relaxed">Fiyat hesaplama, gönderi oluşturma ve anlık takip — tüm süreçler saniyeler içinde tamamlanır.</p>
                 </div>
               </div>
@@ -130,7 +133,7 @@ export default function HakkimizdaPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
                     </svg>
                   </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-1.5 sm:mb-2">Ölçeklenebilirlik</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-1.5 sm:mb-2">{t("scale")}</h3>
                   <p className="text-slate-500 text-[13px] sm:text-sm leading-relaxed">Küçük işletmeden global oyuncuya, büyüyen her operasyona kolayca uyum sağlar.</p>
                 </div>
               </div>
@@ -138,12 +141,12 @@ export default function HakkimizdaPage() {
               <div className="col-span-2 bg-gradient-to-r from-[#0000BE] to-[#4D4DF2] rounded-2xl p-5 sm:p-6 md:p-7 overflow-hidden relative">
                 <div className="absolute -right-10 -bottom-10 w-48 h-48 rounded-full bg-white/5 blur-2xl pointer-events-none" />
                 <div className="grid grid-cols-3 gap-3 sm:flex sm:flex-row sm:items-center sm:justify-between relative z-10">
-                  {STATS.map((s, i) => (
-                    <Fragment key={s.label}>
+                  {STAT_KEYS.map((s, i) => (
+                    <Fragment key={s.key}>
                       {i > 0 && <div className="hidden sm:block w-px h-8 bg-white/20 shrink-0" />}
                       <div className="text-center sm:text-left sm:flex sm:items-center sm:gap-2.5">
                         <span className="block text-2xl sm:text-3xl lg:text-4xl font-black text-white/90 leading-none">{s.value}</span>
-                        <span className="block text-white/50 text-[10px] sm:text-xs lg:text-sm leading-snug mt-1 sm:mt-0" dangerouslySetInnerHTML={{ __html: s.label.replace(" ", "<br/> ") }} />
+                        <span className="block text-white/50 text-[10px] sm:text-xs lg:text-sm leading-snug mt-1 sm:mt-0" dangerouslySetInnerHTML={{ __html: t(`stats.${s.key}`).replace(" ", "<br/> ") }} />
                       </div>
                     </Fragment>
                   ))}
@@ -158,15 +161,15 @@ export default function HakkimizdaPage() {
       <section className="py-12 md:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 mb-2">Özelliklerimiz</h2>
-            <p className="text-slate-500 text-sm md:text-base">Lojistik süreçlerinizi kolaylaştıran temel çözümlerimiz.</p>
+            <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 mb-2">{t("featuresTitle")}</h2>
+            <p className="text-slate-500 text-sm md:text-base">{t("featuresSubtitle")}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-5">
-            {FEATURES.map((f) => (
+            {features.map((f, fi) => (
               <div key={f.title} className="zalusa-card p-5 group hover:-translate-y-0.5">
                 <div className="zalusa-icon-container !w-11 !h-11 mb-4 md:ml-auto group-hover:bg-[#0000BE] group-hover:text-white transition">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {f.icon.split(" M").map((d, i) => (
+                    {FEATURE_ICONS[fi].split(" M").map((d: string, i: number) => (
                       <path key={i} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={i === 0 ? d : "M" + d} />
                     ))}
                   </svg>
@@ -182,14 +185,14 @@ export default function HakkimizdaPage() {
       {/* CTA */}
       <section className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-semibold text-slate-900 mb-6">Lojistikte Yeni Bir Döneme Hazır mısın?</h2>
-          <p className="text-slate-500 mb-10 text-lg">Zalusa ile e-ihracatta sınırları kaldırın, işinizi büyütmeye odaklanın.</p>
+          <h2 className="text-4xl font-semibold text-slate-900 mb-6">{t("ctaTitle")}</h2>
+          <p className="text-slate-500 mb-10 text-lg">{t("ctaDesc")}</p>
           <div className="flex flex-wrap justify-center gap-4">
             <a href="/giris" className="px-10 py-4 bg-[#0000BE] text-white font-bold rounded-xl shadow-xl hover:bg-[#00009c] transition">
-              Hemen Üye Ol
+              {t("ctaPrimary")}
             </a>
             <a href="/iletisim" className="px-10 py-4 border border-gray-200 text-slate-700 font-bold rounded-xl hover:bg-gray-50 transition">
-              Bize Ulaşın
+              {t("ctaSecondary")}
             </a>
           </div>
         </div>

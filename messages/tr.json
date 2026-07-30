@@ -385,5 +385,51 @@
     "provincesSubtitle": "İlinizden yurtdışına kargo gönderin",
     "provinceSearch": "İl ara…",
     "noResult": "Sonuç bulunamadı."
+  },
+  "about": {
+    "title": "Hakkımızda",
+    "subtitle": "Zalusa, yurt içi ve yurt dışı gönderileri tek bir panelden yönetmenizi sağlayan, şeffaf, hızlı ve ölçeklenebilir bir lojistik platformudur.",
+    "metaTitle": "Hakkımızda - Zalusa",
+    "metaDesc": "Zalusa, yurt içi ve yurt dışı gönderileri tek bir panelden yönetmenizi sağlayan şeffaf, hızlı ve ölçeklenebilir bir lojistik platformudur.",
+    "transparency": "Şeffaflık",
+    "transparencyDesc": "Her adımı görebilir, her kararı anlık takip edebilirsiniz. Sürpriz yok, karmaşa yok — sadece tam görünürlük.",
+    "transparencyNote": "Anlık durum & maliyet takibi",
+    "speed": "Hız",
+    "speedDesc": "Fiyat hesaplama, gönderi oluşturma ve anlık takip — tüm süreçler saniyeler içinde tamamlanır.",
+    "scale": "Ölçeklenebilirlik",
+    "scaleDesc": "Küçük işletmeden global oyuncuya, büyüyen her operasyona kolayca uyum sağlar.",
+    "featuresTitle": "Özelliklerimiz",
+    "featuresSubtitle": "Lojistik süreçlerinizi kolaylaştıran temel çözümlerimiz.",
+    "ctaTitle": "Lojistikte Yeni Bir Döneme Hazır mısın?",
+    "ctaDesc": "Zalusa ile e-ihracatta sınırları kaldırın, işinizi büyütmeye odaklanın.",
+    "ctaPrimary": "Hemen Üye Ol",
+    "ctaSecondary": "Bize Ulaşın",
+    "stats": {
+      "countries": "Ülkeye Teslimat",
+      "shipments": "Başarılı Gönderi",
+      "businesses": "Aktif İşletme"
+    },
+    "features": [
+      {
+        "title": "Tek Panelden Yönetim",
+        "desc": "Tüm gönderi, teklif ve ödeme süreçlerinizi tek bir ekrandan yönetin."
+      },
+      {
+        "title": "Anlık Fiyat Karşılaştırma",
+        "desc": "Farklı taşıyıcı seçeneklerini saniyeler içinde karşılaştırın."
+      },
+      {
+        "title": "Gerçek Zamanlı Takip",
+        "desc": "Gönderilerinizin durumunu anlık olarak izleyin."
+      },
+      {
+        "title": "Güvenli Ödeme Altyapısı",
+        "desc": "Ödemelerinizi hızlı ve güvenli bir şekilde tamamlayın."
+      },
+      {
+        "title": "Operasyon Kontrolü",
+        "desc": "Süreçlerinizi daha planlı ve ölçülebilir hale getirin."
+      }
+    ]
   }
 }

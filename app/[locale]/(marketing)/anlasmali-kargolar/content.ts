@@ -127,3 +127,6 @@ export const HTML = `<header class="py-8 md:py-10 bg-slate-50 relative overflow-
     </div>
 </section>
 `;
+
+// İngilizce gövde ayrı dosyada; pickHTML burada görür.
+export { HTML_EN } from "./content.en";

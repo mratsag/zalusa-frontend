@@ -385,5 +385,51 @@
     "provincesSubtitle": "Ship abroad from your province",
     "provinceSearch": "Search province…",
     "noResult": "No results found."
+  },
+  "about": {
+    "title": "About Us",
+    "subtitle": "Zalusa is a transparent, fast and scalable logistics platform that lets you manage domestic and international shipments from a single panel.",
+    "metaTitle": "About Us - Zalusa",
+    "metaDesc": "Zalusa is a transparent, fast and scalable logistics platform that lets you manage domestic and international shipments from one panel.",
+    "transparency": "Transparency",
+    "transparencyDesc": "See every step and follow every decision in real time. No surprises, no clutter — just full visibility.",
+    "transparencyNote": "Live status & cost tracking",
+    "speed": "Speed",
+    "speedDesc": "Price calculation, shipment creation and live tracking — every step completes in seconds.",
+    "scale": "Scalability",
+    "scaleDesc": "From small businesses to global players, it adapts easily to any growing operation.",
+    "featuresTitle": "Our Features",
+    "featuresSubtitle": "The core capabilities that simplify your logistics processes.",
+    "ctaTitle": "Ready for a New Era in Logistics?",
+    "ctaDesc": "Remove the barriers in e-export with Zalusa and focus on growing your business.",
+    "ctaPrimary": "Sign Up Now",
+    "ctaSecondary": "Contact Us",
+    "stats": {
+      "countries": "Countries Served",
+      "shipments": "Successful Shipments",
+      "businesses": "Active Businesses"
+    },
+    "features": [
+      {
+        "title": "Manage From One Panel",
+        "desc": "Handle all your shipments, quotes and payments from a single screen."
+      },
+      {
+        "title": "Instant Price Comparison",
+        "desc": "Compare different carrier options in seconds."
+      },
+      {
+        "title": "Real-Time Tracking",
+        "desc": "Follow the status of your shipments live."
+      },
+      {
+        "title": "Secure Payment Infrastructure",
+        "desc": "Complete your payments quickly and securely."
+      },
+      {
+        "title": "Operational Control",
+        "desc": "Make your processes more planned and measurable."
+      }
+    ]
   }
 }
