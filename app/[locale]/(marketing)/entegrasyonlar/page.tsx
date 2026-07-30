@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getPageMetadata } from "@/lib/marketing/pageSeo";
 
+import * as content from "./content";
+import { pickHTML } from "@/lib/marketing/content";
 import { EntegrasyonlarContent } from "./entegrasyonlar-client";
 
 // PHP entegrasyonlar.php portu. İçerik + gömülü <style> ham HTML; sticky-nav
@@ -14,6 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   }, locale);
 }
 
-export default function EntegrasyonlarPage() {
-  return <EntegrasyonlarContent />;
+export default async function EntegrasyonlarPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return <EntegrasyonlarContent html={pickHTML(content, locale)} />;
 }

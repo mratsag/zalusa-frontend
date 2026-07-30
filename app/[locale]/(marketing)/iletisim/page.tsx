@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getPageMetadata } from "@/lib/marketing/pageSeo";
 
+import * as content from "./content";
+import { pickHTML } from "@/lib/marketing/content";
 import { IletisimContent } from "./iletisim-client";
 
 // PHP iletisim.php portu. İçerik ham HTML (cf-email'ler çözüldü); form + chip +
@@ -14,6 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   }, locale);
 }
 
-export default function IletisimPage() {
-  return <IletisimContent />;
+export default async function IletisimPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return <IletisimContent html={pickHTML(content, locale)} />;
 }

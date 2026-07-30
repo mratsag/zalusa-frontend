@@ -2,11 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
-import { HTML } from "./content";
 
 // entegrasyonlar.php sticky-nav scroll-spy portu (IntersectionObserver).
 // İçerik ham HTML gömülü; effect render sonrası DOM üzerinde çalışır.
-export function EntegrasyonlarContent() {
+// HTML sunucudan prop olarak gelir (dile göre seçilir; ayrıca client bundle'a gömülmez).
+export function EntegrasyonlarContent({ html }: { html: string }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -58,5 +58,5 @@ export function EntegrasyonlarContent() {
     };
   }, []);
 
-  return <div ref={ref} dangerouslySetInnerHTML={{ __html: HTML }} />;
+  return <div ref={ref} dangerouslySetInnerHTML={{ __html: html }} />;
 }

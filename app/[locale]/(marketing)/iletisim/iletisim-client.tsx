@@ -2,14 +2,14 @@
 
 import { useEffect, useRef } from "react";
 
-import { HTML } from "./content";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 // iletisim.php portu: ham HTML + JS davranışları React'e alındı:
 // - topic-chip tek-seçim, FAQ tek-açılır <details>, in-page smooth-scroll
 // - #contact-form native POST yerine /api/contact'a AJAX (success/error UI)
-export function IletisimContent() {
+// HTML sunucudan prop olarak gelir (dile göre seçilir; ayrıca client bundle'a gömülmez).
+export function IletisimContent({ html }: { html: string }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -120,5 +120,5 @@ export function IletisimContent() {
     return () => cleanups.forEach((fn) => fn());
   }, []);
 
-  return <div ref={ref} dangerouslySetInnerHTML={{ __html: HTML }} />;
+  return <div ref={ref} dangerouslySetInnerHTML={{ __html: html }} />;
 }
