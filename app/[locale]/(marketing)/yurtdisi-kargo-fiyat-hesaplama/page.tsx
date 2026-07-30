@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getPageMetadata } from "@/lib/marketing/pageSeo";
 
+import * as content from "./content";
+import { pickHTML } from "@/lib/marketing/content";
 import { PricingContent } from "./pricing-client";
 
 // PHP fiyat_hesaplama.php portu — Yurtdışı Kargo Fiyat Hesaplama.
@@ -15,6 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   }, locale);
 }
 
-export default function PricingPage() {
-  return <PricingContent />;
+export default async function PricingPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return <PricingContent html={pickHTML(content, locale)} />;
 }

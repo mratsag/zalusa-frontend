@@ -2,14 +2,14 @@
 
 import { useEffect, useRef } from "react";
 
-import { HTML } from "./content";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 // fiyat_hesaplama.php portu: içerik ham HTML, calculator (kargo-hesapla-v2) +
 // FAQ/scroll JS React'e alındı. Calculator ülkeleri {API}/api/countries'ten yükler,
 // "Hesapla" → /yurtdisi-kargo-fiyat-hesaplama'ya param'larla redirect (v2 davranışı).
-export function PricingContent() {
+// HTML sunucudan prop olarak gelir (dile gore secilir).
+export function PricingContent({ html }: { html: string }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -240,5 +240,5 @@ export function PricingContent() {
     return () => cleanups.forEach((fn) => fn());
   }, []);
 
-  return <div ref={ref} dangerouslySetInnerHTML={{ __html: HTML }} />;
+  return <div ref={ref} dangerouslySetInnerHTML={{ __html: html }} />;
 }
