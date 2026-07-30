@@ -55,7 +55,7 @@ export default async function MarketingLayout({
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
-  const [menu, promo] = await Promise.all([getSiteMenu(), getPromoPopup()]);
+  const [menu, promo] = await Promise.all([getSiteMenu(locale), getPromoPopup()]);
 
   return (
     <div

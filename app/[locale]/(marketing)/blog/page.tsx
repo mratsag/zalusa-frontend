@@ -9,11 +9,12 @@ export const revalidate = 300;
 
 const API = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "";
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   return getPageMetadata("blog", {
     title: "Blog - Zalusa",
     description: "Zalusa Blog: e-ihracat rehberleri, sektör analizleri, dropshipping, LUCID kaydı, e-ticaret ipuçları ve güncel içerikler.",
-  });
+  }, locale);
 }
 
 type ApiBlog = { title: string; slug: string; excerpt: string; category: string; featuredImage: string; createdAt: string };

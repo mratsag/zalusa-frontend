@@ -16,11 +16,13 @@ type PageSeo = {
 
 export type SeoFallback = { title: string; description: string };
 
-export async function getPageMetadata(slug: string, fallback: SeoFallback): Promise<Metadata> {
+// locale verilirse (ör. "en") DB'den o dildeki SEO alanları istenir; boşsa Türkçe döner.
+export async function getPageMetadata(slug: string, fallback: SeoFallback, locale?: string): Promise<Metadata> {
   let seo: PageSeo = {};
   if (API) {
     try {
-      const res = await fetch(`${API}/api/pages/${encodeURIComponent(slug)}`, {
+      const qs = locale && locale !== "tr" ? `?lang=${encodeURIComponent(locale)}` : "";
+      const res = await fetch(`${API}/api/pages/${encodeURIComponent(slug)}${qs}`, {
         next: { revalidate: 300 },
         signal: AbortSignal.timeout(2500),
       });

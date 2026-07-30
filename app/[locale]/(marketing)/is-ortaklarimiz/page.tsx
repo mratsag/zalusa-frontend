@@ -4,11 +4,12 @@ import { getPageMetadata } from "@/lib/marketing/pageSeo";
 import * as content from "./content";
 import { pickHTML } from "@/lib/marketing/content";
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   return getPageMetadata("is-ortaklarimiz", {
   title: "İş Ortaklarımız",
   description: "Zalusa'nın birlikte çalıştığı teknoloji, operasyon ve lojistik iş ortaklarını inceleyin.",
-  });
+  }, locale);
 }
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {

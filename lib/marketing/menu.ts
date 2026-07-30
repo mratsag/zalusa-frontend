@@ -89,10 +89,11 @@ function mapNodes(nodes: ApiNode[]): NavItem[] {
     });
 }
 
-export async function getSiteMenu(): Promise<NavItem[]> {
+export async function getSiteMenu(locale?: string): Promise<NavItem[]> {
   if (!API) return DEFAULT_NAV;
   try {
-    const res = await fetch(`${API}/api/menu`, {
+    const qs = locale && locale !== "tr" ? `?lang=${encodeURIComponent(locale)}` : "";
+    const res = await fetch(`${API}/api/menu${qs}`, {
       next: { revalidate: 300 },
       signal: AbortSignal.timeout(2500),
     });

@@ -14,12 +14,13 @@ import { BlogOneCikan } from "@/components/marketing/home/blog-onecikan";
 import { StickyCalculator } from "@/components/marketing/home/sticky-calculator";
 
 // PHP homepage-v2.php / index.php portu — zalusa.com anasayfası.
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   return getPageMetadata("index", {
   title: "Zalusa - E-ihracat Lojistik ve Kargo Çözümleri",
   description:
     "E-ihracat yapan işletmeler için uçtan uca lojistik. Uluslararası kargo fiyat hesaplama, tek panelden gönderi takibi, DHL, FedEx, UPS entegrasyonu. Ücretsiz deneyin.",
-  });
+  }, locale);
 }
 
 export default function HomePage() {

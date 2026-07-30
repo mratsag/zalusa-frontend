@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { PageHeader } from "@/components/marketing/page-header";
 
@@ -27,25 +28,16 @@ interface UnifiedTracking {
   international_events: TrackingEvent[] | null;
 }
 
-const STATUS_TR: Record<string, string> = {
-  draft: "Taslak",
-  pending_payment: "Ödeme Bekleniyor",
-  paid: "Sipariş Alındı",
-  label_created: "Etiket Oluşturuldu",
-  shipped: "Gönderildi",
-  in_transit: "Yolda",
-  delivered: "Teslim Edildi",
-  cancelled: "İptal Edildi",
-  returned: "İade Edildi",
-};
+const STATUS_KEYS = ["draft","pending_payment","paid","label_created","shipped","in_transit","delivered","cancelled","returned"] as const;
 
-function statusLabel(s: string): string {
-  if (!s) return "Bilinmiyor";
+// API "❓ label_created" gibi emoji önekli dönebilir -> anahtarı içerikten bul.
+function statusKey(s: string): string {
+  if (!s) return "unknown";
   const lower = s.toLowerCase();
-  for (const [k, v] of Object.entries(STATUS_TR)) {
-    if (lower === k || lower.includes(k)) return v;
+  for (const k of STATUS_KEYS) {
+    if (lower === k || lower.includes(k)) return k;
   }
-  return s;
+  return "";
 }
 
 // Teslim/yolda/iptal durumuna göre renk sınıfları
@@ -60,6 +52,7 @@ function statusTone(s: string): string {
 }
 
 function Timeline({ title, icon, events }: { title: string; icon: string; events: TrackingEvent[] }) {
+  const tEvent = useTranslations("tracking")("event");
   if (!events.length) return null;
   return (
     <div>
@@ -77,7 +70,7 @@ function Timeline({ title, icon, events }: { title: string; icon: string; events
               aria-hidden="true"
             />
             <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-              <span className="text-sm font-semibold text-slate-900">{ev.status || "Hareket"}</span>
+              <span className="text-sm font-semibold text-slate-900">{ev.status || tEvent}</span>
               {ev.date && <span className="text-xs text-slate-400">{ev.date}</span>}
             </div>
             {ev.description && <p className="mt-0.5 text-sm text-slate-600">{ev.description}</p>}
@@ -95,6 +88,7 @@ function Timeline({ title, icon, events }: { title: string; icon: string; events
 }
 
 export function TrackClient() {
+  const t = useTranslations("tracking");
   const [code, setCode] = useState("");
   const [data, setData] = useState<UnifiedTracking | null>(null);
   const [loading, setLoading] = useState(false);
@@ -110,15 +104,13 @@ export function TrackClient() {
       const res = await fetch(`${API}/api/shipments/track/${encodeURIComponent(q)}`);
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
-        throw new Error(d?.error || "Girdiğiniz takip numarasına ait kargo bulunamadı.");
+        throw new Error(d?.error || t("notFound"));
       }
       setData(await res.json());
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
       setError(
-        msg.includes("Failed to fetch")
-          ? "Takip servisi şu anda yanıt vermiyor. Lütfen daha sonra tekrar deneyin."
-          : msg || "Bir hata oluştu.",
+        msg.includes("Failed to fetch") ? t("serviceDown") : msg || t("genericError"),
       );
     } finally {
       setLoading(false);
@@ -142,9 +134,9 @@ export function TrackClient() {
   return (
     <>
       <PageHeader
-        current="Yurt Dışı Kargo Takip"
-        title="Kargo Takip"
-        subtitle="Zalusa takip kodunuz veya taşıyıcı takip numaranızla gönderinizi anında sorgulayın."
+        current={t("breadcrumb")}
+        title={t("title")}
+        subtitle={t("subtitle")}
       />
 
       <section className="py-10 md:py-14 bg-white">
@@ -158,7 +150,7 @@ export function TrackClient() {
             className="bg-white p-5 md:p-6 rounded-2xl border border-slate-200/80 ring-1 ring-slate-900/[0.03] shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.12)]"
           >
             <label htmlFor="track-code" className="block text-sm font-bold text-slate-900 mb-2">
-              Takip Numarası
+              {t("label")}
             </label>
             <div className="flex flex-col sm:flex-row gap-3">
               <input
@@ -166,7 +158,7 @@ export function TrackClient() {
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                placeholder="ZLS-SHP-XXXXXX veya taşıyıcı takip no"
+                placeholder={t("placeholder")}
                 autoComplete="off"
                 className="flex-1 bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 text-slate-900 font-medium text-sm focus:ring-2 focus:ring-[#4D4DF2] focus:border-transparent outline-none"
               />
@@ -178,22 +170,22 @@ export function TrackClient() {
                 {loading ? (
                   <>
                     <i className="ph-bold ph-circle-notch text-[15px] animate-spin" aria-hidden="true" />
-                    Sorgulanıyor
+                    {t("searching")}
                   </>
                 ) : (
                   <>
                     <i className="ph-bold ph-magnifying-glass text-[15px]" aria-hidden="true" />
-                    Sorgula
+                    {t("submit")}
                   </>
                 )}
               </button>
             </div>
             <p className="mt-2.5 text-xs text-slate-500">
-              Takip kodunuzu gönderi e-postanızda veya{" "}
+              {t("hintBefore")}{" "}
               <a href="/giris" className="font-semibold text-[#0000BE] hover:underline">
-                panelinizde
+                {t("hintLink")}
               </a>{" "}
-              bulabilirsiniz.
+              {t("hintAfter")}
             </p>
           </form>
 
@@ -213,7 +205,7 @@ export function TrackClient() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                      Takip Kodu
+                      {t("trackingCode")}
                     </span>
                     <p className="text-lg font-bold text-slate-900">{data.tracking_code || code}</p>
                   </div>
@@ -221,32 +213,32 @@ export function TrackClient() {
                     className={`inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 ring-1 ${statusTone(data.main_status)}`}
                   >
                     <i className="ph-bold ph-package text-[13px]" aria-hidden="true" />
-                    {statusLabel(data.main_status)}
+                    {statusKey(data.main_status) ? t(`status.${statusKey(data.main_status)}`) : data.main_status}
                   </span>
                 </div>
 
                 <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                   {data.carrier && data.carrier !== "Bilinmiyor" && (
                     <div className="flex items-center justify-between sm:justify-start sm:gap-2">
-                      <dt className="text-slate-500">Taşıyıcı</dt>
+                      <dt className="text-slate-500">{t("carrier")}</dt>
                       <dd className="font-semibold text-slate-900">{data.carrier}</dd>
                     </div>
                   )}
                   {data.target_country && (
                     <div className="flex items-center justify-between sm:justify-start sm:gap-2">
-                      <dt className="text-slate-500">Varış Ülkesi</dt>
+                      <dt className="text-slate-500">{t("destination")}</dt>
                       <dd className="font-semibold text-slate-900">{data.target_country}</dd>
                     </div>
                   )}
                   {data.last_mile_carrier && (
                     <div className="flex items-center justify-between sm:justify-start sm:gap-2">
-                      <dt className="text-slate-500">Son Mil Taşıyıcı</dt>
+                      <dt className="text-slate-500">{t("lastMileCarrier")}</dt>
                       <dd className="font-semibold text-slate-900">{data.last_mile_carrier}</dd>
                     </div>
                   )}
                   {data.last_mile_tracking_no && (
                     <div className="flex items-center justify-between sm:justify-start sm:gap-2">
-                      <dt className="text-slate-500">Son Mil Takip No</dt>
+                      <dt className="text-slate-500">{t("lastMileNo")}</dt>
                       <dd className="font-semibold text-slate-900">
                         {data.last_mile_tracking_url ? (
                           <a
@@ -270,15 +262,14 @@ export function TrackClient() {
               {/* Hareketler */}
               {hasEvents ? (
                 <div className="p-5 md:p-6 rounded-2xl border border-slate-200/80 space-y-7">
-                  <Timeline title="Yurt Dışı Hareketleri" icon="ph-globe" events={international} />
-                  <Timeline title="Yurt İçi Hareketleri" icon="ph-truck" events={domestic} />
+                  <Timeline title={t("intlEvents")} icon="ph-globe" events={international} />
+                  <Timeline title={t("domesticEvents")} icon="ph-truck" events={domestic} />
                 </div>
               ) : (
                 <div className="p-5 rounded-2xl border border-slate-200/80 bg-white text-center">
                   <i className="ph-bold ph-clock text-[22px] text-slate-300" aria-hidden="true" />
                   <p className="mt-2 text-sm text-slate-600">
-                    Gönderiniz kaydedildi, hareket bilgisi henüz oluşmadı. Taşıyıcı kargoyu teslim
-                    aldığında hareketler burada görünür.
+                    {t("noEvents")}
                   </p>
                 </div>
               )}

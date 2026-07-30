@@ -4,11 +4,12 @@ import { getPageMetadata } from "@/lib/marketing/pageSeo";
 import * as content from "./content";
 import { pickHTML } from "@/lib/marketing/content";
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   return getPageMetadata("anlasmali-kargolar", {
   title: "Anlaşmalı Kargolar",
   description: "Zalusa üzerinden çalışabileceğiniz anlaşmalı kargo seçeneklerini ve operasyon avantajlarını görüntüleyin.",
-  });
+  }, locale);
 }
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {

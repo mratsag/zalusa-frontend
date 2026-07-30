@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { getTranslations } from "next-intl/server";
+
 import { getPageMetadata } from "@/lib/marketing/pageSeo";
 import { QuickCalculatorForm } from "@/components/marketing/quick-calculator";
 import { YurtdisiKargoGrids, type HubCountry, type HubProvince } from "@/components/marketing/seo/yurtdisi-kargo-hub";
@@ -8,8 +10,9 @@ import { YurtdisiKargoGrids, type HubCountry, type HubProvince } from "@/compone
 const API = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "";
 const FB = { title: "Yurt Dışı Kargo - Ülke ve Şehir Rehberi | Zalusa", description: "220+ ülkeye ve Türkiye çıkışlı illere uygun fiyatlı yurt dışı kargo. Ülke ve şehir bazlı rehberler, anlık fiyat hesaplama." };
 
-export async function generateMetadata(): Promise<Metadata> {
-  return getPageMetadata("yurtdisi-kargo", FB);
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return getPageMetadata("yurtdisi-kargo", FB, locale);
 }
 
 async function getIndex(): Promise<{ countries: HubCountry[]; tr_provinces: HubProvince[] }> {
@@ -49,14 +52,16 @@ async function getPageFaqs(): Promise<{ question: string; answer: string }[]> {
 }
 
 const CARRIERS = ["dhl", "fedex", "ups", "tnt", "gls"];
-const STEPS = [
-  { n: "1", t: "Fiyat hesapla", d: "Ülke, ağırlık ve boyut girin; taşıyıcıları anında karşılaştırın." },
-  { n: "2", t: "Gönderini oluştur", d: "En uygun taşıyıcıyı seçin, etiketinizi tek tıkla oluşturun." },
-  { n: "3", t: "Takip et", d: "Tüm gönderilerinizi tek panelden anlık takip edin." },
-];
+const STEPS = ["s1", "s2", "s3"] as const;
 
-export default async function YurtdisiKargoHubPage() {
-  const [{ countries, tr_provinces }, content, faqs] = await Promise.all([getIndex(), getPageContent(), getPageFaqs()]);
+export default async function YurtdisiKargoHubPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const [{ countries, tr_provinces }, content, faqs, t] = await Promise.all([
+    getIndex(),
+    getPageContent(),
+    getPageFaqs(),
+    getTranslations({ locale, namespace: "shippingHub" }),
+  ]);
 
   const faqLd =
     faqs.length > 0
@@ -73,14 +78,14 @@ export default async function YurtdisiKargoHubPage() {
         <div className="absolute inset-0 zal-hero-grid pointer-events-none" aria-hidden="true" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14 md:pt-14 md:pb-20">
           <nav className="flex items-center gap-1.5 text-xs text-slate-500 mb-6">
-            <a href="/" className="hover:text-[#0000BE] transition">Anasayfa</a>
+            <a href="/" className="hover:text-[#0000BE] transition">{t("home")}</a>
             <span className="text-slate-300">/</span>
-            <span className="text-slate-800 font-semibold">Yurt Dışı Kargo</span>
+            <span className="text-slate-800 font-semibold">{t("breadcrumb")}</span>
           </nav>
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-start">
             <div className="zal-rise">
-              <h1 className="text-3xl md:text-4xl lg:text-[42px] font-bold tracking-tight text-slate-900 leading-[1.1]">Yurt Dışı Kargo Rehberi</h1>
-              <p className="mt-4 text-base md:text-lg text-slate-600 leading-relaxed max-w-xl">220+ ülkeye ve Türkiye çıkışlı tüm illere uygun fiyatlı, hızlı yurt dışı kargo. Ülke ve şehir rehberleriyle en uygun fiyatı bulun.</p>
+              <h1 className="text-3xl md:text-4xl lg:text-[42px] font-bold tracking-tight text-slate-900 leading-[1.1]">{t("title")}</h1>
+              <p className="mt-4 text-base md:text-lg text-slate-600 leading-relaxed max-w-xl">{t("subtitle")}</p>
               <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 opacity-70">
                 {CARRIERS.map((c) => (
                   <img key={c} src={`/assets/${c}.png`} alt={c.toUpperCase()} className="h-5 md:h-6 w-auto object-contain" loading="lazy" />
@@ -99,11 +104,11 @@ export default async function YurtdisiKargoHubPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight text-center mb-10">Yurt dışı kargo gönderimi nasıl yapılır?</h2>
           <div className="grid md:grid-cols-3 gap-5">
-            {STEPS.map((s) => (
-              <div key={s.n} className="rounded-2xl border border-slate-200 bg-white p-6 zal-shadow-soft">
-                <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-[#0000BE] text-white font-bold">{s.n}</span>
-                <h3 className="mt-4 text-lg font-bold text-slate-900">{s.t}</h3>
-                <p className="mt-1.5 text-sm text-slate-600 leading-relaxed">{s.d}</p>
+            {STEPS.map((key, i) => (
+              <div key={i + 1} className="rounded-2xl border border-slate-200 bg-white p-6 zal-shadow-soft">
+                <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-[#0000BE] text-white font-bold">{i + 1}</span>
+                <h3 className="mt-4 text-lg font-bold text-slate-900">{t(`steps.${key}t`)}</h3>
+                <p className="mt-1.5 text-sm text-slate-600 leading-relaxed">{t(`steps.${key}d`)}</p>
               </div>
             ))}
           </div>

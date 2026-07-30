@@ -10,12 +10,13 @@ import { FeedbackForm } from "./feedback-form";
 // Önceden 1,3 MB statik HTML (content.ts) idi; DB'ye taşındı.
 const API = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "";
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   return getPageMetadata("yorumlar", {
     title: "Yorumlar - Zalusa",
     description:
       "Zalusa kullanıcı yorumları ve değerlendirmeleri. Genel ve ülke sayfalarındaki tüm değerlendirmeler burada listelenir.",
-  });
+  }, locale);
 }
 
 type ApiResponse = { testimonials: Review[]; total: number; averageRating: number };
