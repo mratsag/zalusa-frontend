@@ -1,14 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
+import { getTranslations } from "next-intl/server";
+
 // homepage-v2.php "NEDEN ZALUSA?" karşılaştırma tablosu (live 1900-2050) portu.
-const FEATURES = [
-  "Şeffaf fiyat — kurulum ve gizli maliyet yok",
-  "Gönderi başına optimize maliyet (ort. %27 tasarruf)",
-  "Tüm taşıyıcılar tek panelde fiyat karşılaştırma",
-  "7/24 operasyon ve canlı destek",
-  "Kabulden teslimata uçtan uca canlı takip",
-  "Tek tıkla otomatik etiket ve gönderi oluşturma",
-  "Etsy, Shopify, Amazon entegrasyonları hazır",
-];
+// Özellik listesi çeviri kataloğunda: whyZalusa.features (dizi).
 
 function CheckIcon() {
   return (
@@ -30,7 +24,10 @@ function CrossIcon() {
   );
 }
 
-export function NedenZalusa() {
+export async function NedenZalusa() {
+  const t = await getTranslations("whyZalusa");
+  const features = t.raw("features") as string[];
+
   return (
     <section className="relative py-16 md:py-28 bg-white overflow-hidden cv-auto">
       {/* Ambient decorations */}
@@ -45,14 +42,14 @@ export function NedenZalusa() {
         <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
           <div className="inline-flex items-center gap-2 mb-3">
             <span className="w-1 h-1 rounded-full bg-[#4D4DF2]/60" />
-            <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#4D4DF2]">Karşılaştırma</span>
+            <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#4D4DF2]">{t("eyebrow")}</span>
             <span className="w-1 h-1 rounded-full bg-[#4D4DF2]/60" />
           </div>
           <h2 className="text-[32px] md:text-[44px] font-semibold tracking-tight text-slate-900 leading-[1.1]">
-            <span className="text-[#0000BE]">NEDEN</span> ZALUSA?
+            <span className="text-[#0000BE]">{t("titleHighlight")}</span> {t("titleRest")}
           </h2>
           <p className="mt-4 text-base md:text-[17px] text-slate-500 leading-relaxed">
-            Diğer yöntemlerle Zalusa&apos;yı yan yana koyduk. Fark, tek panelde net görülüyor.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -61,7 +58,7 @@ export function NedenZalusa() {
             {/* Column headers */}
             <div className="grid grid-cols-[1fr_84px_84px] sm:grid-cols-[1fr_150px_150px]">
               <div className="p-4 sm:p-6 flex items-end">
-                <span className="text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.14em] text-slate-400">Özellik</span>
+                <span className="text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.14em] text-slate-400">{t("colFeature")}</span>
               </div>
               <div className="relative p-3 sm:p-5 bg-gradient-to-b from-[#0000BE] to-[#1a1aff] text-white flex flex-col items-center justify-center gap-2 text-center">
                 <span className="absolute top-0 inset-x-0 h-1 bg-[#BFFF00]" />
@@ -76,12 +73,12 @@ export function NedenZalusa() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h10" />
                   </svg>
                 </span>
-                <span className="text-[11px] sm:text-[13px] font-semibold leading-tight">Diğerleri</span>
+                <span className="text-[11px] sm:text-[13px] font-semibold leading-tight">{t("colOthers")}</span>
               </div>
             </div>
 
             {/* Feature rows */}
-            {FEATURES.map((f) => (
+            {features.map((f) => (
               <div key={f} className="grid grid-cols-[1fr_84px_84px] sm:grid-cols-[1fr_150px_150px] border-t border-slate-100">
                 <div className="p-4 sm:px-6 sm:py-4 flex items-center text-[13px] sm:text-[15px] font-medium text-slate-700">{f}</div>
                 <div className="flex items-center justify-center bg-[#0000BE]/[0.035] py-3.5">
@@ -99,7 +96,7 @@ export function NedenZalusa() {
               href="/giris"
               className="inline-flex items-center justify-center gap-2 px-6 h-11 md:h-12 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-sm font-semibold rounded-lg shadow-sm transition-all whitespace-nowrap"
             >
-              Ücretsiz Teklif Al
+              {t("ctaPrimary")}
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
@@ -108,7 +105,7 @@ export function NedenZalusa() {
               href="/yurtdisi-kargo-fiyat-hesaplama"
               className="inline-flex items-center justify-center px-6 h-11 md:h-12 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-sm font-semibold rounded-lg transition-all whitespace-nowrap"
             >
-              Fiyat Hesapla
+              {t("ctaSecondary")}
             </a>
           </div>
         </div>

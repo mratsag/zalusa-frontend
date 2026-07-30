@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { getTranslations } from "next-intl/server";
 // homepage-v2.php BLOG bölümü (live 2398-2513) portu.
 // Canlıda DB'den son 3 yayınlanmış yazı gelir; cutover'da Go backend'e bağlanacak.
 // Şimdilik canlıdaki 3 yazı statik data olarak (pixel-perfect referans).
@@ -49,7 +50,9 @@ function ArrowRight({ className }: { className: string }) {
   );
 }
 
-export function BlogOneCikan() {
+export async function BlogOneCikan() {
+  const t = await getTranslations("blogSection");
+
   return (
     <section className="py-16 md:py-24 bg-white cv-auto">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -60,17 +63,17 @@ export function BlogOneCikan() {
               Kaynaklar
             </span>
             <h2 className="text-[32px] md:text-[44px] font-semibold tracking-tight text-slate-900 leading-[1.1]">
-              E-ihracat rehberi ve <span className="text-[#0000BE]">güncel içerikler</span>.
+              {t("titleStart")} <span className="text-[#0000BE]">{t("titleHighlight")}</span>.
             </h2>
             <p className="mt-4 text-[15px] md:text-[16px] text-slate-500 leading-relaxed">
-              Operasyonunuzu büyütmek için uzman analizleri, sektör rehberleri ve pratik ipuçları.
+              {t("subtitle")}
             </p>
           </div>
           <a
             href="/blog"
             className="hidden md:inline-flex items-center gap-2 text-[14px] font-semibold text-[#0000BE] hover:text-[#00009c] transition group shrink-0"
           >
-            Tüm yazılar
+            {t("allPosts")}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition" />
           </a>
         </div>
@@ -105,7 +108,7 @@ export function BlogOneCikan() {
                 </h3>
                 <p className="text-[14px] text-slate-500 leading-relaxed line-clamp-2 mb-4">{p.excerpt}</p>
                 <span className="mt-auto inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#0000BE]">
-                  Yazıyı oku
+                  {t("readPost")}
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
                 </span>
               </div>
@@ -119,7 +122,7 @@ export function BlogOneCikan() {
             href="/blog"
             className="inline-flex items-center gap-2 text-[14px] font-semibold text-[#0000BE] hover:text-[#00009c] transition group"
           >
-            Tüm blog yazıları
+            {t("allBlogPosts")}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition" />
           </a>
         </div>

@@ -6,6 +6,7 @@ import { Referanslar } from "@/components/marketing/home/referanslar";
 import { Istatistik } from "@/components/marketing/home/istatistik";
 import { UcAdimda } from "@/components/marketing/home/uc-adimda";
 import { KimlerIcin } from "@/components/marketing/home/kimler-icin";
+import { KuryeOtomasyonu } from "@/components/marketing/home/kurye-otomasyonu";
 import { NedenZalusa } from "@/components/marketing/home/neden-zalusa";
 import { TasimaModlari } from "@/components/marketing/home/tasima-modlari";
 import { Testimonials } from "@/components/marketing/home/testimonials";
@@ -28,6 +29,7 @@ export default function HomePage() {
       <Referanslar />
       <Istatistik />
       <UcAdimda />
+      <KuryeOtomasyonu />
       <KimlerIcin />
       <NedenZalusa />
       <TasimaModlari />

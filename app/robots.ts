@@ -8,7 +8,11 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin", "/api", "/giris", "/panel"],
+      // /en GEÇİCİ olarak kapalı: İngilizce çeviriler (Faz 2-4) tamamlanana kadar
+      // sayfalar çoğunlukla Türkçe içerik gösteriyor → yinelenen/karışık içerik
+      // olarak indekslenmesini engelliyoruz. Çeviriler bitince bu satır kaldırılıp
+      // sitemap'e /en URL'leri + hreflang eklenecek.
+      disallow: ["/admin", "/api", "/giris", "/panel", "/en"],
     },
     sitemap: `${SITE}/sitemap.xml`,
     host: SITE,

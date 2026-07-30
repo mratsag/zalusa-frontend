@@ -667,3 +667,6 @@ export const NASIL_CALISIR_HTML = `    <header class="py-8 md:py-10 bg-gradient-
         </div>
     </section>
 `;
+
+// pickHTML `HTML` adını bekler — takma ad (içerik tek kaynaktan gelir).
+export const HTML = NASIL_CALISIR_HTML;

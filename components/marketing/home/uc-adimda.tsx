@@ -1,66 +1,55 @@
 /* eslint-disable @next/next/no-img-element */
-import type { ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
 
 // homepage-v2.php "3 ADIMDA KOLAY GÖNDERİ" (live 1524-1817) portu.
 // Büyük adım illüstrasyonları statik SVG dosyaları (public/assets/home/stepN.svg).
+// Metinler çeviri kataloğunda: howItWorks.* (adım 2 başlığı <ai> etiketiyle zengin metin).
 
-type Step = {
-  n: string;
-  bg: string; // illüstrasyon konteyner arka planı
-  shadow: string; // img drop-shadow
-  img: string;
-  title: ReactNode;
-};
+type Step = { n: string; key: "s1" | "s2" | "s3"; bg: string; shadow: string; img: string };
 
 const STEPS: Step[] = [
   {
     n: "1",
+    key: "s1",
     bg: "from-[#F0F4FF] via-[#F8F9FF] to-white",
     shadow: "drop-shadow-[0_8px_24px_rgba(0,0,190,0.15)]",
     img: "/assets/home/step1.svg",
-    title: "Gönderi Bilgilerini Girin",
   },
   {
     n: "2",
+    key: "s2",
     bg: "from-[#F0F1FF] via-[#F8F8FF] to-white",
     shadow: "drop-shadow-[0_8px_24px_rgba(124,124,227,0.2)]",
     img: "/assets/home/step2.svg",
-    title: (
-      <>
-        Zalusa{" "}
-        <span className="bg-gradient-to-r from-[#4D4DF2] to-[#0000BE] bg-clip-text text-transparent">
-          AI
-        </span>{" "}
-        Otomatik Planlasın
-      </>
-    ),
   },
   {
     n: "3",
+    key: "s3",
     bg: "from-[#ECFDF5] via-[#F0FAF5] to-white",
     shadow: "drop-shadow-[0_8px_24px_rgba(16,185,129,0.18)]",
     img: "/assets/home/step3.svg",
-    title: "Etiket Oluşsun, Canlı Takip Edin",
   },
 ];
 
-const PRICING_ROWS = ["Kurulum bedeli", "Entegrasyon bedeli", "Gizli maliyet"];
+const PRICING_ROWS = ["setup", "integration", "hidden"] as const;
 
-export function UcAdimda() {
+export async function UcAdimda() {
+  const t = await getTranslations("howItWorks");
+
   return (
     <section className="py-16 md:py-28 bg-white overflow-hidden cv-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
           <span className="inline-block text-[12px] font-semibold uppercase tracking-[0.18em] text-[#4D4DF2] mb-3">
-            Nasıl Çalışır
+            {t("eyebrow")}
           </span>
           <h2 className="text-[34px] md:text-[44px] font-semibold tracking-tight text-slate-900 leading-[1.1]">
-            <span className="text-[#0000BE]">3 Adımda</span> Kolay Gönderi.
+            <span className="text-[#0000BE]">{t("titleHighlight")}</span> {t("titleRest")}
           </h2>
           <p className="mt-4 text-base md:text-[17px] text-slate-500 leading-relaxed">
-            Manuel kontrol, evrak takibi ve operasyon yükünü sıfıra indirin.{" "}
-            <span className="font-semibold text-slate-700">Zalusa AI</span> gönderi sürecini baştan
-            sona yönetir — siz sadece sonucu takip edersiniz.
+            {t.rich("subtitle", {
+              b: (chunks) => <span className="font-semibold text-slate-700">{chunks}</span>,
+            })}
           </p>
         </div>
 
@@ -84,7 +73,15 @@ export function UcAdimda() {
                 <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#0000BE] text-white text-[22px] font-extrabold shadow-[0_6px_16px_-4px_rgba(0,0,190,0.45)] ring-4 ring-[#0000BE]/10">
                   {s.n}
                 </span>
-                <h3 className="text-[19px] font-semibold tracking-tight text-slate-900">{s.title}</h3>
+                <h3 className="text-[19px] font-semibold tracking-tight text-slate-900">
+                  {t.rich(`steps.${s.key}`, {
+                    ai: (chunks) => (
+                      <span className="bg-gradient-to-r from-[#4D4DF2] to-[#0000BE] bg-clip-text text-transparent">
+                        {chunks}
+                      </span>
+                    ),
+                  })}
+                </h3>
               </div>
             </article>
           ))}
@@ -95,7 +92,7 @@ export function UcAdimda() {
             href="/giris"
             className="inline-flex items-center justify-center gap-2 px-6 h-11 md:h-12 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-sm font-semibold rounded-lg shadow-sm cursor-pointer transition-all whitespace-nowrap"
           >
-            Ücretsiz Teklif Al
+            {t("cta")}
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
@@ -126,25 +123,24 @@ export function UcAdimda() {
                       d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  Şeffaf Fiyatlandırma
+                  {t("pricing.badge")}
                 </span>
                 <h2 className="text-[34px] sm:text-[42px] md:text-[48px] font-bold tracking-tight leading-[1.05] text-white">
-                  Ne ödeyeceğinizi
+                  {t("pricing.titleLine1")}
                   <span className="block">
                     <span className="bg-gradient-to-r from-[#BFFF00] to-[#A8E600] bg-clip-text text-transparent">
-                      baştan bilirsiniz.
+                      {t("pricing.titleLine2")}
                     </span>
                   </span>
                 </h2>
                 <p className="mt-5 text-[16px] md:text-[17px] text-white/70 leading-relaxed max-w-xl">
-                  Aylık abonelik yok, kullandığınız kadar ödersiniz. Ek bedel veya sürpriz fatura yok —
-                  sadece gönderdiğiniz kargoların net fiyatı.
+                  {t("pricing.text")}
                 </p>
               </div>
               <div className="lg:col-span-5 grid grid-cols-1 gap-3">
-                {PRICING_ROWS.map((label) => (
+                {PRICING_ROWS.map((rowKey) => (
                   <div
-                    key={label}
+                    key={rowKey}
                     className="flex items-center justify-between gap-3 px-4 md:px-5 py-3.5 rounded-xl bg-white/[0.08] border border-white/10 backdrop-blur-sm"
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -153,10 +149,12 @@ export function UcAdimda() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </span>
-                      <span className="text-white font-semibold text-[16px] md:text-[18px] leading-tight">{label}</span>
+                      <span className="text-white font-semibold text-[16px] md:text-[18px] leading-tight">
+                        {t(`pricing.rows.${rowKey}`)}
+                      </span>
                     </div>
                     <span className="shrink-0 text-[#BFFF00] font-black text-[30px] md:text-[36px] uppercase tracking-tight leading-none">
-                      Yok
+                      {t("pricing.none")}
                     </span>
                   </div>
                 ))}

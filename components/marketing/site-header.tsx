@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import type { NavItem, NavChild } from "@/lib/marketing/menu";
+import { LanguageSwitcher } from "./language-switcher";
 import { useOfferModal } from "./offer-modal";
 
 // PHP includes/header.php birebir portu.
@@ -14,67 +16,57 @@ import { useOfferModal } from "./offer-modal";
 export function SiteHeader({ menu }: { menu: NavItem[] }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { openKurumsal } = useOfferModal();
+  const t = useTranslations("topbar");
+  const tNav = useTranslations("nav");
 
   return (
     <>
-      {/* Üst iletişim bandı */}
+      {/* Üst iletişim bandı — açık zemin: solda iletişim, sağda hızlı erişim + dil seçici.
+          z-[60]: sticky nav z-50 olduğu için, dil menüsü nav'ın ALTINDA kalmasın diye üstte. */}
       <div
         id="top-contactbar"
         dir="ltr"
-        className="bg-[#0000BE] text-white text-[11px] md:text-xs relative z-50"
+        className="bg-slate-50 border-b border-slate-200/80 text-slate-600 text-[11px] md:text-xs relative z-[60]"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 h-9">
-          <span className="hidden sm:inline-flex items-center gap-2 text-white/90 font-medium whitespace-nowrap">
-            <span className="relative flex w-2 h-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#BFFF00] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#BFFF00]" />
-            </span>
-            7/24 Canlı Operasyon Desteği
-          </span>
-          <div className="flex items-center gap-4 md:gap-6 ml-auto">
-            <a
-              href="mailto:destek@zalusa.com"
-              className="inline-flex items-center gap-1.5 font-medium hover:text-[#BFFF00] transition whitespace-nowrap"
-            >
-              <svg
-                className="w-3.5 h-3.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                width="14"
-                height="14"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-              destek@zalusa.com
-            </a>
-            <span className="w-px h-3.5 bg-white/25" aria-hidden="true" />
+          {/* Sol: iletişim */}
+          <div className="flex items-center gap-4 md:gap-6 min-w-0">
             <a
               href="tel:08502551840"
-              className="inline-flex items-center gap-1.5 font-semibold hover:text-[#BFFF00] transition whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 font-semibold hover:text-[#0000BE] transition whitespace-nowrap"
             >
-              <svg
-                className="w-3.5 h-3.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                width="14"
-                height="14"
-                strokeWidth="2.2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                />
-              </svg>
+              <i className="ph-bold ph-phone text-[13px] text-[#0000BE]" aria-hidden="true" />
               0850 255 18 40
             </a>
+            <a
+              href="mailto:destek@zalusa.com"
+              className="hidden sm:inline-flex items-center gap-1.5 font-medium hover:text-[#0000BE] transition whitespace-nowrap"
+            >
+              <i className="ph-bold ph-envelope-simple text-[13px] text-[#0000BE]" aria-hidden="true" />
+              destek@zalusa.com
+            </a>
+          </div>
+
+          {/* Sağ: hızlı erişim */}
+          <div className="flex items-center gap-4 md:gap-6">
+            <a
+              href="/kargo-takip"
+              className="inline-flex items-center gap-1.5 font-medium hover:text-[#0000BE] transition whitespace-nowrap"
+            >
+              <i className="ph-bold ph-package text-[13px] text-[#0000BE]" aria-hidden="true" />
+              <span className="sm:hidden">{t("trackingShort")}</span>
+              <span className="hidden sm:inline">{t("trackingLong")}</span>
+            </a>
+            <span className="hidden sm:block w-px h-3.5 bg-slate-300" aria-hidden="true" />
+            <a
+              href="/yurtdisi-kargo-fiyat-hesaplama"
+              className="hidden sm:inline-flex items-center gap-1.5 font-medium hover:text-[#0000BE] transition whitespace-nowrap"
+            >
+              <i className="ph-bold ph-calculator text-[13px] text-[#0000BE]" aria-hidden="true" />
+              {t("calculator")}
+            </a>
+            <span className="w-px h-3.5 bg-slate-300" aria-hidden="true" />
+            <LanguageSwitcher />
           </div>
         </div>
       </div>
@@ -92,7 +84,7 @@ export function SiteHeader({ menu }: { menu: NavItem[] }) {
               <a
                 href="/"
                 className="site-logo-link flex items-center gap-2 text-[#0000BE] hover:opacity-90 transition"
-                title="Zalusa Ana Sayfa"
+                title={tNav("homeTitle")}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -122,13 +114,13 @@ export function SiteHeader({ menu }: { menu: NavItem[] }) {
                 href="/giris"
                 className="text-slate-700 hover:text-slate-900 font-medium text-[14px] transition whitespace-nowrap"
               >
-                Giriş Yap
+                {tNav("login")}
               </a>
               <a
                 href="/giris"
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-sm font-semibold rounded-lg shadow-sm cursor-pointer transition-all whitespace-nowrap"
               >
-                Ücretsiz Teklif Al
+                {tNav("cta")}
                 <ArrowRight className="w-4 h-4" />
               </a>
             </div>
@@ -140,7 +132,7 @@ export function SiteHeader({ menu }: { menu: NavItem[] }) {
                 id="mobile-menu-btn"
                 aria-expanded={mobileOpen}
                 aria-controls="mobile-menu"
-                aria-label="Menüyü aç/kapat"
+                aria-label={tNav("toggleMenu")}
                 onClick={() => setMobileOpen((v) => !v)}
                 className="text-slate-900 p-2 -mr-2 rounded-xl hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0000BE]/40 transition-colors"
               >
@@ -181,7 +173,7 @@ export function SiteHeader({ menu }: { menu: NavItem[] }) {
                 href="/giris"
                 className="inline-flex w-full min-h-[44px] items-center justify-center gap-2 px-2 py-2 bg-[#BFFF00] hover:bg-[#aee600] text-slate-900 text-sm font-bold rounded-lg shadow-sm cursor-pointer transition-all text-center leading-snug"
               >
-                Ücretsiz Teklif Al
+                {tNav("cta")}
                 <ArrowRight className="w-4 h-4 shrink-0" />
               </a>
               <div className="flex items-center justify-between gap-3 pt-1">
@@ -189,7 +181,7 @@ export function SiteHeader({ menu }: { menu: NavItem[] }) {
                   href="/giris"
                   className="inline-flex items-center text-[13.5px] font-semibold text-slate-700 hover:text-[#0000BE] transition"
                 >
-                  Giriş Yap
+                  {tNav("login")}
                 </a>
                 <a
                   href="tel:08502551840"

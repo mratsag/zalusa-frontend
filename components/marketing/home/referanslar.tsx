@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import type { ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
 
 // homepage-v2.php REFERANSLAR bölümü (satır 142 / live 751-819) portu.
 // Admin'de referans varsa dinamik marquee (logolar), yoksa stilize fallback (PHP ile birebir).
@@ -222,13 +223,13 @@ function FallbackMarquee() {
 }
 
 export async function Referanslar() {
-  const refs = await getReferences();
+  const [refs, t] = await Promise.all([getReferences(), getTranslations("references")]);
 
   return (
     <section className="py-12 md:py-16 bg-slate-50/60 border-y border-slate-200/40 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <p className="text-center text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.16em] text-slate-500 mb-7 md:mb-9">
-          Yüzlerce markanın tercihi
+          {t("trusted")}
         </p>
 
         {/* Marquee — admin'de referans varsa dinamik, yoksa stilize fallback */}
@@ -237,7 +238,7 @@ export async function Referanslar() {
         {/* Anlaşmalı Partnerler */}
         <div className="mt-10 md:mt-14 pt-8 md:pt-10 border-t border-slate-200/60">
           <p className="text-center text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.16em] text-slate-500 mb-6 md:mb-7">
-            Anlaşmalı Partnerler
+            {t("partners")}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-9 gap-y-5 md:gap-x-16">
             {PARTNERS.map((p) => (
@@ -256,7 +257,7 @@ export async function Referanslar() {
         {/* Global İş Ortaklarımız */}
         <div className="mt-10 md:mt-14 pt-8 md:pt-10 border-t border-slate-200/60">
           <p className="text-center text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.16em] text-slate-500 mb-6 md:mb-7">
-            Global İş Ortaklarımız
+            {t("globalPartners")}
           </p>
           <div className="flex items-center justify-center gap-x-6 gap-y-4 md:gap-x-10 flex-wrap md:flex-nowrap">
             {GLOBAL_PARTNERS.map((p) => (

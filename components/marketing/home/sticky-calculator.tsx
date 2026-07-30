@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { QuickCalculatorForm } from "@/components/marketing/quick-calculator";
 
@@ -8,6 +9,7 @@ import { QuickCalculatorForm } from "@/components/marketing/quick-calculator";
 // - Sağ-alt sabit widget; scrollY >= 600'de görünür.
 // - Pill (kapalı) ↔ Panel (açık). Panel içinde paylaşılan "Kargo Hesapla" formu.
 export function StickyCalculator() {
+  const t = useTranslations("stickyCalc");
   const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
@@ -34,8 +36,8 @@ export function StickyCalculator() {
             </span>
           </span>
           <span className="flex flex-col items-start leading-tight">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Anında</span>
-            <span className="text-[13px] font-bold text-slate-900">Fiyat Hesapla</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{t("instant")}</span>
+            <span className="text-[13px] font-bold text-slate-900">{t("calculate")}</span>
           </span>
         </button>
       )}
@@ -49,7 +51,7 @@ export function StickyCalculator() {
               </span>
               <div className="flex flex-col leading-tight">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Zalusa</span>
-                <span className="text-[14px] font-semibold text-slate-900">Hızlı Fiyat Hesapla</span>
+                <span className="text-[14px] font-semibold text-slate-900">{t("panelTitle")}</span>
               </div>
             </div>
             <button

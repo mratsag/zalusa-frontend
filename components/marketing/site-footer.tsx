@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import type { ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
 
 // PHP includes/footer.php portu:
 // - "Güvenilir platformlarda değerlendirildik" + "Bugüne Kadar Biz" bandı
@@ -53,39 +54,44 @@ const TRUST: { svg: ReactNode; score: string; max: string; is100?: boolean }[] =
   },
 ];
 
-const STATS: { iconClass: string; svg: ReactNode; text: string }[] = [
+// text yerine çeviri anahtarı (footer.stats.*)
+const STATS: { iconClass: string; svg: ReactNode; key: "shipments" | "businesses" | "countries" }[] = [
   {
     iconClass: "stat-icon-blue",
     svg: <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />,
-    text: "2.4M+ gönderi",
+    key: "shipments",
   },
   {
     iconClass: "stat-icon-green",
     svg: <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />,
-    text: "65K+ aktif işletme",
+    key: "businesses",
   },
   {
     iconClass: "stat-icon-amber",
     svg: <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0h.5a2.5 2.5 0 002.5-2.5V3.935M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
-    text: "220+ ülke",
+    key: "countries",
   },
 ];
 
-const COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
+// labelKey = footer.links.* çeviri anahtarı; label = çevrilmeyen sabit (marka adları).
+// NOT: blog başlıkları bilerek Türkçe bırakıldı — hedef yazılar Türkçe (bloglar Faz 3'te
+// DB üzerinden çevrilecek); başlığı çevirip Türkçe içeriğe yönlendirmek yanıltıcı olurdu.
+type FooterLink = { href: string; label?: string; labelKey?: string };
+const COLUMNS: { titleKey: string; links: FooterLink[] }[] = [
   {
-    title: "Kurumsal",
+    titleKey: "company",
     links: [
-      { href: "/hakkimizda", label: "Hakkımızda" },
-      { href: "/kariyer", label: "Kariyer" },
-      { href: "/neden-zalusa", label: "Neden Zalusa?" },
-      { href: "/is-ortaklarimiz", label: "İş Ortaklarımız" },
-      { href: "/anlasmali-kargolar", label: "Anlaşmalı Kargolar" },
-      { href: "/blog", label: "Blog" },
-      { href: "/sss", label: "SSS" },
+      { href: "/hakkimizda", labelKey: "about" },
+      { href: "/kariyer", labelKey: "careers" },
+      { href: "/neden-zalusa", labelKey: "why" },
+      { href: "/is-ortaklarimiz", labelKey: "partners" },
+      { href: "/anlasmali-kargolar", labelKey: "carriers" },
+      { href: "/blog", labelKey: "blog" },
+      { href: "/sss", labelKey: "faq" },
     ],
   },
   {
-    title: "Entegrasyonlar",
+    titleKey: "integrations",
     links: [
       { href: "/entegrasyonlar#pazaryerleri", label: "Etsy" },
       { href: "/entegrasyonlar#e-ticaret", label: "Shopify" },
@@ -98,17 +104,17 @@ const COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
     ],
   },
   {
-    title: "Gizlilik ve Kullanım",
+    titleKey: "legal",
     links: [
-      { href: "/kullanim-sozlesmesi", label: "Kullanıcı Sözleşmesi" },
-      { href: "/iptal-ve-iadeler", label: "İptal ve İadeler" },
-      { href: "/cerez-politikasi", label: "Çerez Politikası" },
-      { href: "/gizlilik-politikasi", label: "Gizlilik Politikası" },
-      { href: "/kvkk-aydinlatma-metni", label: "KVKK Aydınlatma Metni" },
+      { href: "/kullanim-sozlesmesi", labelKey: "terms" },
+      { href: "/iptal-ve-iadeler", labelKey: "returns" },
+      { href: "/cerez-politikasi", labelKey: "cookies" },
+      { href: "/gizlilik-politikasi", labelKey: "privacy" },
+      { href: "/kvkk-aydinlatma-metni", labelKey: "kvkk" },
     ],
   },
   {
-    title: "En Çok Okunan Bloglar",
+    titleKey: "topBlogs",
     links: [
       { href: "/blog/e-ihracat-bilinmesi-gereken-tarihler-guncel-takvim", label: "E-İhracat Bilinmesi Gereken Tarihler (2026 Güncel Takvim)" },
       { href: "/blog/dropshipping-nedir-ve-nasil-yapilir-ultimate-rehber", label: "Dropshipping Nedir ve Nasıl Yapılır? (2026 Ultimate Rehber)" },
@@ -124,7 +130,9 @@ const SOCIAL: { href: string; label: string; path: string }[] = [
   { href: "https://www.youtube.com/@zalusa", label: "YouTube", path: "M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.263-4.356 2.698-4.381 4.802 0 .011 0 .022 0 .033v6.398c0 .011 0 .022 0 .033.025 2.105.484 4.54 4.381 4.802 3.6.245 11.626.246 15.23 0 3.897-.263 4.356-2.697 4.381-4.802 0-.011 0-.022 0-.033v-6.398c0-.011 0-.022 0-.033-.025-2.104-.484-4.539-4.381-4.802zm-10.615 12.816v-8l8 4-8 4z" },
 ];
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const t = await getTranslations("footer");
+
   return (
     <>
       {/* Güven + istatistik bandı */}
@@ -133,7 +141,7 @@ export function SiteFooter() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
             <div>
               <p className="footer-section-title text-center lg:text-left text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">
-                Güvenilir platformlarda değerlendirildik
+                {t("trustTitle")}
               </p>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-3">
                 {TRUST.map((t, i) => (
@@ -149,17 +157,17 @@ export function SiteFooter() {
             </div>
             <div className="lg:text-right">
               <p className="footer-section-title text-center lg:text-right text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">
-                Bugüne Kadar Biz
+                {t("statsTitle")}
               </p>
               <div className="stat-frame flex flex-row flex-wrap lg:flex-nowrap items-center justify-center lg:justify-end gap-2 sm:gap-4 lg:gap-3 text-center sm:text-left lg:items-center">
                 {STATS.map((s) => (
-                  <div key={s.text} className="flex items-center gap-2 lg:gap-2.5 stat-item">
+                  <div key={s.key} className="flex items-center gap-2 lg:gap-2.5 stat-item">
                     <span className={`stat-icon ${s.iconClass}`}>
                       <svg className="stat-icon-svg" fill="none" stroke="currentColor" strokeWidth="2.25" viewBox="0 0 24 24">
                         {s.svg}
                       </svg>
                     </span>
-                    <span className="stat-text">{s.text}</span>
+                    <span className="stat-text">{t(`stats.${s.key}`)}</span>
                   </div>
                 ))}
               </div>
@@ -173,13 +181,13 @@ export function SiteFooter() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-16 border-b border-gray-100 pb-16">
             {COLUMNS.map((col) => (
-              <div key={col.title}>
-                <p className="font-bold text-[#0A0F29] text-lg mb-6">{col.title}</p>
+              <div key={col.titleKey}>
+                <p className="font-bold text-[#0A0F29] text-lg mb-6">{t(`columns.${col.titleKey}`)}</p>
                 <ul className="space-y-3">
                   {col.links.map((l, i) => (
                     <li key={`${l.href}-${i}`}>
                       <a href={l.href} className="text-slate-600 hover:text-[#0000BE] transition text-sm">
-                        {l.label}
+                        {l.labelKey ? t(`links.${l.labelKey}`) : l.label}
                       </a>
                     </li>
                   ))}
@@ -190,27 +198,27 @@ export function SiteFooter() {
 
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-16">
             <div className="max-w-md">
-              <a href="/" className="site-logo-link flex items-center gap-2 text-[#0000BE] hover:opacity-90 transition mb-4" title="Zalusa Ana Sayfa">
+              <a href="/" className="site-logo-link flex items-center gap-2 text-[#0000BE] hover:opacity-90 transition mb-4" title={t("homeTitle")}>
                 <img src="/assets/logo-ikon.png" alt="Zalusa Logo İkonu" title="Zalusa Logo İkonu" className="site-logo-icon flex-shrink-0 w-8 h-8 rounded-lg object-contain" width={48} height={48} />
                 <span className="text-3xl font-bold tracking-tighter font-montserrat">Zalusa</span>
               </a>
               <p className="text-slate-600 font-medium text-lg leading-snug">
-                E-ihracat yapan işletmeler için uçtan uca lojistik çözümler.
+                {t("tagline")}
               </p>
             </div>
             <div className="w-full md:w-auto">
-              <p className="font-bold text-[#0A0F29] text-lg mb-3">Bültenimize abone olun</p>
+              <p className="font-bold text-[#0A0F29] text-lg mb-3">{t("newsletterTitle")}</p>
               <p className="text-slate-500 text-sm mb-4 max-w-sm">
-                En güncel haberler ve kaynaklar her hafta e-posta kutunuza gönderilir.
+                {t("newsletterText")}
               </p>
               <div className="flex gap-2">
                 <input
                   type="email"
-                  placeholder="E-postanızı girin"
+                  placeholder={t("emailPlaceholder")}
                   className="flex-1 min-w-[240px] px-4 py-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
                 <button className="px-6 py-3 bg-[#0000BE] text-white font-bold text-sm rounded-lg hover:bg-[#00009c] transition">
-                  Abone Ol
+                  {t("subscribe")}
                 </button>
               </div>
             </div>
@@ -219,7 +227,7 @@ export function SiteFooter() {
           <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-xs text-slate-500 leading-relaxed text-center md:text-left">
               <p className="font-bold text-slate-700">© 2026 Zalusa Lojistik ve Teknoloji Anonim Şirketi.</p>
-              <p>Tüm Hakları Saklıdır.</p>
+              <p>{t("rights")}</p>
             </div>
             <div className="flex items-center space-x-6">
               <div className="flex space-x-5 text-slate-800">
@@ -231,15 +239,6 @@ export function SiteFooter() {
                   </a>
                 ))}
               </div>
-              <button className="flex items-center space-x-2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-                </svg>
-                <span>Türkçe</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
             </div>
           </div>
         </div>

@@ -1,0 +1,328 @@
+{
+  "topbar": {
+    "trackingLong": "Yurt Dışı Kargo Takip",
+    "trackingShort": "Kargo Takip",
+    "calculator": "Fiyat Hesaplama"
+  },
+  "language": {
+    "switchLabel": "Dil seçimi",
+    "tr": "Türkçe",
+    "en": "English"
+  },
+  "calculator": {
+    "title": "Kargo Hesapla",
+    "liveBadge": "Canlı fiyat",
+    "errorCountry": "Lütfen bir ülke seçin.",
+    "destination": "Nereye?",
+    "selectCountry": "Ülke seçin",
+    "searchCountry": "Arayarak seçin",
+    "clearSelection": "Seçimi temizle",
+    "postal": "Posta Kodu / Şehir",
+    "postalPlaceholder": "Posta kodu veya şehir girin",
+    "packageType": "Paket Türü",
+    "types": {
+      "Koli": "Koli",
+      "Paket": "Paket",
+      "Belge": "Belge"
+    },
+    "documentNote": "Belge gönderimi — Sabit 0.5 desi",
+    "dimensions": "Boyutlar (cm / kg)",
+    "addPackage": "Yeni Paket Ekle",
+    "removePackage": "Paketi sil",
+    "weight": "Ağırlık",
+    "quantity": "Koli Adedi",
+    "width": "Genişlik",
+    "length": "Uzunluk",
+    "height": "Yükseklik",
+    "unitKg": "kg",
+    "unitPcs": "ad.",
+    "unitCm": "cm",
+    "submit": "Hesapla",
+    "trust": {
+      "instant": "Sonuçlar anında gösterilir",
+      "noCard": "Kredi kartı gerekmez",
+      "free": "Ücretsiz"
+    }
+  },
+  "hero": {
+    "badgeText": "Zalusa AI ile uçtan uca otomasyon",
+    "rotator": [
+      "En Akıllı",
+      "En Pratik",
+      "En Hızlı",
+      "En Kolay"
+    ],
+    "titleLine2": "Kargo Gönderimi.",
+    "subtitleStrong": "2 dakikada",
+    "subtitleRest": "gönderini oluştur.",
+    "description": "Şeffaf fiyat, anlık takip, tam kontrol. Zalusa AI lojistik sürecini baştan tasarladı — siz sadece gönderin, gerisini biz hallederiz.",
+    "ctaPrimary": "Ücretsiz Teklif Al",
+    "ctaSecondary": "Fiyat Hesapla",
+    "customerAlt": "Müşteri",
+    "reviews": "1.200+ değerlendirme",
+    "supportStrong": "7/24",
+    "supportRest": "canlı destek"
+  },
+  "nav": {
+    "login": "Giriş Yap",
+    "cta": "Ücretsiz Teklif Al",
+    "homeTitle": "Zalusa Ana Sayfa",
+    "toggleMenu": "Menüyü aç/kapat"
+  },
+  "stickyCalc": {
+    "instant": "Anında",
+    "calculate": "Fiyat Hesapla",
+    "panelTitle": "Hızlı Fiyat Hesapla"
+  },
+  "references": {
+    "trusted": "Yüzlerce markanın tercihi",
+    "partners": "Anlaşmalı Partnerler",
+    "globalPartners": "Global İş Ortaklarımız"
+  },
+  "howItWorks": {
+    "eyebrow": "Nasıl Çalışır",
+    "titleHighlight": "3 Adımda",
+    "titleRest": "Kolay Gönderi.",
+    "subtitle": "Manuel kontrol, evrak takibi ve operasyon yükünü sıfıra indirin. <b>Zalusa AI</b> gönderi sürecini baştan sona yönetir — siz sadece sonucu takip edersiniz.",
+    "steps": {
+      "s1": "Gönderi Bilgilerini Girin",
+      "s2": "Zalusa <ai>AI</ai> Otomatik Planlasın",
+      "s3": "Etiket Oluşsun, Canlı Takip Edin"
+    },
+    "cta": "Ücretsiz Teklif Al",
+    "pricing": {
+      "badge": "Şeffaf Fiyatlandırma",
+      "titleLine1": "Ne ödeyeceğinizi",
+      "titleLine2": "baştan bilirsiniz.",
+      "text": "Aylık abonelik yok, kullandığınız kadar ödersiniz. Ek bedel veya sürpriz fatura yok — sadece gönderdiğiniz kargoların net fiyatı.",
+      "rows": {
+        "setup": "Kurulum bedeli",
+        "integration": "Entegrasyon bedeli",
+        "hidden": "Gizli maliyet"
+      },
+      "none": "Yok"
+    }
+  },
+  "transportModes": {
+    "eyebrow": "Her İhtiyaca Uygun Taşımacılık",
+    "air": "Hava",
+    "land": "Kara",
+    "sea": "Deniz",
+    "titleTail": " — Tek Panel.",
+    "subtitle": "Tüm taşıma modlarını tek panelden yönetin. Parsiyel, konteyner, express — hangi mod olursa olsun, operasyon sıfır.",
+    "cta": "Ücretsiz Teklif Al",
+    "footnote": "Tek platform, tüm taşıma modları, tam görünürlük.",
+    "modes": {
+      "cargo": {
+        "subtitle": "Parsiyel & Kargo",
+        "desc": "Hızlı teklif, otomatik etiket ve canlı takip ile kargo süreçlerini sadeleştirin.",
+        "tags": [
+          "SLA",
+          "Canlı takip",
+          "Otomatik etiket"
+        ]
+      },
+      "truck": {
+        "subtitle": "Karayolu & Dağıtım",
+        "desc": "Rota planlama, sürücü atama ve teslimat kanıtı (POD) ile saha operasyonlarını uçtan uca yönetin.",
+        "tags": [
+          "Rota",
+          "POD",
+          "Optimizasyon"
+        ]
+      },
+      "fly": {
+        "subtitle": "Havayolu & Express",
+        "desc": "Kritik ve süreye duyarlı gönderiler için transit görünürlük ve anlık gecikme uyarıları.",
+        "tags": [
+          "Express",
+          "Alarm",
+          "Hız"
+        ]
+      },
+      "ship": {
+        "subtitle": "Denizyolu & Konteyner",
+        "desc": "Konteyner planlama, ETA takibi ve doküman süreçlerinin merkezi yönetimi.",
+        "tags": [
+          "ETA",
+          "Doküman",
+          "Takip"
+        ]
+      }
+    }
+  },
+  "stats": {
+    "onTime": {
+      "label": "Zamanında Teslimat",
+      "value": "98.7%"
+    },
+    "support": {
+      "label": "Operasyon Desteği",
+      "value": "7/24"
+    },
+    "countries": {
+      "label": "Ülkeye Teslimat",
+      "value": "150+"
+    },
+    "savings": {
+      "label": "Maliyet Avantajı",
+      "value": "%30"
+    }
+  },
+  "audience": {
+    "eyebrow": "Kimler İçin",
+    "titleStart": "Herkes için",
+    "titleHighlight": "Tek Lojistik Paneli",
+    "subtitle": "Küçükten büyüğe, bireysel göndericiden sektör devlerine — herkes Zalusa ile gönderir.",
+    "cards": {
+      "individual": "Bireysel Göndericiler",
+      "startups": "Startuplar",
+      "sme": "KOBİ'ler",
+      "companies": "Şirketler",
+      "enterprise": "Sektör Devleri"
+    }
+  },
+  "courier": {
+    "eyebrow": "Kurye Otomasyonu",
+    "titleStart": "İstediğin adresten",
+    "titleHighlight": "biz alalım.",
+    "subtitle": "Kargonu şubeye götürme. Ödemen tamamlanır tamamlanmaz kurye otomatik yönlendirilir; sen sadece paketini hazır et.",
+    "features": [
+      {
+        "title": "Adresinden alım",
+        "desc": "Ev, ofis ya da depo fark etmez — gönderini bulunduğun yerden teslim alırız."
+      },
+      {
+        "title": "Zamanı sen seç",
+        "desc": "Uygun olduğun gün ve saat aralığını seç, kurye o aralıkta kapında olsun."
+      },
+      {
+        "title": "Otomatik yönlendirme",
+        "desc": "Ödeme tamamlandığı anda kurye çağrısı otomatik oluşur, ekstra işlem gerekmez."
+      },
+      {
+        "title": "Tek panelden takip",
+        "desc": "Kurye atandı mı, yolda mı, teslim aldı mı — hepsi anlık olarak panelinde."
+      }
+    ],
+    "ctaPrimary": "Kurye Çağır",
+    "ctaSecondary": "Nasıl çalışır?"
+  },
+  "whyZalusa": {
+    "eyebrow": "Karşılaştırma",
+    "titleHighlight": "NEDEN",
+    "titleRest": "ZALUSA?",
+    "subtitle": "Diğer yöntemlerle Zalusa'yı yan yana koyduk. Fark, tek panelde net görülüyor.",
+    "colFeature": "Özellik",
+    "colOthers": "Diğerleri",
+    "features": [
+      "Şeffaf fiyat — kurulum ve gizli maliyet yok",
+      "Gönderi başına optimize maliyet (ort. %27 tasarruf)",
+      "Tüm taşıyıcılar tek panelde fiyat karşılaştırma",
+      "7/24 operasyon ve canlı destek",
+      "Kabulden teslimata uçtan uca canlı takip",
+      "Tek tıkla otomatik etiket ve gönderi oluşturma",
+      "Etsy, Shopify, Amazon entegrasyonları hazır",
+      "Kurye otomasyonu",
+      "Akıllı GTIP sorgulama ve AI ile HS kodu bulma",
+      "Minimum tutar limiti yok"
+    ],
+    "ctaPrimary": "Ücretsiz Teklif Al",
+    "ctaSecondary": "Fiyat Hesapla"
+  },
+  "footer": {
+    "trustTitle": "Güvenilir platformlarda değerlendirildik",
+    "statsTitle": "Bugüne Kadar Biz",
+    "stats": {
+      "shipments": "2.4M+ gönderi",
+      "businesses": "65K+ aktif işletme",
+      "countries": "220+ ülke"
+    },
+    "columns": {
+      "company": "Kurumsal",
+      "integrations": "Entegrasyonlar",
+      "legal": "Gizlilik ve Kullanım",
+      "topBlogs": "En Çok Okunan Bloglar"
+    },
+    "links": {
+      "about": "Hakkımızda",
+      "careers": "Kariyer",
+      "why": "Neden Zalusa?",
+      "partners": "İş Ortaklarımız",
+      "carriers": "Anlaşmalı Kargolar",
+      "blog": "Blog",
+      "faq": "SSS",
+      "terms": "Kullanıcı Sözleşmesi",
+      "returns": "İptal ve İadeler",
+      "cookies": "Çerez Politikası",
+      "privacy": "Gizlilik Politikası",
+      "kvkk": "KVKK Aydınlatma Metni"
+    },
+    "tagline": "E-ihracat yapan işletmeler için uçtan uca lojistik çözümler.",
+    "newsletterTitle": "Bültenimize abone olun",
+    "newsletterText": "En güncel haberler ve kaynaklar her hafta e-posta kutunuza gönderilir.",
+    "emailPlaceholder": "E-postanızı girin",
+    "subscribe": "Abone Ol",
+    "rights": "Tüm Hakları Saklıdır.",
+    "homeTitle": "Zalusa Ana Sayfa"
+  },
+  "testimonials": {
+    "eyebrow": "Müşteri Deneyimleri",
+    "titleStart": "Onbinlerce",
+    "titleHighlight": "Mutlu Kullanıcı",
+    "reviews": "1.200+ değerlendirme",
+    "viewAll": "Tüm yorumları görüntüle",
+    "roles": {
+      "r1": "Satış Müdürü · E-ticaret",
+      "r2": "Kurucu · E-ihracat Markası",
+      "r3": "Operasyon Direktörü · Lojistik"
+    }
+  },
+  "blogSection": {
+    "titleStart": "E-ihracat rehberi ve",
+    "titleHighlight": "güncel içerikler",
+    "subtitle": "Operasyonunuzu büyütmek için uzman analizleri, sektör rehberleri ve pratik ipuçları.",
+    "allPosts": "Tüm yazılar",
+    "readPost": "Yazıyı oku",
+    "allBlogPosts": "Tüm blog yazıları"
+  },
+  "offerModal": {
+    "title": "Teklif Alın",
+    "subtitle": "Bilgilerinizi bırakın, sizi arayalım.",
+    "name": "Adınız",
+    "surname": "Soyadınız",
+    "company": "Şirket Adı",
+    "optional": "(opsiyonel)",
+    "message": "Mesajınız",
+    "sending": "Gönderiliyor…",
+    "submit": "Teklif Talebini Gönder",
+    "submitCorporate": "Kurumsal Teklif Talebini Gönder"
+  },
+  "reviews": {
+    "title": "Yorumlar",
+    "subtitle": "Zalusa kullanıcılarının değerlendirmeleri. Genel ve ülke sayfalarındaki tüm yorumlar burada.",
+    "filterAll": "Tümü",
+    "filterGeneral": "Genel",
+    "filterCountry": "Ülke",
+    "statTotal": "Toplam Yorum",
+    "statAvg": "Ortalama Puan",
+    "statVerified": "Doğrulanmış",
+    "verified": "Doğrulandı",
+    "loadMore": "Daha fazla göster",
+    "showing": "{count} / {total} yorum gösteriliyor",
+    "empty": "Bu filtreye uygun yorum bulunamadı.",
+    "loading": "Yorumlar yükleniyor…",
+    "error": "Yorumlar yüklenemedi.",
+    "fbTitle": "Deneyimini paylaş",
+    "fbSubtitle": "Görüşün bizim için değerli — yorumun incelendikten sonra yayınlanır.",
+    "fbName": "Adınız",
+    "fbEmail": "E-posta",
+    "fbPhone": "Telefon (opsiyonel)",
+    "fbMessage": "Yorumunuz",
+    "fbSubmit": "Gönder",
+    "fbSending": "Gönderiliyor…",
+    "fbThanks": "Teşekkürler!",
+    "fbReceived": "Geri bildiriminiz alındı.",
+    "fbError": "Gönderilemedi, lütfen tekrar deneyin."
+  }
+}

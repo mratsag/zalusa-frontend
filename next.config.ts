@@ -1,4 +1,8 @@
+import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
+
+// i18n: mesaj kataloğu + sunucu yapılandırması i18n/request.ts'ten okunur.
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
   // Dockerfile'ın çalışması için en kritik satır:
@@ -61,4 +65,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

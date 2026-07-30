@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { createContext, useCallback, useContext, useState } from "react";
 
 // PHP includes/header.php'deki zalusa-offer-modal portu — shared.
@@ -25,6 +27,7 @@ const LABEL = "block text-xs font-bold text-slate-700 mb-1.5";
 const SUBMIT = "w-full inline-flex items-center justify-center gap-2 px-6 h-11 bg-gradient-to-br from-[#4D4DF2] to-[#0000BE] hover:from-[#5959FF] hover:to-[#00009c] hover:-translate-y-0.5 text-white text-sm font-semibold rounded-lg shadow-sm cursor-pointer transition-all disabled:opacity-70";
 
 export function OfferModalProvider({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("offerModal");
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("quick");
   const [done, setDone] = useState(false);
@@ -127,8 +130,8 @@ export function OfferModalProvider({ children }: { children: React.ReactNode }) 
             <div>
               <div className="flex items-center justify-between px-6 pt-4 pb-3 border-b border-gray-100">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">Teklif Alın</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Bilgilerinizi bırakın, sizi arayalım.</p>
+                  <h2 className="text-lg font-semibold text-slate-900">{t("title")}</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">{t("subtitle")}</p>
                 </div>
                 <CloseBtn onClick={close} />
               </div>
@@ -136,8 +139,8 @@ export function OfferModalProvider({ children }: { children: React.ReactNode }) 
                 {error && <ErrorBox msg={error} />}
                 <form className="space-y-4" noValidate onSubmit={submit}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Field label="Adınız" required name="name" placeholder="Adınız" />
-                    <Field label="Soyadınız" name="surname" placeholder="Soyadınız" />
+                    <Field label={t("name")} required name="name" placeholder={t("name")} />
+                    <Field label={t("surname")} name="surname" placeholder={t("surname")} />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field label="Telefon" required name="phone" type="tel" placeholder="0500 000 00 00" />
@@ -145,20 +148,20 @@ export function OfferModalProvider({ children }: { children: React.ReactNode }) 
                   </div>
                   <div>
                     <label className={LABEL}>
-                      Şirket Adı <span className="text-slate-400 font-normal">(opsiyonel)</span>
+                      {t("company")} <span className="text-slate-400 font-normal">{t("optional")}</span>
                     </label>
                     <input type="text" name="tracking_code" placeholder="Şirket adınız" className={FIELD} />
                   </div>
                   <div>
                     <label className={LABEL}>
-                      Mesajınız <span className="text-red-500">*</span>
+                      {t("message")} <span className="text-red-500">*</span>
                     </label>
                     <textarea name="message" rows={3} required placeholder="Teklif talebinizi veya sorularınızı yazın…" className={`${FIELD} resize-none`} />
                   </div>
                   <input type="hidden" name="category" value="Teklif Talebi" />
                   <button type="submit" disabled={sending} className={SUBMIT}>
                     <SubmitIcon />
-                    <span>{sending ? "Gönderiliyor…" : "Teklif Talebini Gönder"}</span>
+                    <span>{sending ? t("sending") : t("submit")}</span>
                   </button>
                 </form>
               </div>
@@ -180,7 +183,7 @@ export function OfferModalProvider({ children }: { children: React.ReactNode }) 
                 <form className="space-y-4" noValidate onSubmit={submit}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field label="Ad Soyad" required name="name" placeholder="Ad Soyad" />
-                    <Field label="Şirket Adı" required name="tracking_code" placeholder="Şirket Adı" />
+                    <Field label={t("company")} required name="tracking_code" placeholder={t("company")} />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field label="Telefon" required name="phone" type="tel" placeholder="0500 000 00 00" />
@@ -208,7 +211,7 @@ export function OfferModalProvider({ children }: { children: React.ReactNode }) 
                   </div>
                   <button type="submit" disabled={sending} className={SUBMIT}>
                     <SubmitIcon />
-                    <span>{sending ? "Gönderiliyor…" : "Kurumsal Teklif Talebini Gönder"}</span>
+                    <span>{sending ? t("sending") : t("submitCorporate")}</span>
                   </button>
                 </form>
               </div>

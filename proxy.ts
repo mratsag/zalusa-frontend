@@ -1,9 +1,37 @@
+import createIntlMiddleware from "next-intl/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+
+import { routing } from "./i18n/routing";
 
 // 301/302 yönlendirmeler — admin'de tanımlı aktif kuralları uygular.
 // Backend'den aktif kurallar 60 sn önbelleğe alınır; hata durumunda fail-open (site çalışmaya devam eder).
 // Next 16: "middleware" yerine "proxy" konvansiyonu.
+//
+// SIRA ÖNEMLİ: (1) admin yönlendirme kuralları → (2) i18n dil çözümlemesi.
+// i18n YALNIZCA marketing yollarına uygulanır; uygulama yolları (panel, giriş, admin...)
+// dil öneki almaz, dokunulmadan geçer.
+const intlMiddleware = createIntlMiddleware(routing);
+
+// Dil yönlendirmesi UYGULANMAYACAK uygulama yolları (marketing dışı).
+const APP_PATHS = [
+  "panel",
+  "admin",
+  "giris",
+  "auth",
+  "widget",
+  "entegrasyon",
+  "payment-success",
+  "payment-failed",
+  "paytr-test",
+  "debug-track",
+  "typlear",
+];
+
+function isAppPath(pathname: string): boolean {
+  const seg = pathname.split("/").filter(Boolean)[0];
+  return !!seg && APP_PATHS.includes(seg);
+}
 
 const API = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -47,16 +75,24 @@ async function getRules(): Promise<Map<string, Rule>> {
 
 export default async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // 1) Admin'de tanımlı yönlendirme kuralları (301/302) — her zaman önce.
   const rules = await getRules();
-  if (rules.size === 0) return NextResponse.next();
+  if (rules.size > 0) {
+    const rule = rules.get(pathname) || rules.get(pathname.replace(/\/$/, "")) || null;
+    if (rule) {
+      const target = /^https?:\/\//i.test(rule.target)
+        ? rule.target
+        : new URL(rule.target, req.url).toString();
+      return NextResponse.redirect(target, rule.code);
+    }
+  }
 
-  const rule = rules.get(pathname) || rules.get(pathname.replace(/\/$/, "")) || null;
-  if (!rule) return NextResponse.next();
+  // 2) Uygulama yolları dil çözümlemesine girmez.
+  if (isAppPath(pathname)) return NextResponse.next();
 
-  const target = /^https?:\/\//i.test(rule.target)
-    ? rule.target
-    : new URL(rule.target, req.url).toString();
-  return NextResponse.redirect(target, rule.code);
+  // 3) Marketing yolları: dil çözümlemesi (tr önseksiz, en → /en).
+  return intlMiddleware(req);
 }
 
 export const config = {

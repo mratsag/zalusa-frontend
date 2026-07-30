@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { getPageMetadata } from "@/lib/marketing/pageSeo";
 
-import { HTML } from "./content";
+import * as content from "./content";
+import { pickHTML } from "@/lib/marketing/content";
 
 // PHP sss.php portu — Sıkça Sorulan Sorular (native <details>, JSON-LD dahil).
 export async function generateMetadata(): Promise<Metadata> {
@@ -12,6 +13,9 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default function SssPage() {
+export default async function SssPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const HTML = pickHTML(content, locale);
+
   return <div dangerouslySetInnerHTML={{ __html: HTML }} />;
 }

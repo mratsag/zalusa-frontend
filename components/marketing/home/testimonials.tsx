@@ -1,8 +1,9 @@
+import { getTranslations } from "next-intl/server";
 // homepage-v2.php TESTIMONIALS (live 2317-2395) portu. 3 yorum kartı.
 type Testimonial = {
   quote: string;
   name: string;
-  role: string;
+  roleKey: "r1" | "r2" | "r3";
   initials: string;
   avatarBg: string; // gradient + text color class
   featured?: boolean;
@@ -13,7 +14,7 @@ const TESTIMONIALS: Testimonial[] = [
     quote:
       "Canlı takip, bildirimler ve tek panel yönetimi sayesinde operasyon ekibinin yükü ciddi azaldı. Artık sadece işimize odaklanıyoruz.",
     name: "Ahmet K.",
-    role: "Satış Müdürü · E-ticaret",
+    roleKey: "r1",
     initials: "AK",
     avatarBg: "from-blue-100 to-indigo-100 text-[#0000BE]",
   },
@@ -21,7 +22,7 @@ const TESTIMONIALS: Testimonial[] = [
     quote:
       "ETGB tarafı bizi çok rahatlattı. Evrak süreçleri daha düzenli, destek ekibi hızlı ve net. Tavsiye ederim.",
     name: "Zeynep S.",
-    role: "Kurucu · E-ihracat Markası",
+    roleKey: "r2",
     initials: "ZS",
     avatarBg: "from-pink-100 to-rose-100 text-rose-700",
     featured: true,
@@ -30,7 +31,7 @@ const TESTIMONIALS: Testimonial[] = [
     quote:
       "Tek panelden teklifleri görüyoruz, en mantıklı rotayı seçiyoruz. Takip ekranı sayesinde müşteriye anında bilgi geçiyoruz.",
     name: "Emre S.",
-    role: "Operasyon Direktörü · Lojistik",
+    roleKey: "r3",
     initials: "ES",
     avatarBg: "from-emerald-100 to-teal-100 text-emerald-700",
   },
@@ -52,17 +53,19 @@ function QuoteMark({ className }: { className: string }) {
   );
 }
 
-export function Testimonials() {
+export async function Testimonials() {
+  const t = await getTranslations("testimonials");
+
   return (
     <section className="py-16 md:py-24 bg-slate-50/60 border-y border-slate-200/40 cv-auto">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
           <span className="inline-block text-[12px] font-semibold uppercase tracking-[0.18em] text-[#4D4DF2] mb-3">
-            Müşteri Deneyimleri
+            {t("eyebrow")}
           </span>
           <h2 className="text-[32px] md:text-[44px] font-semibold tracking-tight text-slate-900 leading-[1.1]">
-            Onbinlerce <span className="text-[#0000BE]">Mutlu Kullanıcı</span>.
+            {t("titleStart")} <span className="text-[#0000BE]">{t("titleHighlight")}</span>.
           </h2>
           <div className="mt-5 inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
             <span className="flex text-amber-400">
@@ -72,36 +75,36 @@ export function Testimonials() {
             </span>
             <span className="text-[13px] font-semibold text-slate-900">4.9/5</span>
             <span className="text-slate-300">·</span>
-            <span className="text-[13px] text-slate-600">1.200+ değerlendirme</span>
+            <span className="text-[13px] text-slate-600">{t("reviews")}</span>
           </div>
         </div>
 
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
-          {TESTIMONIALS.map((t) => (
+          {TESTIMONIALS.map((item) => (
             <figure
-              key={t.name}
+              key={item.name}
               className={
-                t.featured
+                item.featured
                   ? "group bg-white rounded-2xl p-6 md:p-7 border border-[#0000BE]/20 ring-1 ring-[#0000BE]/5 shadow-[0_8px_24px_-12px_rgba(0,0,190,0.20)] hover:shadow-[0_14px_36px_-12px_rgba(0,0,190,0.30)] hover:-translate-y-0.5 transition-all duration-300"
                   : "group bg-white rounded-2xl p-6 md:p-7 border border-slate-200/80 shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:shadow-[0_12px_30px_-12px_rgba(15,23,42,0.15)] hover:-translate-y-0.5 transition-all duration-300"
               }
             >
-              <QuoteMark className={`w-7 h-7 mb-4 ${t.featured ? "text-[#0000BE]/30" : "text-[#0000BE]/15"}`} />
+              <QuoteMark className={`w-7 h-7 mb-4 ${item.featured ? "text-[#0000BE]/30" : "text-[#0000BE]/15"}`} />
               <blockquote
                 className={`text-[15px] md:text-[15.5px] leading-relaxed mb-6 ${
-                  t.featured ? "text-slate-800 font-medium" : "text-slate-700"
+                  item.featured ? "text-slate-800 font-medium" : "text-slate-700"
                 }`}
               >
-                {t.quote}
+                {item.quote}
               </blockquote>
               <figcaption className="flex items-center gap-3 pt-4 border-t border-slate-100">
-                <div className={`w-10 h-10 rounded-full bg-gradient-to-br flex items-center justify-center font-semibold text-[14px] ${t.avatarBg}`}>
-                  {t.initials}
+                <div className={`w-10 h-10 rounded-full bg-gradient-to-br flex items-center justify-center font-semibold text-[14px] ${item.avatarBg}`}>
+                  {item.initials}
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-900 text-[14px] leading-tight">{t.name}</p>
-                  <p className="text-[12.5px] text-slate-500 mt-0.5">{t.role}</p>
+                  <p className="font-semibold text-slate-900 text-[14px] leading-tight">{item.name}</p>
+                  <p className="text-[12.5px] text-slate-500 mt-0.5">{t(`roles.${item.roleKey}`)}</p>
                 </div>
               </figcaption>
             </figure>
@@ -114,7 +117,7 @@ export function Testimonials() {
             href="/yorumlar"
             className="inline-flex items-center gap-2 text-[14px] font-semibold text-[#0000BE] hover:text-[#00009c] transition group"
           >
-            Tüm yorumları görüntüle
+            {t("viewAll")}
             <svg className="w-4 h-4 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>

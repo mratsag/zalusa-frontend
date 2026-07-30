@@ -1,0 +1,328 @@
+{
+  "topbar": {
+    "trackingLong": "International Shipment Tracking",
+    "trackingShort": "Track Shipment",
+    "calculator": "Price Calculator"
+  },
+  "language": {
+    "switchLabel": "Language",
+    "tr": "Türkçe",
+    "en": "English"
+  },
+  "calculator": {
+    "title": "Shipping Calculator",
+    "liveBadge": "Live pricing",
+    "errorCountry": "Please select a country.",
+    "destination": "Where to?",
+    "selectCountry": "Select a country",
+    "searchCountry": "Search to select",
+    "clearSelection": "Clear selection",
+    "postal": "Postal Code / City",
+    "postalPlaceholder": "Enter postal code or city",
+    "packageType": "Package Type",
+    "types": {
+      "Koli": "Parcel",
+      "Paket": "Package",
+      "Belge": "Document"
+    },
+    "documentNote": "Document shipment — Fixed 0.5 desi",
+    "dimensions": "Dimensions (cm / kg)",
+    "addPackage": "Add Package",
+    "removePackage": "Remove package",
+    "weight": "Weight",
+    "quantity": "Quantity",
+    "width": "Width",
+    "length": "Length",
+    "height": "Height",
+    "unitKg": "kg",
+    "unitPcs": "pcs",
+    "unitCm": "cm",
+    "submit": "Calculate",
+    "trust": {
+      "instant": "Results shown instantly",
+      "noCard": "No credit card required",
+      "free": "Free"
+    }
+  },
+  "hero": {
+    "badgeText": "End-to-end automation with Zalusa AI",
+    "rotator": [
+      "The Smartest",
+      "The Simplest",
+      "The Fastest",
+      "The Easiest"
+    ],
+    "titleLine2": "Way to Ship.",
+    "subtitleStrong": "In 2 minutes,",
+    "subtitleRest": "create your shipment.",
+    "description": "Transparent pricing, real-time tracking, full control. Zalusa AI redesigned logistics from the ground up — you just ship, we handle the rest.",
+    "ctaPrimary": "Get a Free Quote",
+    "ctaSecondary": "Calculate Price",
+    "customerAlt": "Customer",
+    "reviews": "1,200+ reviews",
+    "supportStrong": "24/7",
+    "supportRest": "live support"
+  },
+  "nav": {
+    "login": "Sign In",
+    "cta": "Get a Free Quote",
+    "homeTitle": "Zalusa Home",
+    "toggleMenu": "Toggle menu"
+  },
+  "stickyCalc": {
+    "instant": "Instant",
+    "calculate": "Calculate Price",
+    "panelTitle": "Quick Price Calculator"
+  },
+  "references": {
+    "trusted": "Trusted by hundreds of brands",
+    "partners": "Carrier Partners",
+    "globalPartners": "Global Business Partners"
+  },
+  "howItWorks": {
+    "eyebrow": "How It Works",
+    "titleHighlight": "3 Steps",
+    "titleRest": "to Easy Shipping.",
+    "subtitle": "Cut manual checks, paperwork and operational overhead to zero. <b>Zalusa AI</b> manages the shipping process end to end — you just follow the result.",
+    "steps": {
+      "s1": "Enter Shipment Details",
+      "s2": "Zalusa <ai>AI</ai> Plans It Automatically",
+      "s3": "Label Is Created, Track It Live"
+    },
+    "cta": "Get a Free Quote",
+    "pricing": {
+      "badge": "Transparent Pricing",
+      "titleLine1": "You know what you'll pay",
+      "titleLine2": "right from the start.",
+      "text": "No monthly subscription — you pay as you go. No extra charges or surprise invoices, just the net price of what you ship.",
+      "rows": {
+        "setup": "Setup fee",
+        "integration": "Integration fee",
+        "hidden": "Hidden costs"
+      },
+      "none": "None"
+    }
+  },
+  "transportModes": {
+    "eyebrow": "Transport For Every Need",
+    "air": "Air",
+    "land": "Road",
+    "sea": "Sea",
+    "titleTail": " — One Panel.",
+    "subtitle": "Manage every transport mode from a single panel. Parcel, container, express — whichever mode, zero operational overhead.",
+    "cta": "Get a Free Quote",
+    "footnote": "One platform, every transport mode, full visibility.",
+    "modes": {
+      "cargo": {
+        "subtitle": "Parcel & Freight",
+        "desc": "Simplify shipping with instant quotes, automatic labels and live tracking.",
+        "tags": [
+          "SLA",
+          "Live tracking",
+          "Auto label"
+        ]
+      },
+      "truck": {
+        "subtitle": "Road & Distribution",
+        "desc": "Manage field operations end to end with route planning, driver assignment and proof of delivery (POD).",
+        "tags": [
+          "Route",
+          "POD",
+          "Optimization"
+        ]
+      },
+      "fly": {
+        "subtitle": "Air & Express",
+        "desc": "Transit visibility and instant delay alerts for critical, time-sensitive shipments.",
+        "tags": [
+          "Express",
+          "Alerts",
+          "Speed"
+        ]
+      },
+      "ship": {
+        "subtitle": "Sea & Container",
+        "desc": "Central management of container planning, ETA tracking and documentation.",
+        "tags": [
+          "ETA",
+          "Documents",
+          "Tracking"
+        ]
+      }
+    }
+  },
+  "stats": {
+    "onTime": {
+      "label": "On-Time Delivery",
+      "value": "98.7%"
+    },
+    "support": {
+      "label": "Operations Support",
+      "value": "24/7"
+    },
+    "countries": {
+      "label": "Countries Served",
+      "value": "150+"
+    },
+    "savings": {
+      "label": "Cost Advantage",
+      "value": "30%"
+    }
+  },
+  "audience": {
+    "eyebrow": "Who It's For",
+    "titleStart": "One Logistics Panel",
+    "titleHighlight": "for Everyone",
+    "subtitle": "From small to large, from individual senders to industry leaders — everyone ships with Zalusa.",
+    "cards": {
+      "individual": "Individual Senders",
+      "startups": "Startups",
+      "sme": "SMEs",
+      "companies": "Companies",
+      "enterprise": "Enterprises"
+    }
+  },
+  "courier": {
+    "eyebrow": "Courier Automation",
+    "titleStart": "We collect from",
+    "titleHighlight": "any address you like.",
+    "subtitle": "No need to visit a branch. The moment your payment goes through, a courier is dispatched automatically — you just get the parcel ready.",
+    "features": [
+      {
+        "title": "Pickup from your address",
+        "desc": "Home, office or warehouse — we collect your shipment wherever you are."
+      },
+      {
+        "title": "You pick the time",
+        "desc": "Choose the day and time window that suits you; the courier arrives within it."
+      },
+      {
+        "title": "Automatic dispatch",
+        "desc": "As soon as payment completes, the courier request is created automatically — nothing else to do."
+      },
+      {
+        "title": "Track in one panel",
+        "desc": "Assigned, on the way, picked up — every step live in your panel."
+      }
+    ],
+    "ctaPrimary": "Request a Courier",
+    "ctaSecondary": "How it works"
+  },
+  "whyZalusa": {
+    "eyebrow": "Comparison",
+    "titleHighlight": "WHY",
+    "titleRest": "ZALUSA?",
+    "subtitle": "We put Zalusa side by side with the alternatives. The difference is clear in a single panel.",
+    "colFeature": "Feature",
+    "colOthers": "Others",
+    "features": [
+      "Transparent pricing — no setup or hidden costs",
+      "Optimized cost per shipment (avg. 27% savings)",
+      "Compare all carrier prices in one panel",
+      "24/7 operations and live support",
+      "End-to-end live tracking from pickup to delivery",
+      "One-click automatic label and shipment creation",
+      "Etsy, Shopify, Amazon integrations ready",
+      "Courier automation",
+      "Smart GTIP lookup and AI-powered HS code finder",
+      "No minimum order value"
+    ],
+    "ctaPrimary": "Get a Free Quote",
+    "ctaSecondary": "Calculate Price"
+  },
+  "footer": {
+    "trustTitle": "Rated on trusted platforms",
+    "statsTitle": "Our Track Record",
+    "stats": {
+      "shipments": "2.4M+ shipments",
+      "businesses": "65K+ active businesses",
+      "countries": "220+ countries"
+    },
+    "columns": {
+      "company": "Company",
+      "integrations": "Integrations",
+      "legal": "Privacy & Terms",
+      "topBlogs": "Most Read Articles"
+    },
+    "links": {
+      "about": "About Us",
+      "careers": "Careers",
+      "why": "Why Zalusa?",
+      "partners": "Our Partners",
+      "carriers": "Carrier Partners",
+      "blog": "Blog",
+      "faq": "FAQ",
+      "terms": "Terms of Service",
+      "returns": "Cancellations & Returns",
+      "cookies": "Cookie Policy",
+      "privacy": "Privacy Policy",
+      "kvkk": "KVKK Disclosure Notice"
+    },
+    "tagline": "End-to-end logistics solutions for e-export businesses.",
+    "newsletterTitle": "Subscribe to our newsletter",
+    "newsletterText": "The latest news and resources delivered to your inbox every week.",
+    "emailPlaceholder": "Enter your email",
+    "subscribe": "Subscribe",
+    "rights": "All Rights Reserved.",
+    "homeTitle": "Zalusa Home"
+  },
+  "testimonials": {
+    "eyebrow": "Customer Stories",
+    "titleStart": "Tens of thousands of",
+    "titleHighlight": "Happy Users",
+    "reviews": "1,200+ reviews",
+    "viewAll": "View all reviews",
+    "roles": {
+      "r1": "Sales Manager · E-commerce",
+      "r2": "Founder · E-export Brand",
+      "r3": "Operations Director · Logistics"
+    }
+  },
+  "blogSection": {
+    "titleStart": "E-export guides and",
+    "titleHighlight": "fresh insights",
+    "subtitle": "Expert analysis, industry guides and practical tips to grow your operation.",
+    "allPosts": "All posts",
+    "readPost": "Read article",
+    "allBlogPosts": "All blog posts"
+  },
+  "offerModal": {
+    "title": "Get a Quote",
+    "subtitle": "Leave your details and we'll call you back.",
+    "name": "First Name",
+    "surname": "Last Name",
+    "company": "Company Name",
+    "optional": "(optional)",
+    "message": "Your Message",
+    "sending": "Sending…",
+    "submit": "Send Quote Request",
+    "submitCorporate": "Send Corporate Quote Request"
+  },
+  "reviews": {
+    "title": "Reviews",
+    "subtitle": "Ratings from Zalusa users. Every review from our general and country pages, in one place.",
+    "filterAll": "All",
+    "filterGeneral": "General",
+    "filterCountry": "By country",
+    "statTotal": "Total Reviews",
+    "statAvg": "Average Rating",
+    "statVerified": "Verified",
+    "verified": "Verified",
+    "loadMore": "Show more",
+    "showing": "Showing {count} of {total} reviews",
+    "empty": "No reviews match this filter.",
+    "loading": "Loading reviews…",
+    "error": "Could not load reviews.",
+    "fbTitle": "Share your experience",
+    "fbSubtitle": "Your feedback matters — reviews are published after moderation.",
+    "fbName": "Your name",
+    "fbEmail": "Email",
+    "fbPhone": "Phone (optional)",
+    "fbMessage": "Your review",
+    "fbSubmit": "Send",
+    "fbSending": "Sending…",
+    "fbThanks": "Thank you!",
+    "fbReceived": "Your feedback has been received.",
+    "fbError": "Could not send, please try again."
+  }
+}

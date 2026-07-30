@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { getPageMetadata } from "@/lib/marketing/pageSeo";
 
-import { HTML } from "./content";
+import * as content from "./content";
+import { pickHTML } from "@/lib/marketing/content";
 
 export async function generateMetadata(): Promise<Metadata> {
   return getPageMetadata("neden-zalusa", {
@@ -10,6 +11,9 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default function Page() {
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const HTML = pickHTML(content, locale);
+
   return <div dangerouslySetInnerHTML={{ __html: HTML }} />;
 }
