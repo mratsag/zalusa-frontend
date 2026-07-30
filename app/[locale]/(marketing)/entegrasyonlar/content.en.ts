@@ -1,5 +1,5 @@
-// PHP entegrasyonlar.php içeriği — statik (içinde <style> integration-* var, gömülü çalışır). Sticky-nav scroll-spy client component'te.
-export const HTML = `<main class="relative bg-white overflow-hidden integration-page-home">
+// İngilizce sürüm — ceviri.py ile üretildi: markup birebir aynı, yalnızca metin düğümleri çevrildi.
+export const HTML_EN = `<main class="relative bg-white overflow-hidden integration-page-home">
     <section class="integration-hero pt-8 md:pt-12 pb-10 md:pb-14 overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav class="mb-5 md:mb-6" aria-label="Breadcrumb">
@@ -9,14 +9,14 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
             itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
             <meta itemprop="position" content="1">
 
-                            <a href="/"
+                            <a href="/en"
                    class="inline-flex items-center gap-1.5 text-slate-400 hover:text-[#0000BE] transition"
                    itemprop="item">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
                     </svg>
-                    <span class="hidden md:inline" itemprop="name">Anasayfa</span>
+                    <span class="hidden md:inline" itemprop="name">Home</span>
                 </a>
                     </li>
                         <li class="flex items-center text-slate-300 shrink-0" aria-hidden="true">/</li>
@@ -25,7 +25,7 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
             itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
             <meta itemprop="position" content="2">
 
-                            <span class="text-slate-600 font-semibold truncate" itemprop="name">Entegrasyonlar</span>
+                            <span class="text-slate-600 font-semibold truncate" itemprop="name">Integrations</span>
                 <meta itemprop="item" content="/entegrasyonlar">
                     </li>
             </ol>
@@ -34,12 +34,12 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
             <div class="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-7 md:gap-9 items-start">
                 <div class="space-y-5">
                     <span class="inline-flex items-center gap-2 rounded-full border border-[#0000BE]/20 bg-[#0000BE]/5 px-3 py-1.5 text-xs font-semibold tracking-wide text-[#0000BE]">
-                        Operasyon Orkestrasyon Katmanı
+                        Operations Orchestration Layer
                     </span>
                     <h1 class="text-4xl md:text-6xl font-semibold leading-[1.04] tracking-tight text-slate-900">
-                        Entegrasyonlarını
-                        <span class="inline-block bg-clip-text text-transparent bg-gradient-to-r from-[#0000BE] to-[#22c55e]">tek iş akışında</span>
-                        yönet
+                        Manage your integrations
+                        <span class="inline-block bg-clip-text text-transparent bg-gradient-to-r from-[#0000BE] to-[#22c55e]">in a single workflow</span>
+                         
                     </h1>
                     <p class="text-base md:text-lg text-slate-600 max-w-3xl leading-relaxed">
                         Pazaryerleri, e-ticaret altyapıları ve muhasebe bağlantıları için ayrı çalışma alanları oluştur.
@@ -47,17 +47,17 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                     </p>
                     <div class="flex flex-wrap gap-3">
                         <a href="#pazaryerleri" class="inline-flex items-center justify-center px-6 h-10 md:h-12 rounded-lg bg-[#0000BE] text-white font-semibold text-sm hover:bg-[#00009c] cursor-pointer transition shadow-lg shadow-blue-900/20">
-                            Bölümlere Git
+                            Jump to Sections
                         </a>
-                        <a href="/iletisim" class="inline-flex items-center justify-center px-6 h-10 md:h-12 rounded-lg border border-slate-200 bg-white text-slate-700 font-semibold text-sm hover:bg-slate-50 cursor-pointer transition">
-                            Teknik Görüşme Al
+                        <a href="/en/iletisim" class="inline-flex items-center justify-center px-6 h-10 md:h-12 rounded-lg border border-slate-200 bg-white text-slate-700 font-semibold text-sm hover:bg-slate-50 cursor-pointer transition">
+                            Book a Technical Call
                         </a>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                        <div class="hero-kpi-card"><span>Grup</span><strong>3</strong></div>
-                        <div class="hero-kpi-card"><span>Bağlantı</span><strong>10+</strong></div>
-                        <div class="hero-kpi-card"><span>Kurulum</span><strong>2 dk</strong></div>
-                        <div class="hero-kpi-card"><span>Destek</span><strong>7/24</strong></div>
+                        <div class="hero-kpi-card"><span>Group</span><strong>3</strong></div>
+                        <div class="hero-kpi-card"><span>Connection</span><strong>10+</strong></div>
+                        <div class="hero-kpi-card"><span>Setup</span><strong>2 min</strong></div>
+                        <div class="hero-kpi-card"><span>Support</span><strong>7/24</strong></div>
                     </div>
                     <div class="integration-logo-band">
                         <img loading="lazy" decoding="async" src="/assets/etsy.png" alt="Etsy logosu" class="h-7 w-auto object-contain">
@@ -70,13 +70,13 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                 </div>
 
                 <aside class="command-board">
-                    <h2 class="text-xl font-semibold text-slate-900">Canlı Entegrasyon Panosu</h2>
-                    <p class="mt-1 text-sm text-slate-500">Kategorilere göre ayrılmış operasyon görünümü</p>
+                    <h2 class="text-xl font-semibold text-slate-900">Live Integration Board</h2>
+                    <p class="mt-1 text-sm text-slate-500">Operations view grouped by category</p>
 
                     <a href="#pazaryerleri" class="command-row">
                         <span class="command-row-icon bg-amber-100 text-amber-700">P</span>
                         <span class="command-row-content">
-                            <strong>Pazaryerleri</strong>
+                            <strong>Marketplaces</strong>
                             <small>Amazon, Etsy, AliExpress, Wish</small>
                         </span>
                         <span class="command-row-meta">4 ID</span>
@@ -84,7 +84,7 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                     <a href="#e-ticaret" class="command-row">
                         <span class="command-row-icon bg-indigo-100 text-indigo-700">E</span>
                         <span class="command-row-content">
-                            <strong>E-ticaret</strong>
+                            <strong>E-Commerce</strong>
                             <small>Shopify, WooCommerce, Özel API</small>
                         </span>
                         <span class="command-row-meta">3 ID</span>
@@ -92,15 +92,15 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                     <a href="#muhasebe" class="command-row">
                         <span class="command-row-icon bg-emerald-100 text-emerald-700">M</span>
                         <span class="command-row-content">
-                            <strong>Muhasebe</strong>
+                            <strong>Accounting</strong>
                             <small>Paraşüt, Logo, Mikro</small>
                         </span>
                         <span class="command-row-meta">3 ID</span>
                     </a>
 
                     <div class="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-3.5">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Önerilen Sıra</p>
-                        <p class="mt-1 text-sm text-slate-700">Pazaryerleri → E-ticaret → Muhasebe</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Recommended Order</p>
+                        <p class="mt-1 text-sm text-slate-700">Marketplaces → E-Commerce → Accounting</p>
                     </div>
                 </aside>
             </div>
@@ -111,18 +111,18 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <nav data-integration-nav class="integration-nav-shell integration-nav-sticky integration-anchor-nav z-40 mb-7 md:mb-9" aria-label="Entegrasyon Bölümleri">
                 <div class="integration-nav-track">
-                    <a href="#pazaryerleri" class="integration-nav-link is-active">Pazaryerleri</a>
-                    <a href="#e-ticaret" class="integration-nav-link">E-ticaret</a>
-                    <a href="#muhasebe" class="integration-nav-link">Muhasebe</a>
+                    <a href="#pazaryerleri" class="integration-nav-link is-active">Marketplaces</a>
+                    <a href="#e-ticaret" class="integration-nav-link">E-Commerce</a>
+                    <a href="#muhasebe" class="integration-nav-link">Accounting</a>
                 </div>
             </nav>
 
                             <section id="pazaryerleri" class="integration-bucket scroll-mt-44 md:scroll-mt-40 mb-8 md:mb-10">
                     <header class="integration-bucket-head">
-                        <span class="integration-badge">Pazaryerleri</span>
-                        <h2 class="integration-bucket-title">Pazaryeri Entegrasyonları</h2>
+                        <span class="integration-badge">Marketplaces</span>
+                        <h2 class="integration-bucket-title">Marketplace Integrations</h2>
                         <p class="integration-bucket-desc">Amazon, Etsy, AliExpress ve Wish mağazalarını tek panelde yönetin. Sipariş, stok ve gönderi verisini anlık senkronize edin.</p>
-                        <p class="integration-bucket-id">Grup ID: pazaryerleri</p>
+                        <p class="integration-bucket-id">Group ID: marketplaces</p>
                     </header>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
@@ -132,31 +132,31 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                                                                                     <img src="/assets/amazon.png" alt="Amazon entegrasyon logosu" class="h-8 w-auto object-contain" loading="lazy">
                                                                             </div>
                                     <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap bg-emerald-50 text-emerald-700 border-emerald-200">
-                                        Aktif                                    </span>
+                                        Active                                    </span>
                                 </div>
 
                                 <h3 class="mt-3 text-lg font-semibold text-slate-900">Amazon</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Çalışma ID: pazaryeri-amazon</p>
-                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Amazon siparişlerini, gönderi etiketlerini ve takip numaralarını otomatik eşleştirir.</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Workspace ID: marketplace-amazon</p>
+                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Automatically matches Amazon orders, shipping labels and tracking numbers.</p>
 
                                                                     <div class="mt-4 flex flex-wrap gap-2">
-                                                                                    <span class="integration-tag">Sipariş</span>
+                                                                                    <span class="integration-tag">Orders</span>
                                                                                     <span class="integration-tag">FBA/FBM</span>
-                                                                                    <span class="integration-tag">Takip</span>
+                                                                                    <span class="integration-tag">Tracking</span>
                                                                             </div>
                                 
                                                                     <ul class="mt-4 space-y-2">
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Sipariş durumlarına göre otomatik kargo iş emri oluşturma</span>
+                                                <span>Automatic shipping work orders based on order status</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Tek panelden birden fazla marketplace mağazasını yönetme</span>
+                                                <span>Manage multiple marketplace stores from one panel</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>İade sürecinde takip ve müşteri bilgilendirme akışı</span>
+                                                <span>Tracking and customer notification flow during returns</span>
                                             </li>
                                                                             </ul>
                                                             </article>
@@ -166,31 +166,31 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                                                                                     <img src="/assets/etsy.png" alt="Etsy entegrasyon logosu" class="h-8 w-auto object-contain" loading="lazy">
                                                                             </div>
                                     <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap bg-emerald-50 text-emerald-700 border-emerald-200">
-                                        Aktif                                    </span>
+                                        Active                                    </span>
                                 </div>
 
                                 <h3 class="mt-3 text-lg font-semibold text-slate-900">Etsy</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Çalışma ID: pazaryeri-etsy</p>
-                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Etsy mağazalarındaki siparişleri toplar, etiketleme ve gönderim planını hızlandırır.</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Workspace ID: marketplace-etsy</p>
+                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Collects orders from Etsy stores and speeds up labelling and dispatch planning.</p>
 
                                                                     <div class="mt-4 flex flex-wrap gap-2">
-                                                                                    <span class="integration-tag">Sipariş</span>
-                                                                                    <span class="integration-tag">Etiket</span>
-                                                                                    <span class="integration-tag">Otomasyon</span>
+                                                                                    <span class="integration-tag">Orders</span>
+                                                                                    <span class="integration-tag">Labels</span>
+                                                                                    <span class="integration-tag">Automation</span>
                                                                             </div>
                                 
                                                                     <ul class="mt-4 space-y-2">
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Mağaza bazlı sipariş filtreleme ve etiket gruplama</span>
+                                                <span>Store-level order filtering and label grouping</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Hedef ülke ve kargo servisine göre otomatik seçim</span>
+                                                <span>Automatic selection by destination country and carrier service</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Panel içinden gönderi geçmişi ve performans takibi</span>
+                                                <span>Shipment history and performance tracking inside the panel</span>
                                             </li>
                                                                             </ul>
                                                             </article>
@@ -200,31 +200,31 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                                                                                     <img src="/assets/aliexp.png" alt="AliExpress entegrasyon logosu" class="h-8 w-auto object-contain" loading="lazy">
                                                                             </div>
                                     <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap bg-emerald-50 text-emerald-700 border-emerald-200">
-                                        Aktif                                    </span>
+                                        Active                                    </span>
                                 </div>
 
                                 <h3 class="mt-3 text-lg font-semibold text-slate-900">AliExpress</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Çalışma ID: pazaryeri-aliexpress</p>
-                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">AliExpress sipariş akışını tekilleştirir, operasyon ekipleri için toplu işlem kolaylığı sağlar.</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Workspace ID: marketplace-aliexpress</p>
+                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Unifies the AliExpress order flow and makes bulk processing easy for operations teams.</p>
 
                                                                     <div class="mt-4 flex flex-wrap gap-2">
-                                                                                    <span class="integration-tag">Toplu İşlem</span>
-                                                                                    <span class="integration-tag">Takip</span>
-                                                                                    <span class="integration-tag">Raporlama</span>
+                                                                                    <span class="integration-tag">Bulk Actions</span>
+                                                                                    <span class="integration-tag">Tracking</span>
+                                                                                    <span class="integration-tag">Reporting</span>
                                                                             </div>
                                 
                                                                     <ul class="mt-4 space-y-2">
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Toplu sipariş alımı ve hızlı sevkiyat listesi üretimi</span>
+                                                <span>Bulk order intake and fast dispatch list generation</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Ülke bazlı teslimat süresi ve maliyet görünürlüğü</span>
+                                                <span>Country-level delivery time and cost visibility</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Düzenli raporlarla operasyon verimliliği analizi</span>
+                                                <span>Operational efficiency analysis with regular reports</span>
                                             </li>
                                                                             </ul>
                                                             </article>
@@ -234,31 +234,31 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                                                                                     <img src="/assets/wish.png" alt="Wish entegrasyon logosu" class="h-8 w-auto object-contain" loading="lazy">
                                                                             </div>
                                     <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap bg-emerald-50 text-emerald-700 border-emerald-200">
-                                        Aktif                                    </span>
+                                        Active                                    </span>
                                 </div>
 
                                 <h3 class="mt-3 text-lg font-semibold text-slate-900">Wish</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Çalışma ID: pazaryeri-wish</p>
-                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Wish siparişlerini sevkiyat kurallarına göre işleyerek hata oranını azaltır.</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Workspace ID: marketplace-wish</p>
+                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Processes Wish orders against dispatch rules to reduce the error rate.</p>
 
                                                                     <div class="mt-4 flex flex-wrap gap-2">
-                                                                                    <span class="integration-tag">Kurallar</span>
-                                                                                    <span class="integration-tag">Hata Azaltma</span>
-                                                                                    <span class="integration-tag">Veri Akışı</span>
+                                                                                    <span class="integration-tag">Rules</span>
+                                                                                    <span class="integration-tag">Error Reduction</span>
+                                                                                    <span class="integration-tag">Data Flow</span>
                                                                             </div>
                                 
                                                                     <ul class="mt-4 space-y-2">
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Sipariş önceliğine göre otomatik gönderi sıralama</span>
+                                                <span>Automatic shipment ordering by order priority</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Eksik bilgi kontrolü ile operasyonel hata önleme</span>
+                                                <span>Missing-data checks that prevent operational errors</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Kargo ve teslimat verilerinin tek ekranda görünmesi</span>
+                                                <span>Shipping and delivery data on a single screen</span>
                                             </li>
                                                                             </ul>
                                                             </article>
@@ -266,10 +266,10 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                 </section>
                             <section id="e-ticaret" class="integration-bucket scroll-mt-44 md:scroll-mt-40 mb-8 md:mb-10">
                     <header class="integration-bucket-head">
-                        <span class="integration-badge">E-ticaret</span>
-                        <h2 class="integration-bucket-title">E-ticaret Altyapı Entegrasyonları</h2>
+                        <span class="integration-badge">E-Commerce</span>
+                        <h2 class="integration-bucket-title">E-Commerce Platform Integrations</h2>
                         <p class="integration-bucket-desc">Shopify ve WooCommerce mağazalarınızı bağlayın. Sipariş, stok ve gönderi verilerini operasyon ekibi için merkezi hale getirin.</p>
-                        <p class="integration-bucket-id">Grup ID: e-ticaret</p>
+                        <p class="integration-bucket-id">Group ID: e-commerce</p>
                     </header>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
@@ -279,31 +279,31 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                                                                                     <img src="/assets/shopify.png" alt="Shopify entegrasyon logosu" class="h-8 w-auto object-contain" loading="lazy">
                                                                             </div>
                                     <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap bg-emerald-50 text-emerald-700 border-emerald-200">
-                                        Aktif                                    </span>
+                                        Active                                    </span>
                                 </div>
 
                                 <h3 class="mt-3 text-lg font-semibold text-slate-900">Shopify</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Çalışma ID: eticaret-shopify</p>
-                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Shopify sipariş verisini anlık taşır, gönderi süreçlerini tek panelde yönetmenizi sağlar.</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Workspace ID: ecommerce-shopify</p>
+                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Moves Shopify order data in real time so you can manage shipping from one panel.</p>
 
                                                                     <div class="mt-4 flex flex-wrap gap-2">
                                                                                     <span class="integration-tag">Checkout</span>
-                                                                                    <span class="integration-tag">Stok</span>
-                                                                                    <span class="integration-tag">Kargo</span>
+                                                                                    <span class="integration-tag">Inventory</span>
+                                                                                    <span class="integration-tag">Shipping</span>
                                                                             </div>
                                 
                                                                     <ul class="mt-4 space-y-2">
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Siparişten gönderiye uçtan uca otomasyon kurgusu</span>
+                                                <span>End-to-end automation from order to shipment</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Stok ve sevkiyat bilgilerini operasyona uygun eşleme</span>
+                                                <span>Mapping inventory and dispatch data to your operation</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Çoklu mağaza yapısında merkezi raporlama</span>
+                                                <span>Central reporting across multiple stores</span>
                                             </li>
                                                                             </ul>
                                                             </article>
@@ -313,31 +313,31 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                                                                                     <img src="/assets/woocommerce.png" alt="WooCommerce entegrasyon logosu" class="h-8 w-auto object-contain" loading="lazy">
                                                                             </div>
                                     <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap bg-emerald-50 text-emerald-700 border-emerald-200">
-                                        Aktif                                    </span>
+                                        Active                                    </span>
                                 </div>
 
                                 <h3 class="mt-3 text-lg font-semibold text-slate-900">WooCommerce</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Çalışma ID: eticaret-woocommerce</p>
-                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">WooCommerce altyapınızla senkron çalışarak siparişten teslimata süreci sadeleştirir.</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Workspace ID: ecommerce-woocommerce</p>
+                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Works in sync with your WooCommerce setup and simplifies order-to-delivery.</p>
 
                                                                     <div class="mt-4 flex flex-wrap gap-2">
                                                                                     <span class="integration-tag">WordPress</span>
-                                                                                    <span class="integration-tag">Sipariş</span>
-                                                                                    <span class="integration-tag">Takip</span>
+                                                                                    <span class="integration-tag">Orders</span>
+                                                                                    <span class="integration-tag">Tracking</span>
                                                                             </div>
                                 
                                                                     <ul class="mt-4 space-y-2">
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>WooCommerce sipariş durumlarını taşıyıcı aksiyonlarına bağlama</span>
+                                                <span>Linking WooCommerce order statuses to carrier actions</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Müşteri bilgilendirme mesajları için takip verisi üretimi</span>
+                                                <span>Generating tracking data for customer notification messages</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Hızlı onboarding ile teknik kurulum süresini kısaltma</span>
+                                                <span>Shortening technical setup time with fast onboarding</span>
                                             </li>
                                                                             </ul>
                                                             </article>
@@ -348,31 +348,31 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                                                 API                                            </span>
                                                                             </div>
                                     <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap bg-blue-50 text-blue-700 border-blue-200">
-                                        Destekleniyor                                    </span>
+                                        Supported                                    </span>
                                 </div>
 
-                                <h3 class="mt-3 text-lg font-semibold text-slate-900">Özel E-ticaret API</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Çalışma ID: eticaret-ozel-api</p>
-                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Kendi altyapınızı webhook ve API katmanlarıyla bağlayarak tam kontrol sağlayın.</p>
+                                <h3 class="mt-3 text-lg font-semibold text-slate-900">Custom E-Commerce API</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Workspace ID: ecommerce-custom-api</p>
+                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Connect your own stack through webhook and API layers for full control.</p>
 
                                                                     <div class="mt-4 flex flex-wrap gap-2">
                                                                                     <span class="integration-tag">Webhook</span>
                                                                                     <span class="integration-tag">Custom</span>
-                                                                                    <span class="integration-tag">Esnek</span>
+                                                                                    <span class="integration-tag">Flexible</span>
                                                                             </div>
                                 
                                                                     <ul class="mt-4 space-y-2">
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Sipariş olaylarını gerçek zamanlı izleme ve tetikleme</span>
+                                                <span>Real-time monitoring and triggering of order events</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>İş kurallarına göre özel alan eşleme desteği</span>
+                                                <span>Custom field mapping support based on business rules</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Geliştirici ekip için dokümantasyon odaklı entegrasyon planı</span>
+                                                <span>A documentation-first integration plan for developer teams</span>
                                             </li>
                                                                             </ul>
                                                             </article>
@@ -380,10 +380,10 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                 </section>
                             <section id="muhasebe" class="integration-bucket scroll-mt-44 md:scroll-mt-40 mb-8 md:mb-10">
                     <header class="integration-bucket-head">
-                        <span class="integration-badge">Muhasebe</span>
-                        <h2 class="integration-bucket-title">Muhasebe Entegrasyonları</h2>
+                        <span class="integration-badge">Accounting</span>
+                        <h2 class="integration-bucket-title">Accounting Integrations</h2>
                         <p class="integration-bucket-desc">Sipariş ve kargo maliyetlerinizi muhasebe süreçlerine bağlayın. E-fatura ve finansal raporlama için düzenli veri akışı oluşturun.</p>
-                        <p class="integration-bucket-id">Grup ID: muhasebe</p>
+                        <p class="integration-bucket-id">Group ID: accounting</p>
                     </header>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
@@ -398,27 +398,27 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                                 </div>
 
                                 <h3 class="mt-3 text-lg font-semibold text-slate-900">Paraşüt</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Çalışma ID: muhasebe-parasut</p>
-                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Sipariş ve kargo giderlerini finans kayıtlarıyla ilişkilendirerek operasyonel görünürlük sağlar.</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Workspace ID: accounting-parasut</p>
+                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Links order and shipping costs to financial records for operational visibility.</p>
 
                                                                     <div class="mt-4 flex flex-wrap gap-2">
-                                                                                    <span class="integration-tag">E-fatura</span>
-                                                                                    <span class="integration-tag">Maliyet</span>
-                                                                                    <span class="integration-tag">Mutabakat</span>
+                                                                                    <span class="integration-tag">E-Invoice</span>
+                                                                                    <span class="integration-tag">Cost</span>
+                                                                                    <span class="integration-tag">Reconciliation</span>
                                                                             </div>
                                 
                                                                     <ul class="mt-4 space-y-2">
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Kargo maliyetlerini sipariş bazında muhasebe kayıtlarına bağlama</span>
+                                                <span>Linking shipping costs to accounting records per order</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Dönemsel masraf raporlarında lojistik görünürlüğü artırma</span>
+                                                <span>Improving logistics visibility in periodic expense reports</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Mutabakat süreçleri için düzenli veri çıktısı üretimi</span>
+                                                <span>Producing consistent data output for reconciliation</span>
                                             </li>
                                                                             </ul>
                                                             </article>
@@ -433,27 +433,27 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                                 </div>
 
                                 <h3 class="mt-3 text-lg font-semibold text-slate-900">Logo Yazılım</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Çalışma ID: muhasebe-logo</p>
-                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Logo ERP kullanan ekipler için sipariş-finans köprüsü kurarak manuel işlem yükünü azaltır.</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Workspace ID: accounting-logo</p>
+                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Builds an order-to-finance bridge for teams on Logo ERP, cutting manual work.</p>
 
                                                                     <div class="mt-4 flex flex-wrap gap-2">
                                                                                     <span class="integration-tag">ERP</span>
-                                                                                    <span class="integration-tag">Raporlama</span>
-                                                                                    <span class="integration-tag">Süreç</span>
+                                                                                    <span class="integration-tag">Reporting</span>
+                                                                                    <span class="integration-tag">Process</span>
                                                                             </div>
                                 
                                                                     <ul class="mt-4 space-y-2">
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Sipariş ve gönderi verilerinin ERP tarafına düzenli aktarımı</span>
+                                                <span>Regular transfer of order and shipment data to the ERP</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Hesap mutabakatı için operasyonel maliyet kırılımı</span>
+                                                <span>Operational cost breakdown for account reconciliation</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Finans ekiplerine daha hızlı dönem kapanışı desteği</span>
+                                                <span>Faster period-close support for finance teams</span>
                                             </li>
                                                                             </ul>
                                                             </article>
@@ -467,28 +467,28 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                                         Pilot                                    </span>
                                 </div>
 
-                                <h3 class="mt-3 text-lg font-semibold text-slate-900">Mikro Yazılım</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Çalışma ID: muhasebe-mikro</p>
-                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Mikro kullanan ekiplerde sipariş ve lojistik masraflarını finans kayıtlarıyla hizalar.</p>
+                                <h3 class="mt-3 text-lg font-semibold text-slate-900">Mikro Software</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Workspace ID: accounting-mikro</p>
+                                <p class="mt-3 text-sm text-slate-600 leading-relaxed">Aligns order and logistics costs with financial records for teams using Mikro.</p>
 
                                                                     <div class="mt-4 flex flex-wrap gap-2">
                                                                                     <span class="integration-tag">ERP</span>
-                                                                                    <span class="integration-tag">Muhasebe</span>
-                                                                                    <span class="integration-tag">Aktarım</span>
+                                                                                    <span class="integration-tag">Accounting</span>
+                                                                                    <span class="integration-tag">Transfer</span>
                                                                             </div>
                                 
                                                                     <ul class="mt-4 space-y-2">
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>İşlem bazında maliyet alanlarının standartlaştırılması</span>
+                                                <span>Standardising cost fields per transaction</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Muhasebe ekibine uygun veri formatında rapor üretimi</span>
+                                                <span>Reports in a format suited to the accounting team</span>
                                             </li>
                                                                                     <li class="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
                                                 <span class="integration-dot mt-1.5" aria-hidden="true"></span>
-                                                <span>Tekrarlı manuel veri girişini azaltan otomasyon yaklaşımı</span>
+                                                <span>An automation approach that reduces repetitive manual entry</span>
                                             </li>
                                                                             </ul>
                                                             </article>
@@ -501,7 +501,7 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="space-y-6">
-                    <h2 class="text-[32px] md:text-[42px] font-semibold tracking-tight text-slate-900">Entegrasyon Geçiş Planı</h2>
+                    <h2 class="text-[32px] md:text-[42px] font-semibold tracking-tight text-slate-900">Integration Rollout Plan</h2>
                     <p class="text-base md:text-lg text-slate-500 leading-relaxed max-w-xl">
                         Önce sipariş kanallarını merkezileştir, ardından e-ticaret akışını standardize et ve son adımda muhasebe tarafını devreye al.
                     </p>
@@ -509,22 +509,22 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                         <div class="flow-step">
                             <span class="flow-step-no">1</span>
                             <div>
-                                <h3 class="flow-step-title">Pazaryerlerini Bağla</h3>
-                                <p class="flow-step-text">Amazon, Etsy, AliExpress ve Wish siparişlerini tek panelde topla.</p>
+                                <h3 class="flow-step-title">Connect Marketplaces</h3>
+                                <p class="flow-step-text">Bring Amazon, Etsy, AliExpress and Wish orders into one panel.</p>
                             </div>
                         </div>
                         <div class="flow-step">
                             <span class="flow-step-no">2</span>
                             <div>
-                                <h3 class="flow-step-title">E-ticaret Kanalını Senkronla</h3>
-                                <p class="flow-step-text">Shopify ve WooCommerce siparişlerini operasyon kurallarına göre otomatikleştir.</p>
+                                <h3 class="flow-step-title">Sync Your E-Commerce Channel</h3>
+                                <p class="flow-step-text">Automate Shopify and WooCommerce orders against your operational rules.</p>
                             </div>
                         </div>
                         <div class="flow-step">
                             <span class="flow-step-no">3</span>
                             <div>
-                                <h3 class="flow-step-title">Muhasebe Akışını Aç</h3>
-                                <p class="flow-step-text">Gelir-gider alanlarını muhasebe sistemine taşı ve mutabakat süresini düşür.</p>
+                                <h3 class="flow-step-title">Enable the Accounting Flow</h3>
+                                <p class="flow-step-text">Move income and expense fields into your accounting system and cut reconciliation time.</p>
                             </div>
                         </div>
                     </div>
@@ -532,27 +532,27 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
 
                 <div class="relative">
                     <div class="relative bg-white rounded-3xl shadow-2xl border border-gray-100 p-5 md:p-7">
-                        <h3 class="text-2xl font-semibold text-[#0000BE] mb-5 text-center">Operasyon Kontrol Kartı</h3>
+                        <h3 class="text-2xl font-semibold text-[#0000BE] mb-5 text-center">Operations Control Card</h3>
                         <div class="space-y-4">
                             <div class="control-row">
-                                <span class="control-label">Aktif Entegrasyon</span>
+                                <span class="control-label">Active Integrations</span>
                                 <strong class="control-value">10+</strong>
                             </div>
                             <div class="control-row">
-                                <span class="control-label">Günlük Sipariş Akışı</span>
-                                <strong class="control-value">Anlık</strong>
+                                <span class="control-label">Daily Order Flow</span>
+                                <strong class="control-value">Real time</strong>
                             </div>
                             <div class="control-row">
-                                <span class="control-label">Muhasebe Veri Aktarımı</span>
-                                <strong class="control-value">Planlı</strong>
+                                <span class="control-label">Accounting Data Transfer</span>
+                                <strong class="control-value">Scheduled</strong>
                             </div>
                             <div class="control-row">
-                                <span class="control-label">Hata Oranı</span>
-                                <strong class="control-value text-emerald-600">Düşük</strong>
+                                <span class="control-label">Error Rate</span>
+                                <strong class="control-value text-emerald-600">Low</strong>
                             </div>
                         </div>
-                        <a href="/iletisim" class="mt-6 w-full inline-flex items-center justify-center px-6 h-10 md:h-12 bg-gradient-to-br from-[#4D4DF2] to-[#0000BE] hover:from-[#5959FF] hover:to-[#00009c] hover:-translate-y-0.5 text-white font-semibold rounded-lg cursor-pointer transition-all shadow-lg shadow-blue-900/20">
-                            Planlamayı Başlat
+                        <a href="/en/iletisim" class="mt-6 w-full inline-flex items-center justify-center px-6 h-10 md:h-12 bg-gradient-to-br from-[#4D4DF2] to-[#0000BE] hover:from-[#5959FF] hover:to-[#00009c] hover:-translate-y-0.5 text-white font-semibold rounded-lg cursor-pointer transition-all shadow-lg shadow-blue-900/20">
+                            Start Planning
                         </a>
                     </div>
                     <div class="absolute -z-10 top-6 left-6 right-6 bottom-0 bg-[#0000BE]/10 blur-2xl rounded-full"></div>
@@ -566,12 +566,12 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
             <div class="rounded-3xl border border-slate-200 bg-gradient-to-r from-[#0000BE] to-[#2a2acc] p-6 md:p-8 text-white shadow-lg shadow-[#0000BE]/25">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                     <div class="max-w-2xl">
-                        <h2 class="text-2xl md:text-3xl font-semibold leading-tight">Entegrasyon geçişini birlikte planlayalım</h2>
-                        <p class="mt-2 text-blue-50 text-sm md:text-base">Kanal sayına ve altyapına göre sana özel entegrasyon sırası ve teknik kurulum planı çıkaralım.</p>
+                        <h2 class="text-2xl md:text-3xl font-semibold leading-tight">Let's plan your integration rollout together</h2>
+                        <p class="mt-2 text-blue-50 text-sm md:text-base">We'll build an integration order and technical setup plan tailored to your channels and stack.</p>
                     </div>
                     <div class="flex flex-wrap gap-3">
-                        <a href="/iletisim" class="inline-flex items-center justify-center rounded-lg bg-white px-5 h-10 md:h-12 text-sm font-semibold text-[#0000BE] hover:bg-blue-50 transition">Demo Talep Et</a>
-                        <a href="/yurtdisi-kargo-fiyat-hesaplama" class="inline-flex items-center justify-center rounded-lg border border-white/40 px-5 h-10 md:h-12 text-sm font-semibold text-white hover:bg-white/10 cursor-pointer transition">Fiyat Hesapla</a>
+                        <a href="/en/iletisim" class="inline-flex items-center justify-center rounded-lg bg-white px-5 h-10 md:h-12 text-sm font-semibold text-[#0000BE] hover:bg-blue-50 transition">Request a Demo</a>
+                        <a href="/en/yurtdisi-kargo-fiyat-hesaplama" class="inline-flex items-center justify-center rounded-lg border border-white/40 px-5 h-10 md:h-12 text-sm font-semibold text-white hover:bg-white/10 cursor-pointer transition">Calculate Price</a>
                     </div>
                 </div>
             </div>
@@ -581,14 +581,14 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
     <section class="pt-4 md:pt-6 pb-6 md:pb-10 bg-[#F8FAFC]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-6 md:mb-8">
-                <h2 class="text-3xl md:text-4xl font-semibold text-[#0000BE] mb-2 md:mb-3">Sıkça Sorulan Sorular</h2>
-                <p class="text-base md:text-lg text-slate-500 font-medium">Kargo, ETGB ve operasyon süreçleriyle ilgili en çok sorulan soruların kısa yanıtları.</p>
+                <h2 class="text-3xl md:text-4xl font-semibold text-[#0000BE] mb-2 md:mb-3">Frequently Asked Questions</h2>
+                <p class="text-base md:text-lg text-slate-500 font-medium">Short answers to the most common questions about shipping, ETGB and operations.</p>
             </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start">
                 <div class="flex flex-col gap-3">
                                         <details class="group rounded-xl border border-slate-200 bg-white transition-all duration-200 [&[open]]:bg-blue-50/50 [&[open]]:border-blue-200 h-fit">
                         <summary class="flex justify-between items-center p-4 md:p-5 font-semibold text-sm md:text-base cursor-pointer list-none text-slate-900">
-                            <span>Entegrasyon kurulumu ne kadar sürer?</span>
+                            <span>How long does integration setup take?</span>
                             <span class="transition-transform duration-300 group-open:rotate-180 text-[#0000BE] shrink-0 ml-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
@@ -601,7 +601,7 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                     </details>
                                         <details class="group rounded-xl border border-slate-200 bg-white transition-all duration-200 [&[open]]:bg-blue-50/50 [&[open]]:border-blue-200 h-fit">
                         <summary class="flex justify-between items-center p-4 md:p-5 font-semibold text-sm md:text-base cursor-pointer list-none text-slate-900">
-                            <span>Pazaryeri ve e-ticaret siparişleri tek ekranda yönetilebilir mi?</span>
+                            <span>Can marketplace and e-commerce orders be managed on one screen?</span>
                             <span class="transition-transform duration-300 group-open:rotate-180 text-[#0000BE] shrink-0 ml-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
@@ -616,7 +616,7 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                 <div class="flex flex-col gap-3">
                                         <details class="group rounded-xl border border-slate-200 bg-white transition-all duration-200 [&[open]]:bg-blue-50/50 [&[open]]:border-blue-200 h-fit">
                         <summary class="flex justify-between items-center p-4 md:p-5 font-semibold text-sm md:text-base cursor-pointer list-none text-slate-900">
-                            <span>Muhasebe entegrasyonlarında hangi veriler aktarılır?</span>
+                            <span>What data is transferred in accounting integrations?</span>
                             <span class="transition-transform duration-300 group-open:rotate-180 text-[#0000BE] shrink-0 ml-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
@@ -624,15 +624,15 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
                             </span>
                         </summary>
                         <div class="px-4 md:px-5 pb-4 md:pb-5 text-slate-600 font-medium leading-relaxed text-sm">
-                            <p>Sipariş tutarları, komisyon kalemleri, kargo giderleri ve e-fatura süreçleri için gerekli temel alanlar senkronize edilir.</p>
+                            <p>Order amounts, commission items, shipping costs and the core fields needed for e-invoicing are synchronised.</p>
                         </div>
                     </details>
                                     </div>
             </div>
             <div class="mt-8 text-center">
-                <a href="/iletisim"
+                <a href="/en/iletisim"
                     class="inline-flex items-center px-8 h-10 md:h-12 bg-[#0000BE] text-white font-semibold rounded-lg hover:bg-[#00009c] cursor-pointer transition shadow-lg shadow-blue-900/40 text-sm">
-                    Sorularınızı İletin
+                    Send Us Your Questions
                     <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                     </svg>
@@ -976,6 +976,3 @@ export const HTML = `<main class="relative bg-white overflow-hidden integration-
     }
 </style>
 `;
-
-// İngilizce gövde ayrı dosyada; pickHTML burada görür.
-export { HTML_EN } from "./content.en";
